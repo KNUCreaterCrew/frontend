@@ -8,7 +8,7 @@ body,
 }
 
 body {
-  @apply bg-paper font-sans text-body text-ink;
+  @apply bg-paper font-sans text-body font-medium text-ink;
   -webkit-font-smoothing: antialiased;
 }
 

@@ -7,7 +7,7 @@ export function NotFoundPage() {
       <p className="mt-2">주소가 바뀌었거나 없는 페이지예요.</p>
       <Link
         to="/"
-        className="mt-4 inline-flex min-h-tap items-center font-bold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="mt-4 inline-flex min-h-tap items-center font-bold underline underline-offset-4 focus-visible:outline-3 focus-visible:outline-offset-2"
       >
         처음으로
       </Link>
