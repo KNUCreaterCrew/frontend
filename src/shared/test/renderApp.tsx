@@ -1,16 +1,22 @@
 import { StrictMode } from 'react'
 import { render, type RenderResult } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { MemoryRouter, type Location } from 'react-router'
 import { AppProviders } from '@/app/providers'
 import { createQueryClient } from '@/app/queryClient'
 import { AppRoutes } from '@/app/routes'
 import { resolveScenario } from '@mocks/scenarios'
 import { server } from '@mocks/node'
+import { LocationProbe } from './LocationProbe'
 
 export function renderApp(
   path: string,
-  options?: { scenario?: string; keepRetry?: boolean; strict?: boolean },
+  options?: {
+    scenario?: string
+    keepRetry?: boolean
+    strict?: boolean
+    onLocation?: (location: Location) => void
+  },
 ): RenderResult & { user: UserEvent } {
   if (options?.scenario) server.use(...resolveScenario(options.scenario))
   const queryClient = createQueryClient()
@@ -18,6 +24,7 @@ export function renderApp(
   const tree = (
     <AppProviders queryClient={queryClient}>
       <MemoryRouter initialEntries={[path]}>
+        {options?.onLocation && <LocationProbe onLocation={options.onLocation} />}
         <AppRoutes />
       </MemoryRouter>
     </AppProviders>

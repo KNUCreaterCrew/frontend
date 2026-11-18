@@ -86,6 +86,38 @@ test('열린 동안 같은 좌석의 상태가 바뀌면 시트 안 알림 영�
   expect(live).toHaveTextContent(/^A1 지금 사용 중$/)
 })
 
+test('좌석 변화와 장치 알림이 함께 오면 둘 다 읽힌다', () => {
+  const { rerender } = renderSheet()
+  const live = screen.getByRole('dialog').querySelector('[aria-live="polite"]')
+  rerender(
+    <SeatSheet
+      seat={{ ...a1, status: 'UNKNOWN', rawStatus: 'UNKNOWN' }}
+      staleNotice={null}
+      edgeNotice="장치 연결이 끊겼어요"
+      onClose={() => {}}
+      onCloseAutoFocus={() => {}}
+    />,
+  )
+  expect(live).toHaveTextContent('A1 지금 확인 불가')
+  expect(live).toHaveTextContent('장치 연결이 끊겼어요')
+})
+
+test('열린 채 다른 좌석으로 바뀌면 상태가 달라도 변화 알림은 없다', () => {
+  const { rerender } = renderSheet()
+  const live = screen.getByRole('dialog').querySelector('[aria-live="polite"]')
+  rerender(
+    <SeatSheet
+      seat={b2}
+      staleNotice={null}
+      edgeNotice={null}
+      onClose={() => {}}
+      onCloseAutoFocus={() => {}}
+    />,
+  )
+  expect(screen.getByRole('dialog', { name: 'B2 확인 불가' })).toBeInTheDocument()
+  expect(live).toBeEmptyDOMElement()
+})
+
 test('edgeNotice 가 새 값이 되면 알림 영역에 읽힌다', () => {
   const { rerender } = renderSheet()
   const live = screen.getByRole('dialog').querySelector('[aria-live="polite"]')
@@ -106,7 +138,10 @@ test('손잡이는 화면 읽기 도구에 숨고 막은 z-30, 시트는 z-40 �
   const dialog = screen.getByRole('dialog')
   expect(dialog).toHaveClass('z-40')
   expect(dialog.querySelector('[aria-hidden="true"].w-8.h-1')).not.toBeNull()
-  expect(document.querySelector('.z-30')).not.toBeNull()
+  const overlay = document.querySelector('.z-30')
+  expect(overlay).not.toBeNull()
+  expect(overlay).toHaveClass('fixed', 'inset-0')
+  expect(overlay).not.toContainElement(dialog)
 })
 
 test('콘솔 error 가 없다', () => {

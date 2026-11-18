@@ -24,6 +24,10 @@ interface SeatMapProps {
   highlights?: ReadonlyMap<string, SeatStatus>
   /** 지금 보이는 칸이 콘센트 아이콘을 숨기는지(범례 안내용) */
   onOutletsHiddenChange?: (hidden: boolean) => void
+  /** 좌석을 누르면 seatId 를 알린다(안정된 함수) */
+  onSelect?: (seatId: string) => void
+  /** 상세 시트가 열려 있는 좌석 */
+  selectedSeatId?: string | null
 }
 
 // 강조한 상태가 좌석의 지금 상태와 같을 때만 강조한다(다시 조회해 다른 상태가 된 좌석 등)
@@ -35,7 +39,13 @@ function justChanged(
   return status === seat.status ? status : undefined
 }
 
-export function SeatMap({ seats, highlights, onOutletsHiddenChange }: SeatMapProps) {
+export function SeatMap({
+  seats,
+  highlights,
+  onOutletsHiddenChange,
+  onSelect,
+  selectedSeatId = null,
+}: SeatMapProps) {
   const [boxRef, width] = useElementWidth<HTMLDivElement>()
   const [zoomed, setZoomed] = useState(false)
 
@@ -90,6 +100,8 @@ export function SeatMap({ seats, highlights, onOutletsHiddenChange }: SeatMapPro
               rect={rect}
               justChanged={justChanged(highlights, seat)}
               cellPx={(px ?? 0) * scale}
+              onSelect={onSelect}
+              selected={seat.seatId === selectedSeatId}
             />
           ))}
         </div>

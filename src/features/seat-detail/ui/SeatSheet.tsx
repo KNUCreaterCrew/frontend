@@ -1,14 +1,15 @@
 import { useRef, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
-import { animate } from 'motion'
 import {
   AnimatePresence,
   LazyMotion,
   MotionConfig,
+  animate,
   domMax,
   m,
   useDragControls,
   useMotionValue,
+  useReducedMotion,
   useTransform,
 } from 'motion/react'
 import type { Seat } from '@/entities/room'
@@ -80,11 +81,17 @@ function SheetLayers({
   const [tracked, setTracked] = useState<Tracked>({ seat, edge: edgeNotice, notice: null })
   if (tracked.seat !== seat || tracked.edge !== edgeNotice) {
     let notice = tracked.notice
-    if (edgeNotice !== null && edgeNotice !== tracked.edge) notice = edgeNotice
-    else if (tracked.seat !== seat) notice = seatChangeNotice(tracked.seat, seat) ?? notice
+    const sameSeat = tracked.seat.seatId === seat.seatId
+    const seatNotice =
+      sameSeat && tracked.seat !== seat ? seatChangeNotice(tracked.seat, seat) : null
+    const newEdge = edgeNotice !== null && edgeNotice !== tracked.edge ? edgeNotice : null
+    if (!sameSeat) notice = newEdge
+    else if (seatNotice !== null && newEdge !== null) notice = `${seatNotice}, ${newEdge}`
+    else notice = seatNotice ?? newEdge ?? notice
     setTracked({ seat, edge: edgeNotice, notice })
   }
 
+  const reduceMotion = useReducedMotion()
   const dragY = useMotionValue(0)
   const scrimOpacity = useTransform(dragY, [0, 320], [1, 0.2])
   const dragControls = useDragControls()
@@ -131,7 +138,8 @@ function SheetLayers({
               if (shouldClose({ offsetY: info.offset.y, velocityY: info.velocity.y, height })) {
                 onClose()
               } else {
-                void animate(dragY, 0, TRANSITION)
+                if (reduceMotion) dragY.set(0)
+                else void animate(dragY, 0, TRANSITION)
               }
             }}
           >

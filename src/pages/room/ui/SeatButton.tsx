@@ -32,6 +32,10 @@ interface SeatButtonProps {
   justChanged?: SeatStatus
   /** 이 좌석도에서 가장 작은 칸의 한 변(px). 확대 중이면 배율이 곱해진 값 */
   cellPx: number
+  /** 누르면 seatId 를 알린다. 참조가 바뀌면 모든 버튼이 다시 그려지니 안정된 함수를 넘긴다 */
+  onSelect?: (seatId: string) => void
+  /** 지금 상세 시트가 열려 있는 좌석 */
+  selected?: boolean
 }
 
 // 상태 줄이 있는 칸(full)이 96px 이상이면 "방금 사용 중", 그보다 작으면 "방금"
@@ -41,7 +45,15 @@ function sameRect(a: SeatRect, b: SeatRect): boolean {
   return a.left === b.left && a.top === b.top && a.width === b.width && a.height === b.height
 }
 
-function SeatButtonView({ seat, stage, rect, justChanged, cellPx }: SeatButtonProps) {
+function SeatButtonView({
+  seat,
+  stage,
+  rect,
+  justChanged,
+  cellPx,
+  onSelect,
+  selected = false,
+}: SeatButtonProps) {
   const style = {
     left: `${rect.left}%`,
     top: `${rect.top}%`,
@@ -65,8 +77,11 @@ function SeatButtonView({ seat, stage, rect, justChanged, cellPx }: SeatButtonPr
       <button
         type="button"
         aria-label={seatAccessibleName(seat)}
+        aria-haspopup="dialog"
+        data-seat-id={seat.seatId}
+        onClick={() => onSelect?.(seat.seatId)}
         style={style}
-        className={`absolute overflow-hidden text-left focus-visible:z-20 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink ${FACE[seat.status]}`}
+        className={`absolute overflow-hidden text-left focus-visible:z-20 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink ${FACE[seat.status]} ${selected ? 'outline-4 outline-offset-3 outline-ink' : ''}`}
       >
         {away && (
           <span
@@ -122,5 +137,7 @@ export const SeatButton = memo(
     prev.stage === next.stage &&
     prev.justChanged === next.justChanged &&
     prev.cellPx === next.cellPx &&
+    prev.onSelect === next.onSelect &&
+    prev.selected === next.selected &&
     sameRect(prev.rect, next.rect),
 )
