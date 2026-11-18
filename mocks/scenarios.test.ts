@@ -103,6 +103,27 @@ test('배포 원문 offline 방은 last_observed_at 이 null 이다', () => {
   expect(offlineRoom.seats.every((s) => s.last_observed_at !== null)).toBe(true)
 })
 
+const ROOM_SCENARIOS = SCENARIO_NAMES.filter(
+  (name) => !['loading', 'error', 'not-found', 'slow-wake'].includes(name),
+)
+
+test.each(ROOM_SCENARIOS)(
+  '시나리오 %s 의 알 수 없는 좌석은 마지막 확인이 상태 시작보다 30초 이상 앞선다',
+  async (name) => {
+    server.use(...resolveScenario(name))
+    const dto = roomDtoSchema.parse(
+      await (await fetch(`http://localhost/api/v1/rooms/${ROOM_ID}`)).json(),
+    )
+    const known = ['OCCUPIED', 'AWAY', 'EMPTY']
+    for (const seat of dto.seats) {
+      if (known.includes(seat.status) || seat.last_observed_at === null) continue
+      expect(Date.parse(seat.last_observed_at), `${name} ${seat.seat_id}`).toBeLessThanOrEqual(
+        Date.parse(seat.status_since) - 30_000,
+      )
+    }
+  },
+)
+
 async function getRoom(id: string) {
   return fetch(`http://localhost/api/v1/rooms/${id}`)
 }

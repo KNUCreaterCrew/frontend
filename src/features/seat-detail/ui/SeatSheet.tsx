@@ -171,7 +171,7 @@ function SheetLayers({
                     <dt className="text-body text-ink-soft">{row.label}</dt>
                     <dd className="text-right text-body font-bold text-ink">
                       {row.key === 'outlet' && row.value === '있음' && (
-                        <OutletIcon className="mr-1 inline-block size-3 align-middle" />
+                        <OutletIcon className="mr-1 inline-block size-4 align-middle" />
                       )}
                       {row.value}
                     </dd>

@@ -156,8 +156,8 @@ test('콘센트가 있는 좌석은 값 옆에 좌석도와 같은 콘센트 아
   const icon = value.querySelector('svg')
   expect(icon).not.toBeNull()
   expect(icon).toHaveAttribute('aria-hidden', 'true')
-  // size-3.5 같은 값은 이 토큰 설정에서 CSS 가 만들어지지 않아 좌석도와 같은 size-3 만 쓴다
-  expect(icon).toHaveClass('size-3')
+  // 줄 글자 높이에 맞춘 16px. size-3.5 같은 값은 이 토큰 설정에서 CSS 가 만들어지지 않는다
+  expect(icon).toHaveClass('size-4')
   expect(value).toHaveTextContent(/^있음$/)
 })
 

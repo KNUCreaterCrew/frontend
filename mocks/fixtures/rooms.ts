@@ -9,6 +9,15 @@ type Reason = SeatDto['reason']
 
 const OBSERVED_AT = '2026-11-18T05:02:36Z'
 const SINCE = '2026-11-18T05:00:00Z'
+// 알 수 없음은 유효한 판정 없이 30초가 지나야 되므로 마지막 확인은 SINCE 보다 30초 이상 앞선다(04:58:00 ~ 04:59:30).
+const UNKNOWN_OBSERVED_FROM = Date.parse('2026-11-18T04:58:00Z')
+const KNOWN_STATUSES: string[] = ['OCCUPIED', 'AWAY', 'EMPTY']
+
+function defaultObservedAt(i: SeatInit): string {
+  if (KNOWN_STATUSES.includes(i.status)) return OBSERVED_AT
+  const offsetSeconds = (i.row.charCodeAt(0) * 7 + i.n * 13) % 91
+  return new Date(UNKNOWN_OBSERVED_FROM + offsetSeconds * 1000).toISOString()
+}
 
 export function buildRoom(seats: SeatDto[], overrides: Partial<RoomDto> = {}): RoomDto {
   const total = seats.length
@@ -50,7 +59,7 @@ function seat(i: SeatInit): SeatDto {
     status: i.status,
     reason: i.reason ?? null,
     status_since: i.since ?? SINCE,
-    last_observed_at: i.observedAt === undefined ? OBSERVED_AT : i.observedAt,
+    last_observed_at: i.observedAt === undefined ? defaultObservedAt(i) : i.observedAt,
     has_outlet: i.outlet ?? false,
     is_window: i.window ?? false,
     layout: { x: i.x, y: i.y, width: 64, height: 48 },

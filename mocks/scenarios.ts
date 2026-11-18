@@ -22,6 +22,13 @@ const DEMO_CYCLE = { EMPTY: 'OCCUPIED', OCCUPIED: 'AWAY', AWAY: 'EMPTY' } as con
 const DEMO_INTERVAL_MS = 3000
 const DEMO_OFFLINE_EVERY = 6
 
+// 알 수 없음은 마지막 유효 판정 30초 뒤에 되므로 status_since 보다 30초 이상 앞선 값으로 맞춘다.
+function unknownObservedAt(observed: string | null, since: string): string | null {
+  if (observed === null) return null
+  const limit = Date.parse(since) - 30_000
+  return new Date(Math.min(Date.parse(observed), limit)).toISOString()
+}
+
 // 연결이 있는 동안 3초마다 좌석 하나를 순환시키고, 6번째 단계마다 edge 끊김과 복구를 보여 준다.
 function liveDemoHandlers(base: RoomDto): MockHandler[] {
   let version = base.version
@@ -74,6 +81,7 @@ function liveDemoHandlers(base: RoomDto): MockHandler[] {
         status: 'UNKNOWN',
         reason: 'EDGE_OFFLINE',
         status_since: at,
+        last_observed_at: unknownObservedAt(seat.last_observed_at, at),
       }))
       room.send({
         event: 'EDGE_STATUS_CHANGED',
