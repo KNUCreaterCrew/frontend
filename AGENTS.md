@@ -71,6 +71,8 @@ config/       개발 서버 프록시
 2. 서버 상태는 TanStack Query 만. queryKey 는 `roomKeys` 팩토리로만 만든다.
 3. 실시간 동기화는 순수 함수 `applyRoomEvent(snapshot, event)` 와 `version` 버퍼 로직으로 분리해 단위 테스트한다(INTERFACES.md 예시 흐름 10:15:30 → 10:15:40 → 10:16:11 → 10:17:05 를 그대로 입력과 기대값으로). 훅은 연결, 재연결, 30초 재조회, 끊김 처리(방 조회 404 → 재연결 안 함, 그 밖의 끊김 → 재연결 + 재조회)만 맡는다. 반영은 `queryClient.setQueryData`.
    - 순서는 바꾸지 않는다: **WebSocket 연결 → 방 조회 → 조회 응답의 `version` 이하 이벤트 버리기 → 30초마다 방 다시 조회**. 조회 응답 전에 온 이벤트는 모아 두었다가 이 규칙으로 거른다.
+   - WebSocket 첫 시도가 10초 안에 끝나지 않으면 방 조회를 먼저 하고, 연결되면 다시 조회한다.
+   - WebSocket 주소는 `shared/api/baseUrl` 의 `wsUrl` 로 만든다.
    - 비교 기준은 방 조회 응답의 `version` 이다. 이벤트를 반영해도 기준을 올리지 않는다(같은 `version` 의 `EDGE_STATUS_CHANGED` 와 `SEAT_UPDATED` 가 함께 올 수 있다). 기준은 방을 다시 조회할 때만 새 응답의 값으로 바꾼다.
    - 없는 방은 서버가 WebSocket 연결 전에 HTTP 404 로 거절한다. 브라우저에는 이유 없는 실패(`1006`)로만 보이므로 종료 코드로 판단하지 않는다. 방 조회가 404 이면 다시 연결하지 않고 방이 없다고 표시한다. 조회 결과가 오기 전에 연결 실패가 먼저 올 수 있으니, 재연결은 방 조회 결과를 확인한 뒤에 한다(KNUCreaterCrew/backend#32).
    - `1013` 도 중간 프록시를 거치면 `1006` 으로 보일 수 있다. 종료 코드로 갈라 처리하지 않고, 404 가 아닌 끊김은 모두 재연결 + 재조회로 다룬다.
@@ -87,7 +89,7 @@ config/       개발 서버 프록시
 
 개발 서버에서 `shouldEnableMocking({ dev, flag, search })` 가 참일 때만 켠다. 조건은 DEV 이고 (`VITE_API_MOCKING === 'enabled'` 또는 URL 에 `?scenario=<이름>`) 이다. 그 밖에는 꺼지고 프록시로 실제 백엔드에 간다.
 
-- 시나리오 이름은 부팅 때 한 번 읽어 고정한다. 모르는 이름이면 알려진 이름 목록을 담은 오류가 난다. 있는 이름: `default`(= `mixed`), `mixed`, `all-unknown`, `offline`, `loading`, `error`, `not-found`, `slow-wake`, `many-seats`, `no-seats`. 방 ID 는 `IT4-101`.
+- 시나리오 이름은 부팅 때 한 번 읽어 고정한다. 모르는 이름이면 알려진 이름 목록을 담은 오류가 난다. 있는 이름: `default`(= `mixed`), `mixed`, `all-unknown`, `offline`, `loading`, `error`, `not-found`, `slow-wake`, `many-seats`, `no-seats`, `live-flow`, `ws-reject`, `ws-slow-close`, `ws-down`, `live-demo`. 방 ID 는 `IT4-101`.
 - 운영 빌드는 `import.meta.env.DEV` 분기 안의 동적 import 로 MSW 를 번들에서 뺀다. 이 분기를 깨지 않는다.
 - `default` 핸들러는 `IT4-101` 에 혼합 방(mixed)을 준다. 처리되지 않은 요청이 필요한 테스트는 `/api/v1/rooms/` 밖의 경로를 써야 한다.
 - 새 시나리오는 `mocks/scenarios.ts` 에 더하고, 개발 서버, Vitest, E2E 가 같은 것을 쓴다.
