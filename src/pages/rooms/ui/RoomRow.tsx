@@ -9,9 +9,20 @@ const NO_SEATS = '등록된 좌석이 없어요'
 const ROW = 'border-b-2 border-ink'
 const LINK =
   'flex min-h-tap gap-3 py-4 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink'
-const NAME = 'block text-fact font-black break-keep wrap-anywhere'
+const NAME = 'block text-fact font-black break-keep wrap-anywhere underline underline-offset-4'
 const NUMBER = 'font-num text-row-number tracking-tight tabular-nums'
-const SENTENCE = 'block border-t border-ink pt-1 text-body font-bold'
+const COLUMN = 'w-1/3 shrink-0'
+const LABEL = 'block text-label'
+const SENTENCE = 'mt-2 block text-body font-bold'
+
+function Gutter({ unknown = false }: { unknown?: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`w-band shrink-0 ${unknown ? 'pattern-unknown' : ''}`.trim()}
+    />
+  )
+}
 
 function Fact({ term, value }: { term: string; value: string }) {
   return (
@@ -29,9 +40,12 @@ export function RoomRow({ room }: { room: RoomListItem }) {
   if (summary.kind === 'noSeats') {
     return (
       <li className={ROW}>
-        <Link to={to} aria-label={`${room.roomName}, ${NO_SEATS}`} className={`${LINK} flex-col`}>
-          <span className={NAME}>{room.roomName}</span>
-          <span className="text-body">{NO_SEATS}</span>
+        <Link to={to} aria-label={`${room.roomName}, ${NO_SEATS}`} className={LINK}>
+          <Gutter />
+          <div className="min-w-0 flex-1">
+            <span className={NAME}>{room.roomName}</span>
+            <span className="mt-2 block text-body">{NO_SEATS}</span>
+          </div>
         </Link>
       </li>
     )
@@ -49,19 +63,20 @@ export function RoomRow({ room }: { room: RoomListItem }) {
           aria-label={`${room.roomName}, 빈자리 모름, ${unknown}, ${total}, ${sentence}`}
           className={LINK}
         >
-          <span aria-hidden="true" className="w-band shrink-0 pattern-unknown" />
+          <Gutter unknown />
           <div className="min-w-0 flex-1">
             <span className={NAME}>{room.roomName}</span>
-            <div className="mt-2 flex items-end gap-4">
-              <span className={`${NUMBER} shrink-0 font-black text-ink`}>모름</span>
-              <div className="min-w-0 flex-1">
-                <dl>
-                  <Fact term="확인 불가" value={`${summary.unknownSeats}석`} />
-                  <Fact term="전체" value={`${summary.totalSeats}석`} />
-                </dl>
-                <span className={SENTENCE}>{sentence}</span>
+            <div className="mt-2 flex items-start gap-4">
+              <div className={COLUMN}>
+                <span className={LABEL}>빈자리</span>
+                <span className="block text-title font-black text-ink">모름</span>
               </div>
+              <dl className="min-w-0 flex-1">
+                <Fact term="확인 불가" value={`${summary.unknownSeats}석`} />
+                <Fact term="전체" value={`${summary.totalSeats}석`} />
+              </dl>
             </div>
+            <span className={SENTENCE}>{sentence}</span>
           </div>
         </Link>
       </li>
@@ -74,21 +89,25 @@ export function RoomRow({ room }: { room: RoomListItem }) {
     (summary.edgeOnline ? '' : `, ${OFFLINE}`)
   return (
     <li className={ROW}>
-      <Link to={to} aria-label={name} className={`${LINK} flex-col`}>
-        <span className={NAME}>{room.roomName}</span>
-        <div className="flex items-end gap-4">
-          <span className="shrink-0">
-            <span className={`${NUMBER} font-extrabold text-empty`}>{summary.availableSeats}</span>
-            <span className="text-body font-bold">석</span>
-          </span>
-          <div className="min-w-0 flex-1">
-            <dl>
+      <Link to={to} aria-label={name} className={LINK}>
+        <Gutter />
+        <div className="min-w-0 flex-1">
+          <span className={NAME}>{room.roomName}</span>
+          <div className="mt-2 flex items-start gap-4">
+            <div className={COLUMN}>
+              <span className={LABEL}>빈자리</span>
+              <span className={`${NUMBER} font-extrabold text-empty`}>
+                {summary.availableSeats}
+              </span>
+              <span className="text-body font-bold">석</span>
+            </div>
+            <dl className="min-w-0 flex-1">
               <Fact term="확인 불가" value={`${summary.unknownSeats}석`} />
               <Fact term="전체" value={`${summary.totalSeats}석`} />
               <Fact term="혼잡도" value={congestion} />
             </dl>
-            {!summary.edgeOnline && <span className={SENTENCE}>{OFFLINE}</span>}
           </div>
+          {!summary.edgeOnline && <span className={SENTENCE}>{OFFLINE}</span>}
         </div>
       </Link>
     </li>

@@ -71,3 +71,25 @@ test('rooms-many: 6행이고 긴 이름 행도 화면 폭 안에 있다', async 
     expect(box!.x + box!.width, `link ${i} right`).toBeLessThanOrEqual(width)
   }
 })
+
+test('rooms-many: 방 이름과 표가 모든 행에서 같은 x 에서 시작하고 모름이 줄바꿈되지 않는다', async ({
+  page,
+}) => {
+  await page.goto(url('rooms-many'))
+  const rows = page.getByRole('listitem')
+  await expect(rows).toHaveCount(6)
+  const xs = await rows.evaluateAll((items) =>
+    items.map((li) => {
+      const name = li.querySelector('a > div > span')?.getBoundingClientRect()
+      const table = li.querySelector('dl')?.getBoundingClientRect()
+      return { name: name?.left ?? null, table: table?.left ?? null }
+    }),
+  )
+  expect(new Set(xs.map((x) => x.name)).size).toBe(1)
+  const tables = xs.map((x) => x.table).filter((x) => x !== null)
+  expect(tables).toHaveLength(5)
+  expect(new Set(tables).size).toBe(1)
+  const word = page.getByText('모름', { exact: true }).first()
+  const box = await word.boundingBox()
+  expect(box!.height).toBeLessThan(40)
+})
