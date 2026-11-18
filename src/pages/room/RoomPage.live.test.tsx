@@ -313,6 +313,45 @@ describe('실시간 반영', () => {
       expect(within(seat).getByText('확인 불가')).toBeVisible()
     })
 
+    test('끊김으로 지워진 강조는 5초 안에 같은 상태로 복구돼도 다시 나타나지 않는다', async () => {
+      const live = liveRoom(threeSeatRoom)
+      server.use(...live.handlers)
+      const { container } = renderApp(PATH)
+      await ready()
+      await waitFor(() => expect(live.openClients()).toBe(1))
+      sendAll(live, [seatChange(2, 'A-02')])
+      expect(await screen.findByText('방금 사용 중')).toBeVisible()
+      sendAll(live, edgeOffline(3, 'A-02'))
+      await screen.findByRole('button', { name: /^A2 확인 불가/ })
+      await advance(1000)
+      // 같은 version 의 복구 쌍: 확인 불가였던 좌석이 이전 상태(사용 중)로 돌아온다
+      sendAll(live, [
+        { event: 'EDGE_STATUS_CHANGED', room_id: 'IT4-101', version: 4, edge_online: true },
+        {
+          event: 'SEAT_UPDATED',
+          room_id: 'IT4-101',
+          version: 4,
+          available_seats: 2,
+          unknown_seats: 0,
+          congestion_level: 'LOW',
+          changes: [
+            {
+              seat_id: 'A-02',
+              prev_status: 'UNKNOWN',
+              curr_status: 'OCCUPIED',
+              reason: null,
+              status_since: '2026-11-24T10:20:00+09:00',
+              last_observed_at: '2026-11-24T10:22:00+09:00',
+            },
+          ],
+        },
+      ])
+      const seat = await screen.findByRole('button', { name: /^A2 사용 중/ })
+      expect(rings(container)).toHaveLength(0)
+      expect(chips(container)).toHaveLength(0)
+      expect(within(seat).queryByText(/^방금/)).toBeNull()
+    })
+
     test('장치 알림 문구는 5초 뒤 지워진다', async () => {
       const live = liveRoom(v1RoomDto)
       server.use(...live.handlers)

@@ -124,6 +124,24 @@ describe('keepMatching', () => {
     expect(keepMatching(list, seats).map((h) => h.seatId)).toEqual(['A-02'])
   })
 
+  it('낡은 강조를 먼저 지운 뒤 더하면 아직 유효한 강조가 밀려나지 않는다', () => {
+    const current: Highlight[] = [
+      { seatId: 'A-01', status: 'OCCUPIED', version: 7, until: 9000 },
+      { seatId: 'A-02', status: 'OCCUPIED', version: 8, until: 9000 },
+    ]
+    const seats = [
+      { seatId: 'A-01', status: 'OCCUPIED' as const },
+      { seatId: 'A-02', status: 'UNKNOWN' as const },
+      { seatId: 'A-03', status: 'OCCUPIED' as const },
+    ]
+    const targets = [{ seatId: 'A-03', status: 'OCCUPIED' as const, version: 9 }]
+    const kept = addHighlights(keepMatching(current, seats), targets, 1000)
+    expect(kept.map((h) => h.seatId)).toEqual(['A-01', 'A-03'])
+    // 더한 뒤에 지우면 낡은 A-02 가 자리를 차지해 A-01 이 밀려난다
+    const reversed = keepMatching(addHighlights(current, targets, 1000), seats)
+    expect(reversed.map((h) => h.seatId)).toEqual(['A-03'])
+  })
+
   it('좌석이 없어진 강조도 지운다', () => {
     expect(keepMatching(list, [{ seatId: 'A-02', status: 'EMPTY' }])).toHaveLength(1)
   })

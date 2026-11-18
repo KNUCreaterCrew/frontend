@@ -184,10 +184,9 @@ export function useRoomLive(roomId: string): RoomLive {
       const now = Date.now()
       // 강조 없이 다시 바뀐 좌석(예: 장치 끊김으로 확인 불가)의 강조는 지운다
       setHighlightList((current) =>
-        keepMatching(
-          targets.length > 0 ? addHighlights(current, targets, now) : current,
-          result.room.seats,
-        ),
+        targets.length > 0
+          ? addHighlights(keepMatching(current, result.room.seats), targets, now)
+          : keepMatching(current, result.room.seats),
       )
     }
 
