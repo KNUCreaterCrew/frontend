@@ -412,6 +412,17 @@ describe('목록 핸들러 시나리오', () => {
     const known = (i: (typeof list)[number]) => i.edge_online && i.unknown_seats < i.total_seats
     expect(list.some((i) => known(i) && i.congestion_level === 'LOW')).toBe(true)
     expect(list.some((i) => known(i) && i.congestion_level === 'HIGH')).toBe(true)
+    // 확인한 빈자리 0석, 확인 불가가 섞이고 혼잡이라 말하는 위험한 경우
+    expect(
+      list.some(
+        (i) =>
+          i.edge_online &&
+          i.available_seats === 0 &&
+          i.unknown_seats === 2 &&
+          i.total_seats === 6 &&
+          i.congestion_level === 'HIGH',
+      ),
+    ).toBe(true)
     expect(
       list.some((i) => i.edge_online && i.total_seats > 0 && i.unknown_seats === i.total_seats),
     ).toBe(true)
@@ -423,11 +434,20 @@ describe('목록 핸들러 시나리오', () => {
     expect(list.some((i) => i.room_name.split(' ').some((w) => w.length >= 40))).toBe(true)
   })
 
-  test('rooms-refresh-fail 은 첫 목록만 200 이고 이후 500', async () => {
-    server.use(...resolveScenario('rooms-refresh-fail'))
-    expect((await getList()).status).toBe(200)
-    expect((await getList()).status).toBe(500)
-    expect((await getList()).status).toBe(500)
+  test('rooms-refresh-fail 은 첫 요청부터 10초 동안 200 이고 그 뒤 500', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: false, toFake: ['Date'] })
+    try {
+      vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+      server.use(...resolveScenario('rooms-refresh-fail'))
+      expect((await getList()).status).toBe(200)
+      vi.setSystemTime(new Date('2026-01-01T00:00:05Z'))
+      expect((await getList()).status).toBe(200)
+      vi.setSystemTime(new Date('2026-01-01T00:00:11Z'))
+      expect((await getList()).status).toBe(500)
+      expect((await getList()).status).toBe(500)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   test.each(['live-flow', 'ws-reject', 'ws-slow-close', 'ws-down', 'live-demo'])(

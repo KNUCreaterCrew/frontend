@@ -199,14 +199,18 @@ export const scenarios: Record<string, () => MockHandler[]> = {
     quietRoomSocket(),
   ],
   'rooms-empty': () => [roomHandler({}), roomListHandler([]), quietRoomSocket()],
-  // 첫 목록만 정상이고 이후는 500. 30초 재조회가 실패하는 화면을 보기 위한 것.
+  // 첫 목록 요청부터 10초 동안만 정상이고 이후는 500. 개발 서버의 StrictMode 가 시작 때 요청을
+  // 두 번 보내도 첫 화면은 정상으로 뜨고, 30초 재조회가 실패하는 화면을 보기 위한 것.
   'rooms-refresh-fail': () => {
-    let calls = 0
+    let firstAt: number | undefined
     return [
       roomHandler({ [ROOM_ID]: mixedRoom }),
       http.get(ROOM_LIST_URL, () => {
-        calls += 1
-        if (calls > 1) return HttpResponse.json({ detail: '일시적인 오류입니다.' }, { status: 500 })
+        const now = Date.now()
+        firstAt ??= now
+        if (now - firstAt > 10_000) {
+          return HttpResponse.json({ detail: '일시적인 오류입니다.' }, { status: 500 })
+        }
         return HttpResponse.json([toListItemDto(mixedRoom)])
       }),
       quietRoomSocket(),

@@ -215,9 +215,16 @@ export const manyRooms: RoomDto[] = [
     room_name: ROOM_NAME,
     version: 12,
   }),
-  // 확인된 혼잡(HIGH)
+  // 혼잡(HIGH): 확인된 빈자리 0석에 확인 불가 2석이 섞인 경우
   buildRoom(
-    seatsOf([['OCCUPIED'], ['OCCUPIED'], ['AWAY'], ['OCCUPIED'], ['EMPTY'], ['OCCUPIED']]),
+    seatsOf([
+      ['OCCUPIED'],
+      ['OCCUPIED'],
+      ['AWAY'],
+      ['OCCUPIED'],
+      ['UNKNOWN', 'OCCLUDED'],
+      ['UNKNOWN', 'LOW_CONFIDENCE'],
+    ]),
     { room_id: 'IT4-102', room_name: '제2실습실', version: 12 },
   ),
   // 장치는 연결됨, 전부 확인 불가
