@@ -5,12 +5,13 @@ import {
   cellStage,
   computeViewBox,
   minCellPx,
+  minCellSidePx,
   seatRect,
   sortSeatsForReading,
   zoomScale,
 } from '../lib/geometry'
 import type { CellStage } from '../lib/geometry'
-import { MapZoomControls } from './MapZoomControls'
+import { MapZoomToggle } from './MapZoomToggle'
 import { SeatButton } from './SeatButton'
 
 export function SeatMap({ seats }: { seats: Seat[] }) {
@@ -23,8 +24,8 @@ export function SeatMap({ seats }: { seats: Seat[] }) {
 
   const px = width === null ? null : minCellPx(layouts, vb, width)
   const fitStage: CellStage = px === null ? 'compact' : cellStage(px)
-  const canZoom = fitStage === 'zoom' && px !== null
-  const scale = canZoom && zoomed ? zoomScale(px) : 1
+  const canZoom = fitStage === 'zoom' && width !== null
+  const scale = canZoom && zoomed ? zoomScale(minCellSidePx(layouts, vb, width)) : 1
   const stage: CellStage = canZoom && zoomed ? 'compact' : fitStage
 
   return (
@@ -52,13 +53,7 @@ export function SeatMap({ seats }: { seats: Seat[] }) {
           })}
         </div>
       </div>
-      {canZoom && (
-        <MapZoomControls
-          zoomed={zoomed}
-          onZoomIn={() => setZoomed(true)}
-          onZoomOut={() => setZoomed(false)}
-        />
-      )}
+      {canZoom && <MapZoomToggle zoomed={zoomed} onToggle={() => setZoomed((z) => !z)} />}
     </div>
   )
 }

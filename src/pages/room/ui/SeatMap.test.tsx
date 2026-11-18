@@ -28,17 +28,31 @@ describe('SeatMap', () => {
     expect(screen.getAllByRole('button').filter((b) => b.getAttribute('aria-label'))).toHaveLength(
       40,
     )
-    const zoomIn = screen.getByRole('button', { name: '확대' })
-    const zoomOut = screen.getByRole('button', { name: '축소' })
-    expect(zoomIn).toBeEnabled()
-    expect(zoomOut).toBeDisabled()
+    const toggle = screen.getByRole('button', { name: '확대' })
+    expect(toggle).toBeEnabled()
+    expect(screen.queryByRole('button', { name: '축소' })).not.toBeInTheDocument()
+    expect(screen.queryByText('옆으로 밀면 나머지 좌석이 보여요')).not.toBeInTheDocument()
     const first = screen.getByRole('button', { name: /^A1 / })
     expect(first).toHaveTextContent('')
 
-    await user.click(zoomIn)
-    expect(screen.getByRole('button', { name: '축소' })).toBeEnabled()
-    expect(screen.getByRole('button', { name: '확대' })).toBeDisabled()
+    await user.click(toggle)
+    const back = screen.getByRole('button', { name: '전체 보기' })
+    expect(back).toHaveFocus()
+    expect(screen.queryByRole('button', { name: '확대' })).not.toBeInTheDocument()
+    expect(screen.getByText('옆으로 밀면 나머지 좌석이 보여요')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^A1 / })).toHaveTextContent('A1')
+
+    await user.click(back)
+    expect(screen.getByRole('button', { name: '확대' })).toHaveFocus()
+    expect(screen.queryByText('옆으로 밀면 나머지 좌석이 보여요')).not.toBeInTheDocument()
+  })
+
+  it('확대하면 가장 짧은 변이 44px 가 되도록 폭을 키운다', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<SeatMap seats={many} />)
+    await user.click(screen.getByRole('button', { name: '확대' }))
+    const stage = container.querySelector<HTMLElement>('.relative')!
+    expect(parseFloat(stage.style.width)).toBeCloseTo(174.4, 0)
   })
 
   it('너비를 모르면 compact: 상태 말이 없고 확대 버튼도 없다', () => {

@@ -5,7 +5,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 const BASE =
-  'font-bold focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:opacity-50'
+  'font-bold focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink'
 
 const VARIANTS = {
   primary: 'h-12 w-full bg-ink text-paper',

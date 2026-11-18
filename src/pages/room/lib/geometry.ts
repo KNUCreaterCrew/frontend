@@ -40,6 +40,12 @@ export function minCellPx(layouts: SeatLayout[], vb: ViewBox, containerWidth: nu
   return (smallest / vb.width) * containerWidth
 }
 
+// 칸의 짧은 변(너비와 높이 중 작은 쪽). 확대 배율은 이 값이 44px 가 되도록 정한다.
+export function minCellSidePx(layouts: SeatLayout[], vb: ViewBox, containerWidth: number): number {
+  const smallest = Math.min(...layouts.map((l) => Math.min(l.width, l.height)))
+  return (smallest / vb.width) * containerWidth
+}
+
 export function cellStage(px: number): CellStage {
   if (px >= FULL_MIN_PX) return 'full'
   if (px >= COMPACT_MIN_PX) return 'compact'

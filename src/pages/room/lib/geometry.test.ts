@@ -4,6 +4,7 @@ import {
   cellStage,
   computeViewBox,
   minCellPx,
+  minCellSidePx,
   seatRect,
   sortSeatsForReading,
   viewBoxString,
@@ -57,11 +58,22 @@ describe('minCellPx와 zoomScale', () => {
     expect(cellStage(px)).toBe('full')
   })
 
-  it('40석 328px 는 zoom, 배율 약 1.308', () => {
-    const px = minCellPx(many, computeViewBox(many)!, 328)
+  it('40석 328px 는 단계는 너비로 정해 zoom, 짧은 변은 약 25.23', () => {
+    const vb = computeViewBox(many)!
+    const px = minCellPx(many, vb, 328)
     expect(px).toBeCloseTo(33.64, 2)
     expect(cellStage(px)).toBe('zoom')
-    expect(zoomScale(px)).toBeCloseTo(1.308, 3)
+    const side = minCellSidePx(many, vb, 328)
+    expect(side).toBeCloseTo(25.23, 2)
+    expect(zoomScale(side)).toBeCloseTo(1.744, 3)
+  })
+
+  it('높이가 너비보다 큰 칸은 너비를 짧은 변으로 본다', () => {
+    const tall = [
+      { x: 0, y: 0, width: 20, height: 60 },
+      { x: 40, y: 0, width: 40, height: 60 },
+    ]
+    expect(minCellSidePx(tall, computeViewBox(tall)!, 400)).toBeCloseTo(100, 5)
   })
 
   it('이미 충분히 크면 배율 1', () => {
