@@ -58,8 +58,17 @@ export function zoomScale(px: number): number {
 
 // 확대했을 때 오른쪽 끝에서 칸이 반드시 일부 잘려 보이게 배율을 조금 키운다.
 // 끝이 이미 어떤 칸을 25% 에서 75% 만 보이게 자르면 그대로 둔다. 배율은 줄지 않는다.
-export function zoomScaleWithCutEdge(layouts: SeatLayout[], vb: ViewBox, s0: number): number {
-  const edge = vb.width / s0
+// contentWidthPx 는 무대 폭의 기준(상자 안쪽 폭), visibleWidthPx 는 스크롤 0 에서 실제로 보이는 폭
+// (오른쪽 안쪽 여백까지 내용이 보인다).
+export function zoomScaleWithCutEdge(
+  layouts: SeatLayout[],
+  vb: ViewBox,
+  s0: number,
+  contentWidthPx: number,
+  visibleWidthPx: number,
+): number {
+  const visibleUnits = vb.width * (visibleWidthPx / contentWidthPx)
+  const edge = visibleUnits / s0
   const cells = layouts.map((l) => ({ left: l.x - vb.minX, width: l.width }))
   for (const c of cells) {
     if (c.left < edge && edge < c.left + c.width) {
@@ -70,7 +79,7 @@ export function zoomScaleWithCutEdge(layouts: SeatLayout[], vb: ViewBox, s0: num
   const fits = cells.filter((c) => c.left + 0.5 * c.width <= edge)
   if (fits.length === 0) return s0
   const target = fits.reduce((a, b) => (b.left > a.left ? b : a))
-  return Math.max(s0, vb.width / (target.left + 0.5 * target.width))
+  return Math.max(s0, visibleUnits / (target.left + 0.5 * target.width))
 }
 
 export function sortSeatsForReading<T extends { layout: SeatLayout }>(seats: T[]): T[] {

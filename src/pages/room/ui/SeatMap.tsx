@@ -15,6 +15,9 @@ import type { CellStage } from '../lib/geometry'
 import { MapZoomToggle } from './MapZoomToggle'
 import { SeatButton } from './SeatButton'
 
+// 좌석도 상자의 오른쪽 안쪽 여백(className 의 p-2 = 8px). 확대하면 내용이 이 여백까지 보인다.
+const BOX_PAD_PX = 8
+
 interface SeatMapProps {
   seats: Seat[]
   /** 지금 보이는 칸이 콘센트 아이콘을 숨기는지(범례 안내용) */
@@ -34,15 +37,24 @@ export function SeatMap({ seats, onOutletsHiddenChange }: SeatMapProps) {
   const stage: CellStage = canZoom && zoomed ? 'compact' : fitStage
   const outletsHidden = stage === 'zoom'
 
+  const measured = width !== null
   useEffect(() => {
+    if (!measured) return
     onOutletsHiddenChange?.(outletsHidden)
-  }, [outletsHidden, onOutletsHiddenChange])
+    return () => onOutletsHiddenChange?.(false)
+  }, [measured, outletsHidden, onOutletsHiddenChange])
 
   if (!vb) return null
 
   const scale =
     canZoom && zoomed
-      ? zoomScaleWithCutEdge(layouts, vb, zoomScale(minCellSidePx(layouts, vb, width)))
+      ? zoomScaleWithCutEdge(
+          layouts,
+          vb,
+          zoomScale(minCellSidePx(layouts, vb, width)),
+          width,
+          width + BOX_PAD_PX,
+        )
       : 1
 
   return (

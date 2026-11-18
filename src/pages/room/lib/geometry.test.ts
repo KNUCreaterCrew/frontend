@@ -84,9 +84,11 @@ describe('minCellPx와 zoomScale', () => {
 
 describe('zoomScaleWithCutEdge', () => {
   const vb = computeViewBox(many)!
+  // 좌석도 상자의 오른쪽 안쪽 여백(p-2)만큼 내용이 더 보인다.
+  const PAD = 8
 
-  function visibleFractionAtEdge(scale: number): number | null {
-    const edge = vb.width / scale
+  function visibleFractionAtEdge(scale: number, content: number, visible: number): number | null {
+    const edge = (vb.width * (visible / content)) / scale
     for (const l of many) {
       const left = l.x - vb.minX
       if (left < edge && edge < left + l.width) return (edge - left) / l.width
@@ -94,27 +96,39 @@ describe('zoomScaleWithCutEdge', () => {
     return null
   }
 
-  it.each([312, 342])(
-    '내용 폭 %ipx: 오른쪽 끝 칸이 25% 에서 75% 만 보이고 배율은 줄지 않는다',
+  it.each([312, 342, 280, 300, 330])(
+    '내용 폭 %ipx, 보이는 폭 +8px: 끝 칸이 25% 에서 75% 만 보이고 배율은 줄지 않는다',
     (w) => {
       const s0 = zoomScale(minCellSidePx(many, vb, w))
-      const s = zoomScaleWithCutEdge(many, vb, s0)
+      const s = zoomScaleWithCutEdge(many, vb, s0, w, w + PAD)
       expect(s).toBeGreaterThanOrEqual(s0)
-      const f = visibleFractionAtEdge(s)
+      const f = visibleFractionAtEdge(s, w, w + PAD)
       expect(f).not.toBeNull()
       expect(f!).toBeGreaterThanOrEqual(0.25)
       expect(f!).toBeLessThanOrEqual(0.75)
     },
   )
 
+  it('보이는 폭이 내용 폭과 다르면 보이는 폭 기준으로 25% 에서 75% 를 맞춘다', () => {
+    const w = 330
+    const s0 = zoomScale(minCellSidePx(many, vb, w))
+    // 내용 폭 기준으로는 이미 가운데가 잘려 보이지만, 실제 보이는 338px 기준으로는 76% 가 보인다
+    expect(visibleFractionAtEdge(s0, w, 338)).toBeGreaterThan(0.75)
+    const s = zoomScaleWithCutEdge(many, vb, s0, w, 338)
+    expect(s).toBeGreaterThan(s0)
+    const f = visibleFractionAtEdge(s, w, 338)!
+    expect(f).toBeGreaterThanOrEqual(0.25)
+    expect(f).toBeLessThanOrEqual(0.75)
+  })
+
   it('이미 가운데가 잘려 있으면 그대로 둔다', () => {
     const s0 = vb.width / (80 * 4 + 32)
-    expect(zoomScaleWithCutEdge(many, vb, s0)).toBe(s0)
+    expect(zoomScaleWithCutEdge(many, vb, s0, 300, 300)).toBe(s0)
   })
 
   it('끝이 칸 사이 틈에 닿으면 그 앞 칸의 가운데로 맞춘다', () => {
     const s0 = vb.width / (80 * 4 + 70)
-    expect(zoomScaleWithCutEdge(many, vb, s0)).toBeCloseTo(vb.width / (80 * 4 + 32), 6)
+    expect(zoomScaleWithCutEdge(many, vb, s0, 300, 300)).toBeCloseTo(vb.width / (80 * 4 + 32), 6)
   })
 })
 
