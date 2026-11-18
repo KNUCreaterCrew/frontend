@@ -36,3 +36,26 @@ export interface Room {
   version: number
   seats: Seat[]
 }
+
+export interface SeatChange {
+  seatId: string
+  prevStatus: SeatStatus
+  prevRawStatus: string
+  status: SeatStatus
+  rawStatus: string
+  reason: SeatReason | null
+  statusSince: string
+  lastObservedAt: string | null
+}
+
+export type RoomEvent =
+  | { type: 'EDGE_STATUS_CHANGED'; roomId: string; version: number; edgeOnline: boolean }
+  | {
+      type: 'SEAT_UPDATED'
+      roomId: string
+      version: number
+      availableSeats: number
+      unknownSeats: number
+      congestionLevel: CongestionLevel
+      changes: SeatChange[]
+    }
