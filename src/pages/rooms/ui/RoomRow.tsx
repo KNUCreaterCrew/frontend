@@ -10,7 +10,7 @@ const ROW = 'border-b-2 border-ink'
 const LINK =
   'flex min-h-tap gap-3 py-4 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink'
 const NAME = 'block text-fact font-black break-keep wrap-anywhere'
-const NUMBER = 'font-num text-row-number font-extrabold tracking-tight tabular-nums'
+const NUMBER = 'font-num text-row-number tracking-tight tabular-nums'
 const SENTENCE = 'block border-t border-ink pt-1 text-body font-bold'
 
 function Fact({ term, value }: { term: string; value: string }) {
@@ -50,19 +50,19 @@ export function RoomRow({ room }: { room: RoomListItem }) {
           className={LINK}
         >
           <span aria-hidden="true" className="w-band shrink-0 pattern-unknown" />
-          <span className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
             <span className={NAME}>{room.roomName}</span>
-            <span className="mt-2 flex items-end gap-4">
+            <div className="mt-2 flex items-end gap-4">
               <span className={`${NUMBER} shrink-0 font-black text-ink`}>모름</span>
-              <span className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1">
                 <dl>
                   <Fact term="확인 불가" value={`${summary.unknownSeats}석`} />
                   <Fact term="전체" value={`${summary.totalSeats}석`} />
                 </dl>
                 <span className={SENTENCE}>{sentence}</span>
-              </span>
-            </span>
-          </span>
+              </div>
+            </div>
+          </div>
         </Link>
       </li>
     )
@@ -76,20 +76,20 @@ export function RoomRow({ room }: { room: RoomListItem }) {
     <li className={ROW}>
       <Link to={to} aria-label={name} className={`${LINK} flex-col`}>
         <span className={NAME}>{room.roomName}</span>
-        <span className="flex items-end gap-4">
+        <div className="flex items-end gap-4">
           <span className="shrink-0">
-            <span className={`${NUMBER} text-empty`}>{summary.availableSeats}</span>
+            <span className={`${NUMBER} font-extrabold text-empty`}>{summary.availableSeats}</span>
             <span className="text-body font-bold">석</span>
           </span>
-          <span className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
             <dl>
               <Fact term="확인 불가" value={`${summary.unknownSeats}석`} />
               <Fact term="전체" value={`${summary.totalSeats}석`} />
               <Fact term="혼잡도" value={congestion} />
             </dl>
             {!summary.edgeOnline && <span className={SENTENCE}>{OFFLINE}</span>}
-          </span>
-        </span>
+          </div>
+        </div>
       </Link>
     </li>
   )

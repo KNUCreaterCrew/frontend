@@ -36,8 +36,7 @@ for (const scenario of Object.keys(waitFor)) {
 test('error: 오류 문구와 다시 시도 버튼이 보인다', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto(url('error'))
-  // 앱이 재시도한 뒤에 오류 화면이 나오므로 넉넉히 기다린다
-  await expect(page.getByText('방 목록을 불러오지 못했어요.')).toBeVisible({ timeout: 60_000 })
+  await expect(page.getByText('방 목록을 불러오지 못했어요.')).toBeVisible()
   await expect(page.getByRole('button', { name: '다시 시도' })).toBeVisible()
   expect(await pageOverflow(page)).toBeLessThanOrEqual(0)
   // 4xx/5xx 응답은 브라우저가 스스로 "Failed to load resource" 로 콘솔에 남기므로 이 줄만 제외한다.
@@ -48,7 +47,7 @@ test('mixed: 행을 누르면 방으로 가고 방 목록 링크로 돌아온다
   await page.goto(url('mixed'))
   await page.getByRole('link', { name: /^제1실습실/ }).click()
   await expect(page).toHaveURL(/\/rooms\/IT4-101/)
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: '제1실습실 (예시)' })).toBeVisible()
   await page.getByRole('link', { name: '방 목록' }).click()
   await expect(page).toHaveURL(/\/(\?.*)?$/)
   await expect(heading(page)).toBeVisible()

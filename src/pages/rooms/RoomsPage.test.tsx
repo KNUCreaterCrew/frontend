@@ -1,5 +1,5 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
-import { HttpResponse, http } from 'msw'
+import { HttpResponse, delay, http } from 'msw'
 import type { RoomSummaryDto } from '@/entities/room'
 import { renderApp } from '@/shared/test/renderApp'
 import { server } from '@mocks/node'
@@ -149,12 +149,23 @@ describe('방 목록 화면 행', () => {
   })
 
   test('행 누르기 → 방 화면, 방 목록 링크 → 다시 목록', async () => {
-    const { user } = renderApp('/', { scenario: 'mixed' })
+    // 두 번째 목록 요청은 끝나지 않게 해서, 돌아왔을 때 보이는 목록이 캐시에서 온 것임을 확인한다
+    let calls = 0
+    server.use(
+      http.get(ROOM_LIST_URL, async () => {
+        calls += 1
+        if (calls > 1) await delay('infinite')
+        return HttpResponse.json([item()])
+      }),
+    )
+    const { user } = renderApp('/')
     await user.click(await onlyRow())
     expect(await screen.findByRole('heading', { level: 1, name: NAME })).toBeInTheDocument()
     await user.click(screen.getByRole('link', { name: '방 목록' }))
     expect(await screen.findByRole('heading', { level: 1, name: TITLE })).toBeInTheDocument()
-    expect(within(await screen.findByRole('list')).getAllByRole('link')).toHaveLength(1)
+    // 캐시가 있어야 기다림 없이 바로 목록이 보인다
+    expect(within(screen.getByRole('list')).getAllByRole('link')).toHaveLength(1)
+    expect(document.querySelector('[aria-busy="true"]')).toBeNull()
   })
 })
 
