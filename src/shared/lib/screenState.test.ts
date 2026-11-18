@@ -1,5 +1,5 @@
 import { ApiError } from '@/shared/api'
-import { getLoadingStage, getRoomScreenState } from './screenState'
+import { getLoadingStage, getScreenState } from './screenState'
 
 describe('getLoadingStage', () => {
   test('경과 시간에 따라 단계가 바뀐다', () => {
@@ -10,13 +10,13 @@ describe('getLoadingStage', () => {
   })
 })
 
-describe('getRoomScreenState', () => {
+describe('getScreenState', () => {
   const notFound = new ApiError('http', { status: 404 })
   const serverError = new ApiError('http', { status: 500 })
 
   test('데이터가 있고 오류가 있으면 refreshFailed', () => {
     expect(
-      getRoomScreenState({
+      getScreenState({
         status: 'error',
         hasData: true,
         error: serverError,
@@ -27,7 +27,7 @@ describe('getRoomScreenState', () => {
   })
   test('데이터가 있으면 ready', () => {
     expect(
-      getRoomScreenState({
+      getScreenState({
         status: 'success',
         hasData: true,
         error: null,
@@ -38,7 +38,7 @@ describe('getRoomScreenState', () => {
   })
   test('404 는 notFound', () => {
     expect(
-      getRoomScreenState({
+      getScreenState({
         status: 'error',
         hasData: false,
         error: notFound,
@@ -49,7 +49,7 @@ describe('getRoomScreenState', () => {
   })
   test('그 밖의 오류는 error', () => {
     expect(
-      getRoomScreenState({
+      getScreenState({
         status: 'error',
         hasData: false,
         error: serverError,
@@ -60,7 +60,7 @@ describe('getRoomScreenState', () => {
   })
   test('대기 중이면 loading, 90초가 지나면 error', () => {
     expect(
-      getRoomScreenState({
+      getScreenState({
         status: 'pending',
         hasData: false,
         error: null,
@@ -69,7 +69,7 @@ describe('getRoomScreenState', () => {
       }),
     ).toBe('loading')
     expect(
-      getRoomScreenState({
+      getScreenState({
         status: 'pending',
         hasData: false,
         error: null,
@@ -80,7 +80,7 @@ describe('getRoomScreenState', () => {
   })
   test('오프라인으로 멈춘 조회는 시간이 지나도 loading', () => {
     expect(
-      getRoomScreenState({
+      getScreenState({
         status: 'pending',
         hasData: false,
         error: null,
