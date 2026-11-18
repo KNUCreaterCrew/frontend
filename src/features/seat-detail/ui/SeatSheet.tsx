@@ -106,7 +106,7 @@ function SheetLayers({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={TRANSITION}
+          transition={reduceMotion ? { duration: 0 } : TRANSITION}
         >
           <m.div className="absolute inset-0 bg-scrim" style={{ opacity: scrimOpacity }} />
         </m.div>
