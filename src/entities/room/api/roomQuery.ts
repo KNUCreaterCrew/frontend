@@ -1,0 +1,26 @@
+import { queryOptions } from '@tanstack/react-query'
+import { endpoints, http } from '@/shared/api'
+import { roomDtoSchema } from '../model/dto'
+import { toRoom } from '../model/mapping'
+import type { Room } from '../model/types'
+
+export const roomKeys = {
+  all: ['rooms'] as const,
+  detail: (roomId: string) => ['rooms', 'detail', roomId] as const,
+}
+
+export async function fetchRoom(roomId: string, signal?: AbortSignal): Promise<Room> {
+  const dto = await http.get(endpoints.room(roomId), roomDtoSchema, {
+    signal,
+    timeoutMs: 90_000,
+  })
+  return toRoom(dto)
+}
+
+// retry 는 queryClient 기본값에 맡긴다.
+export function roomQueryOptions(roomId: string) {
+  return queryOptions({
+    queryKey: roomKeys.detail(roomId),
+    queryFn: ({ signal }) => fetchRoom(roomId, signal),
+  })
+}
