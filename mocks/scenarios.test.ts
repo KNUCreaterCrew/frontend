@@ -1,3 +1,4 @@
+import { HttpHandler } from 'msw'
 import {
   applyRoomEvent,
   parseRoomEvent,
@@ -17,6 +18,7 @@ import {
   noSeatsRoom,
   offlineRoom,
 } from './fixtures/rooms'
+import { ROOM_LIST_URL } from './handlers/rooms'
 import { resolveScenario } from './scenarios'
 
 test('default 시나리오는 핸들러 배열이다', () => {
@@ -338,6 +340,14 @@ const SUMMARY_FIELDS = [
 describe('목록 핸들러 시나리오', () => {
   const DELAYED = ['loading', 'slow-wake']
 
+  // 기본 핸들러에도 mixed 목록이 있어서, 응답만 보면 시나리오가 목록 핸들러를 빠뜨려도 통과한다.
+  test.each(SCENARIO_NAMES)('시나리오 %s 는 목록 경로 핸들러를 직접 가진다', (name) => {
+    const owns = resolveScenario(name).filter(
+      (h) => h instanceof HttpHandler && h.info.method === 'GET' && h.info.path === ROOM_LIST_URL,
+    )
+    expect(owns).toHaveLength(1)
+  })
+
   test.each(SCENARIO_NAMES.filter((n) => !DELAYED.includes(n)))(
     '시나리오 %s 는 목록 요청을 처리한다',
     async (name) => {
@@ -352,10 +362,14 @@ describe('목록 핸들러 시나리오', () => {
 
   test.each(DELAYED)('시나리오 %s 의 목록은 상세처럼 지연된다', async (name) => {
     vi.useFakeTimers({ toFake: ['setTimeout'] })
+    const controller = new AbortController()
     try {
       server.use(...resolveScenario(name))
       let done = false
-      void getList().then(() => (done = true))
+      fetch(LIST_URL, { signal: controller.signal }).then(
+        () => (done = true),
+        () => {},
+      )
       await vi.advanceTimersByTimeAsync(30_000)
       expect(done).toBe(false)
       if (name === 'slow-wake') {
@@ -363,6 +377,7 @@ describe('목록 핸들러 시나리오', () => {
         await vi.waitFor(() => expect(done).toBe(true))
       }
     } finally {
+      controller.abort()
       vi.useRealTimers()
     }
   })
