@@ -1,5 +1,6 @@
 export { ApiError, isNotFoundError } from './ApiError'
 export type { ApiErrorKind } from './ApiError'
+export { httpUrl, wsUrl, wsUrlFrom } from './baseUrl'
 export { endpoints } from './endpoints'
 export { http } from './http'
 export { isRetryableError } from './retry'
