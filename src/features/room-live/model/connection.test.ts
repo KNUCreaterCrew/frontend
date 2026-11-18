@@ -5,6 +5,7 @@ import {
   RoomLiveConnection,
   type ConnectionDeps,
   type RoomCheck,
+  type RoomRequestReason,
   type SocketLike,
 } from './connection'
 
@@ -46,8 +47,9 @@ function setup(initial: { visible?: boolean; online?: boolean } = {}) {
     onMessage: (text: string) => messages.push(text),
     allowFirstFetch: vi.fn(),
     requestRoom: vi.fn(
-      () =>
+      (reason: RoomRequestReason) =>
         new Promise<RoomCheck>((resolve) => {
+          void reason
           pending.push(resolve)
         }),
     ),
@@ -108,6 +110,18 @@ describe('RoomLiveConnection', () => {
     sockets[1]!.open()
     expect(deps.allowFirstFetch).toHaveBeenCalledTimes(1)
     expect(deps.requestRoom).toHaveBeenCalledTimes(2)
+  })
+
+  it('닫힘 뒤 조회와 열림 뒤 조회를 구별해 알린다', async () => {
+    const { conn, sockets, deps, answer } = setup()
+    conn.start()
+    sockets[0]!.open()
+    sockets[0]!.serverClose()
+    expect(deps.requestRoom).toHaveBeenLastCalledWith('close')
+    await answer('ok')
+    await vi.advanceTimersByTimeAsync(1000)
+    sockets[1]!.open()
+    expect(deps.requestRoom).toHaveBeenLastCalledWith('open')
   })
 
   it('재연결 뒤 조회가 거절돼도 상태는 그대로이고 예외가 새지 않는다', async () => {

@@ -1,4 +1,4 @@
-import { act, screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { renderApp } from '@/shared/test/renderApp'
 import { server } from '@mocks/node'
@@ -67,6 +67,60 @@ function seatChange(version: number, seatId: string): RoomEventDto {
       },
     ],
   }
+}
+
+// 같은 version 의 장치 끊김과 그 때문에 확인 불가가 된 좌석 변경
+function edgeOffline(version: number, seatId: string): RoomEventDto[] {
+  return [
+    { event: 'EDGE_STATUS_CHANGED', room_id: 'IT4-101', version, edge_online: false },
+    {
+      event: 'SEAT_UPDATED',
+      room_id: 'IT4-101',
+      version,
+      available_seats: 2,
+      unknown_seats: 1,
+      congestion_level: 'LOW',
+      changes: [
+        {
+          seat_id: seatId,
+          prev_status: 'OCCUPIED',
+          curr_status: 'UNKNOWN',
+          reason: 'EDGE_OFFLINE',
+          status_since: '2026-11-24T10:21:00+09:00',
+          last_observed_at: '2026-11-24T10:20:00+09:00',
+        },
+      ],
+    },
+  ]
+}
+
+function unknownSeatEvent(): RoomEventDto {
+  const seatEvent = v2Events[1]
+  if (seatEvent?.event !== 'SEAT_UPDATED') throw new Error('fixture')
+  return { ...seatEvent, changes: seatEvent.changes.map((c) => ({ ...c, seat_id: 'Z-99' })) }
+}
+
+// 첫 소켓의 open 을 붙잡아 둔다(첫 연결이 늦게 열리는 상황). 돌려준 함수를 부르면 열린다.
+function holdFirstOpen(): () => void {
+  const Real = globalThis.WebSocket
+  let onopen: ((ev: Event) => void) | null = null
+  let held = false
+  function HeldWebSocket(url: string | URL): WebSocket {
+    const socket = new Real(url)
+    if (!held) {
+      held = true
+      Object.defineProperty(socket, 'onopen', {
+        configurable: true,
+        get: () => onopen,
+        set: (fn: ((ev: Event) => void) | null) => {
+          onopen = fn
+        },
+      })
+    }
+    return socket
+  }
+  vi.stubGlobal('WebSocket', HeldWebSocket)
+  return () => onopen?.(new Event('open'))
 }
 
 const rings = (container: HTMLElement) => container.querySelectorAll('span.outline-live')
@@ -157,6 +211,19 @@ describe('실시간 반영', () => {
     expect(screen.getByRole('button', { name: /^A1 사용 중/ })).toBeInTheDocument()
   })
 
+  test('모르는 event 종류는 무시하고 재조회하지 않는다', async () => {
+    const live = liveRoom(v1RoomDto)
+    server.use(...live.handlers)
+    renderApp(PATH)
+    await ready()
+    await waitFor(() => expect(live.openClients()).toBe(1))
+    const before = gets(live)
+    act(() => live.sendRaw('{"event":"ROOM_RENAMED"}'))
+    await new Promise((r) => setTimeout(r, 50))
+    expect(gets(live)).toBe(before)
+    expect(screen.getByRole('button', { name: /^A1 사용 중/ })).toBeInTheDocument()
+  })
+
   test('StrictMode 에서도 연결은 하나이고 이벤트는 한 번만 반영된다', async () => {
     const live = liveRoom(v1RoomDto)
     server.use(...live.handlers)
@@ -170,7 +237,131 @@ describe('실시간 반영', () => {
 
   describe('가짜 시계', () => {
     beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }))
-    afterEach(() => vi.useRealTimers())
+    afterEach(() => {
+      vi.useRealTimers()
+      vi.unstubAllGlobals()
+    })
+
+    test('첫 연결이 10초 뒤 진행 중인 조회 사이에 열리면 그 조회가 끝난 뒤 한 번 더 조회한다', async () => {
+      const live = liveRoom(v1RoomDto)
+      server.use(...live.handlers)
+      const openFirstSocket = holdFirstOpen()
+      const releaseGet = live.holdNextGet()
+      renderApp(PATH)
+      await waitFor(() => expect(sockets(live)).toBe(1))
+      await advance(10_000)
+      await waitFor(() => expect(gets(live)).toBe(1))
+      act(() => openFirstSocket())
+      const atOpen = live.log.length
+      releaseGet()
+      await ready()
+      await waitFor(() => expect(gets(live)).toBe(2))
+      expect(live.log.slice(atOpen)).toEqual(['get'])
+      await advance(1000)
+      expect(gets(live)).toBe(2)
+    })
+
+    test('조회 중에 재조회가 필요한 이벤트가 오면 그 조회가 끝난 뒤 한 번 더 조회한다', async () => {
+      const live = liveRoom(v1RoomDto)
+      server.use(...live.handlers)
+      renderApp(PATH)
+      await ready()
+      await waitFor(() => expect(live.openClients()).toBe(1))
+      const release = live.holdNextGet()
+      await advance(30_000)
+      await waitFor(() => expect(gets(live)).toBe(2))
+      sendAll(live, [unknownSeatEvent()])
+      await advance(50)
+      expect(gets(live)).toBe(2)
+      release()
+      await waitFor(() => expect(gets(live)).toBe(3))
+      await advance(1000)
+      expect(gets(live)).toBe(3)
+    })
+
+    test('연결과 첫 조회가 실패해 멈춘 뒤 주기 조회가 성공하면 연결을 다시 시작한다', async () => {
+      const live = liveRoom(v1RoomDto, { rejectFirst: true })
+      server.use(
+        http.get(
+          '*/api/v1/rooms/:roomId',
+          () => HttpResponse.json({ detail: '서버 오류' }, { status: 500 }),
+          { once: true },
+        ),
+        ...live.handlers,
+      )
+      renderApp(PATH)
+      await screen.findByRole('heading', { name: '방 정보를 불러오지 못했어요' })
+      expect(sockets(live)).toBe(1)
+      await advance(30_000)
+      await ready()
+      await waitFor(() => expect(sockets(live)).toBe(2))
+      await waitFor(() => expect(live.openClients()).toBe(1))
+    })
+
+    test('강조된 좌석이 장치 끊김으로 확인 불가가 되면 테두리와 방금 표시가 사라진다', async () => {
+      const live = liveRoom(threeSeatRoom)
+      server.use(...live.handlers)
+      const { container } = renderApp(PATH)
+      await ready()
+      await waitFor(() => expect(live.openClients()).toBe(1))
+      sendAll(live, [seatChange(2, 'A-02')])
+      expect(await screen.findByText('방금 사용 중')).toBeVisible()
+      sendAll(live, edgeOffline(3, 'A-02'))
+      const seat = await screen.findByRole('button', { name: /^A2 확인 불가/ })
+      expect(rings(container)).toHaveLength(0)
+      expect(chips(container)).toHaveLength(0)
+      expect(within(seat).getByText('확인 불가')).toBeVisible()
+    })
+
+    test('장치 알림 문구는 5초 뒤 지워진다', async () => {
+      const live = liveRoom(v1RoomDto)
+      server.use(...live.handlers)
+      const { container } = renderApp(PATH)
+      await ready()
+      await waitFor(() => expect(live.openClients()).toBe(1))
+      sendAll(live, v2Events)
+      await waitFor(() => expect(liveRegion(container)).toHaveTextContent(BANNER))
+      await advance(5000)
+      await waitFor(() => expect(liveRegion(container).textContent).toBe(''))
+    })
+
+    test('다시 조회해서 장치가 돌아왔으면 끊김 문구를 남기지 않고, 다음 끊김을 다시 알린다', async () => {
+      const live = liveRoom(v1RoomDto)
+      server.use(...live.handlers)
+      const { container } = renderApp(PATH)
+      await ready()
+      await waitFor(() => expect(live.openClients()).toBe(1))
+      sendAll(live, v2Events)
+      await waitFor(() => expect(liveRegion(container)).toHaveTextContent(BANNER))
+      // 복구 이벤트를 놓치고 재조회로 장치가 돌아온 것을 알게 된다
+      live.setRoom({ ...v1RoomDto, version: 3 })
+      act(() => live.sendRaw('oops'))
+      await waitFor(() => expect(screen.queryByRole('heading', { name: BANNER })).toBeNull())
+      expect(liveRegion(container).textContent).toBe('')
+      sendAll(
+        live,
+        v2Events.map((event) => ({ ...event, version: 4 })),
+      )
+      await screen.findByRole('heading', { level: 2, name: BANNER })
+      expect(liveRegion(container)).toHaveTextContent(BANNER)
+    })
+
+    test('서버가 다시 시작해 기준 version 이 작아지면 이전 장치 변경 version 을 잊는다', async () => {
+      const live = liveRoom({ ...threeSeatRoom, version: 5 })
+      server.use(...live.handlers)
+      const { container } = renderApp(PATH)
+      await ready()
+      await waitFor(() => expect(live.openClients()).toBe(1))
+      sendAll(live, [
+        { event: 'EDGE_STATUS_CHANGED', room_id: 'IT4-101', version: 6, edge_online: true },
+      ])
+      live.setRoom({ ...threeSeatRoom, version: 1, room_name: '다시 시작한 방' })
+      act(() => live.sendRaw('oops'))
+      await screen.findByRole('heading', { level: 1, name: '다시 시작한 방' })
+      sendAll(live, [seatChange(6, 'A-02')])
+      expect(await screen.findByText('방금 사용 중')).toBeVisible()
+      expect(rings(container)).toHaveLength(1)
+    })
 
     test('조회 중에 온 이벤트가 응답 위에 다시 얹힌다', async () => {
       const live = liveRoom(v1RoomDto)

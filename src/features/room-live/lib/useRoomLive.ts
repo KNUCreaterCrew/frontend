@@ -3,17 +3,24 @@ import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-q
 import {
   applyRoomEvent,
   fetchRoom,
-  parseRoomEvent,
+  parseRoomMessage,
   roomKeys,
   roomQueryOptions,
 } from '@/entities/room'
 import type { Room, SeatStatus } from '@/entities/room'
 import { endpoints, isNotFoundError, wsUrl } from '@/shared/api'
-import { RoomLiveConnection, type RoomCheck, type SocketLike } from '../model/connection'
+import {
+  RoomLiveConnection,
+  type RoomCheck,
+  type RoomRequestReason,
+  type SocketLike,
+} from '../model/connection'
 import {
   addHighlights,
   dropVersion,
+  HIGHLIGHT_MS,
   highlightTargets,
+  keepMatching,
   pruneHighlights,
   type Highlight,
 } from '../model/highlight'
@@ -77,9 +84,11 @@ export function useRoomLive(roomId: string): RoomLive {
   const queryClient = useQueryClient()
   const [log] = useState(() => new EventLog())
   const [firstFetchAllowed, setFirstFetchAllowed] = useState(false)
-  const [highlightList, setHighlightList] = useState<Highlight[]>([])
-  const [edgeNotice, setEdgeNotice] = useState<string | null>(null)
+  const [highlightList, setHighlightList] = useState<readonly Highlight[]>([])
+  // 실시간으로 바뀐 장치 연결. 같은 값이 다시 와도 새 객체라 알림 시간이 다시 잡힌다
+  const [edgeChange, setEdgeChange] = useState<{ online: boolean } | null>(null)
   const connectionRef = useRef<RoomLiveConnection | null>(null)
+  const lastCheckRef = useRef<RoomCheck | null>(null)
 
   const query = useQuery({
     ...fetchOptions(roomId, log),
@@ -91,17 +100,37 @@ export function useRoomLive(roomId: string): RoomLive {
   useEffect(() => {
     const key = roomKeys.detail(roomId)
     const edgeVersions = new Set<number>()
+    let baseVersion: number | null = null
+    let disposed = false
+    let followUp: Promise<void> | null = null
 
-    // 진행 중인 조회가 있으면 겹치지 않게 건너뛴다.
-    const requestRefetch = () => {
-      if (queryClient.isFetching({ queryKey: key }) > 0) return
-      queryClient.fetchQuery({ ...fetchOptions(roomId, log), staleTime: 0 }).catch(() => undefined)
+    // 진행 중인 조회가 있으면 새로 보내지 않고 그 조회에 붙는다
+    const fetchNow = () =>
+      queryClient.fetchQuery({ ...fetchOptions(roomId, log), staleTime: 0 }).then(() => undefined)
+
+    // 진행 중인 조회의 응답은 그 뒤의 연결이나 재조회 요청을 담지 못할 수 있으므로,
+    // 그 조회가 끝난 뒤 한 번 더 조회한다. 뒤따르는 조회는 하나만 둔다.
+    const fetchAfterCurrent = (): Promise<void> => {
+      if (followUp) return followUp
+      if (queryClient.isFetching({ queryKey: key }) === 0) return fetchNow()
+      const next = fetchNow()
+        .catch(() => undefined)
+        .then(() => {
+          followUp = null
+          return disposed ? undefined : fetchNow()
+        })
+      followUp = next
+      return next
     }
 
-    const requestRoom = async (): Promise<RoomCheck> => {
-      setFirstFetchAllowed(true)
+    const requestRefetch = () => {
+      fetchAfterCurrent().catch(() => undefined)
+    }
+
+    const checkRoom = async (reason: RoomRequestReason): Promise<RoomCheck> => {
       try {
-        await queryClient.fetchQuery({ ...fetchOptions(roomId, log), staleTime: 0 })
+        // 닫힘 뒤에는 없는 방인지만 보면 되므로 진행 중인 조회에 붙는다
+        await (reason === 'open' ? fetchAfterCurrent() : fetchNow())
         return 'ok'
       } catch (error) {
         if (isNotFoundError(error)) return 'notFound'
@@ -109,13 +138,26 @@ export function useRoomLive(roomId: string): RoomLive {
       }
     }
 
+    const requestRoom = async (reason: RoomRequestReason): Promise<RoomCheck> => {
+      setFirstFetchAllowed(true)
+      const check = await checkRoom(reason)
+      lastCheckRef.current = check
+      return check
+    }
+
     const onMessage = (text: string) => {
-      const event = parseRoomEvent(text)
-      if (!event) {
+      const message = parseRoomMessage(text)
+      if (message.kind === 'ignore') return
+      if (message.kind === 'invalid') {
         requestRefetch()
         return
       }
+      const event = message.event
       log.push(event)
+      const room = queryClient.getQueryData<Room>(key)
+      // 서버가 다시 시작해 기준이 작아지면 그 전 version 의 장치 변경 기록은 뜻이 없다
+      if (room && baseVersion !== null && room.version < baseVersion) edgeVersions.clear()
+      if (room) baseVersion = room.version
       if (event.type === 'EDGE_STATUS_CHANGED') {
         edgeVersions.add(event.version)
         if (edgeVersions.size > MAX_EDGE_VERSIONS) {
@@ -124,24 +166,29 @@ export function useRoomLive(roomId: string): RoomLive {
         }
         setHighlightList((current) => dropVersion(current, event.version))
       }
-      const room = queryClient.getQueryData<Room>(key)
       if (!room || !isNewer(room, event)) return
       const result = applyRoomEvent(room, event)
       if (result.needsRefetch) {
         requestRefetch()
         return
       }
-      if (result.room !== room) queryClient.setQueryData(key, result.room)
+      if (result.room === room) return
+      queryClient.setQueryData(key, result.room)
       if (event.type === 'EDGE_STATUS_CHANGED') {
         if (result.room.edgeOnline !== room.edgeOnline) {
-          setEdgeNotice(result.room.edgeOnline ? '장치 연결이 돌아왔어요' : '장치 연결이 끊겼어요')
+          setEdgeChange({ online: result.room.edgeOnline })
         }
         return
       }
       const targets = highlightTargets(event, edgeVersions)
-      if (targets.length > 0) {
-        setHighlightList((current) => addHighlights(current, targets, Date.now()))
-      }
+      const now = Date.now()
+      // 강조 없이 다시 바뀐 좌석(예: 장치 끊김으로 확인 불가)의 강조는 지운다
+      setHighlightList((current) =>
+        keepMatching(
+          targets.length > 0 ? addHighlights(current, targets, now) : current,
+          result.room.seats,
+        ),
+      )
     }
 
     const connection = new RoomLiveConnection({
@@ -168,6 +215,7 @@ export function useRoomLive(roomId: string): RoomLive {
     connection.start()
 
     return () => {
+      disposed = true
       document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('online', onOnline)
       window.removeEventListener('offline', onOffline)
@@ -175,9 +223,33 @@ export function useRoomLive(roomId: string): RoomLive {
       connectionRef.current = null
       setFirstFetchAllowed(false)
       setHighlightList([])
-      setEdgeNotice(null)
+      setEdgeChange(null)
     }
   }, [roomId, queryClient, log])
+
+  // 데이터 없이 조회가 실패해 연결을 멈춘 뒤, 주기 조회나 창 포커스로 조회가 살아나면 연결도 다시 시작한다.
+  // restart 는 멈춘 연결만 다시 시작하므로 살아날 때마다 한 번이다.
+  const recoveredAt = query.status === 'success' ? query.dataUpdatedAt : 0
+  useEffect(() => {
+    if (recoveredAt === 0 || lastCheckRef.current !== 'stop') return
+    const connection = connectionRef.current
+    if (connection?.state === 'stopped') connection.restart()
+  }, [recoveredAt])
+
+  // 장치 알림은 강조와 같은 시간만 두고 지운다(다음 같은 알림도 다시 읽히게)
+  useEffect(() => {
+    if (edgeChange === null) return
+    const timer = setTimeout(() => setEdgeChange(null), HIGHLIGHT_MS)
+    return () => clearTimeout(timer)
+  }, [edgeChange])
+
+  // 지금 데이터와 어긋나는 알림(놓친 복구를 재조회로 알게 된 경우 등)은 내보내지 않는다
+  const edgeNotice =
+    edgeChange !== null && edgeChange.online === query.data?.edgeOnline
+      ? edgeChange.online
+        ? '장치 연결이 돌아왔어요'
+        : '장치 연결이 끊겼어요'
+      : null
 
   // 가장 이른 만료 시각에 한 번 정리한다.
   useEffect(() => {

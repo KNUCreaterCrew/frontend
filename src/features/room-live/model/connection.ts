@@ -7,6 +7,9 @@ export interface SocketLike {
 
 export type RoomCheck = 'ok' | 'notFound' | 'stop'
 
+/** open: 열린 직후 다시 조회, close: 닫힌 뒤 없는 방인지 확인 */
+export type RoomRequestReason = 'open' | 'close'
+
 export interface ConnectionDeps {
   url: string
   createSocket(url: string): SocketLike
@@ -14,7 +17,7 @@ export interface ConnectionDeps {
   /** 첫 조회를 켠다. 한 번만 부른다 */
   allowFirstFetch(): void
   /** 방을 (다시) 조회하고 결과를 알린다 */
-  requestRoom(): Promise<RoomCheck>
+  requestRoom(reason: RoomRequestReason): Promise<RoomCheck>
   isVisible(): boolean
   isOnline(): boolean
 }
@@ -135,7 +138,7 @@ export class RoomLiveConnection {
       return
     }
     // 연결 뒤 재조회: 서버가 없는 방은 업그레이드 전에 거절하므로 결과로 상태를 바꾸지 않는다
-    this.deps.requestRoom().catch(() => undefined)
+    this.deps.requestRoom('open').catch(() => undefined)
   }
 
   private handleClose(): void {
@@ -145,7 +148,7 @@ export class RoomLiveConnection {
     this.current = 'waitingForRoom'
     const token = (this.closeToken += 1)
     this.deps
-      .requestRoom()
+      .requestRoom('close')
       .catch((): RoomCheck => 'ok')
       .then((check) => {
         if (this.disposed || token !== this.closeToken) return

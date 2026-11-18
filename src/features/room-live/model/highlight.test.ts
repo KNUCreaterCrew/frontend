@@ -3,6 +3,7 @@ import {
   addHighlights,
   dropVersion,
   HIGHLIGHT_MS,
+  keepMatching,
   highlightTargets,
   MAX_HIGHLIGHTS,
   pruneHighlights,
@@ -106,5 +107,32 @@ describe('pruneHighlights, dropVersion', () => {
 
   it('그 version 의 항목만 지운다', () => {
     expect(dropVersion(list, 7).map((h) => h.seatId)).toEqual(['A-02'])
+  })
+})
+
+describe('keepMatching', () => {
+  const list: Highlight[] = [
+    { seatId: 'A-01', status: 'OCCUPIED', version: 7, until: 5000 },
+    { seatId: 'A-02', status: 'EMPTY', version: 8, until: 9000 },
+  ]
+
+  it('좌석의 지금 상태와 다른 강조는 지운다', () => {
+    const seats = [
+      { seatId: 'A-01', status: 'UNKNOWN' as const },
+      { seatId: 'A-02', status: 'EMPTY' as const },
+    ]
+    expect(keepMatching(list, seats).map((h) => h.seatId)).toEqual(['A-02'])
+  })
+
+  it('좌석이 없어진 강조도 지운다', () => {
+    expect(keepMatching(list, [{ seatId: 'A-02', status: 'EMPTY' }])).toHaveLength(1)
+  })
+
+  it('모두 맞으면 같은 배열을 돌려준다', () => {
+    const seats = [
+      { seatId: 'A-01', status: 'OCCUPIED' as const },
+      { seatId: 'A-02', status: 'EMPTY' as const },
+    ]
+    expect(keepMatching(list, seats)).toBe(list)
   })
 })

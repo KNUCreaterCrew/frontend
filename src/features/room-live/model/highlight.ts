@@ -1,4 +1,4 @@
-import type { RoomEvent, SeatStatus } from '@/entities/room'
+import type { RoomEvent, Seat, SeatStatus } from '@/entities/room'
 
 export const HIGHLIGHT_MS = 5_000
 export const MAX_HIGHLIGHTS = 2
@@ -44,4 +44,14 @@ export function dropVersion(current: readonly Highlight[], version: number): Hig
 
 export function pruneHighlights(current: readonly Highlight[], now: number): Highlight[] {
   return current.filter((item) => item.until > now)
+}
+
+// 강조한 상태와 좌석의 지금 상태가 다르면(강조 없이 다시 바뀐 좌석) 그 강조를 지운다.
+export function keepMatching(
+  current: readonly Highlight[],
+  seats: ReadonlyArray<Pick<Seat, 'seatId' | 'status'>>,
+): readonly Highlight[] {
+  const statusById = new Map(seats.map((seat) => [seat.seatId, seat.status] as const))
+  const next = current.filter((item) => statusById.get(item.seatId) === item.status)
+  return next.length === current.length ? current : next
 }
