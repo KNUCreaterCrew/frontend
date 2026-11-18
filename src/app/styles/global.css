@@ -23,3 +23,8 @@ body {
   padding-bottom: max(var(--spacing-4), env(safe-area-inset-bottom));
   padding-left: max(var(--spacing-4), env(safe-area-inset-left));
 }
+
+/* 확인 불가 좌석의 빗금. 무늬 정의는 tokens.css 의 --pattern-unknown */
+@utility pattern-unknown {
+  background-image: var(--pattern-unknown);
+}
