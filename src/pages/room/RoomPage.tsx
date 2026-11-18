@@ -20,7 +20,7 @@ export function RoomPage() {
   const { data, status, fetchStatus, error, failureReason, dataUpdatedAt } = useQuery(
     roomQueryOptions(roomId),
   )
-  const elapsedMs = useElapsed(status === 'pending', attempt)
+  const elapsedMs = useElapsed(status === 'pending' && fetchStatus !== 'paused', attempt)
   const state = getRoomScreenState({
     status,
     hasData: data !== undefined,

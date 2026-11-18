@@ -9,11 +9,11 @@ import { server } from '@mocks/node'
 
 export function renderApp(
   path: string,
-  options?: { scenario?: string },
+  options?: { scenario?: string; keepRetry?: boolean },
 ): RenderResult & { user: UserEvent } {
   if (options?.scenario) server.use(...resolveScenario(options.scenario))
   const queryClient = createQueryClient()
-  queryClient.setDefaultOptions({ queries: { retry: false } })
+  if (!options?.keepRetry) queryClient.setDefaultOptions({ queries: { retry: false } })
   const result = render(
     <AppProviders queryClient={queryClient}>
       <MemoryRouter initialEntries={[path]}>

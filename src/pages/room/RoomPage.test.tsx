@@ -1,6 +1,6 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
 import { focusManager, onlineManager } from '@tanstack/react-query'
-import { HttpResponse, http } from 'msw'
+import { HttpResponse, delay, http } from 'msw'
 import { renderApp } from '@/shared/test/renderApp'
 import { server } from '@mocks/node'
 import { roomHandler } from '@mocks/handlers/rooms'
@@ -214,7 +214,10 @@ describe('오프라인 로딩', () => {
 
 describe('로딩', () => {
   beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }))
-  afterEach(() => vi.useRealTimers())
+  afterEach(() => {
+    vi.useRealTimers()
+    onlineManager.setOnline(true)
+  })
 
   const advance = (ms: number) => act(() => vi.advanceTimersByTimeAsync(ms))
 
@@ -236,6 +239,34 @@ describe('로딩', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: '방 정보를 불러오지 못했어요' }),
     ).toBeInTheDocument()
+  })
+
+  test('오프라인으로 오래 기다린 뒤 연결되어도 바로 오류 화면이 되지 않는다', async () => {
+    onlineManager.setOnline(false)
+    server.use(
+      http.get('*/api/v1/rooms/:roomId', async () => {
+        await delay('infinite')
+        return HttpResponse.json(mixedRoom)
+      }),
+    )
+    renderApp(PATH)
+    await advance(120_000)
+    expect(screen.getByRole('status')).toHaveTextContent('인터넷에 연결되어 있지 않아요')
+    act(() => onlineManager.setOnline(true))
+    await advance(3000)
+    expect(screen.queryByText('방 정보를 불러오지 못했어요')).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toBeInTheDocument()
+    onlineManager.setOnline(true)
+  })
+
+  test('network 오류로 재시도하는 중 90초가 지나면 연결 확인 안내로 포기한다', async () => {
+    server.use(http.get('*/api/v1/rooms/:roomId', () => HttpResponse.error()))
+    renderApp(PATH, { keepRetry: true })
+    await advance(91_000)
+    expect(
+      screen.getByRole('heading', { level: 1, name: '방 정보를 불러오지 못했어요' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('인터넷 연결을 확인해 주세요.')).toBeInTheDocument()
   })
 
   test('다시 시도하면 경과가 0부터 센다', async () => {
