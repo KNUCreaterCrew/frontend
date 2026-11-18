@@ -149,3 +149,19 @@ test('콘솔 error 가 없다', () => {
   expect(error).not.toHaveBeenCalled()
   error.mockRestore()
 })
+
+test('콘센트가 있는 좌석은 값 옆에 좌석도와 같은 콘센트 아이콘이 있고 글자는 그대로다', () => {
+  renderSheet({ seat: { ...a1, hasOutlet: true } })
+  const value = screen.getByText('있음')
+  const icon = value.querySelector('svg')
+  expect(icon).not.toBeNull()
+  expect(icon).toHaveAttribute('aria-hidden', 'true')
+  expect(value).toHaveTextContent(/^있음$/)
+})
+
+test('콘센트가 없는 좌석에는 아이콘이 없다', () => {
+  renderSheet({ seat: { ...a1, hasOutlet: false } })
+  const value = screen.getByText('없음')
+  expect(value.querySelector('svg')).toBeNull()
+  expect(value).toHaveTextContent(/^없음$/)
+})

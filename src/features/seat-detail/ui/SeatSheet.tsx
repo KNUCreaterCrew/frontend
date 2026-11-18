@@ -13,7 +13,7 @@ import {
   useTransform,
 } from 'motion/react'
 import type { Seat } from '@/entities/room'
-import { Button } from '@/shared/ui'
+import { Button, OutletIcon } from '@/shared/ui'
 import { useNow } from '@/shared/lib'
 import { shouldClose } from '../model/drag'
 import { seatChangeNotice, sheetContent } from '../model/sheetContent'
@@ -169,7 +169,12 @@ function SheetLayers({
                     className="flex items-baseline justify-between gap-4 border-b border-ink py-3"
                   >
                     <dt className="text-body text-ink-soft">{row.label}</dt>
-                    <dd className="text-right text-body font-bold text-ink">{row.value}</dd>
+                    <dd className="text-right text-body font-bold text-ink">
+                      {row.key === 'outlet' && row.value === '있음' && (
+                        <OutletIcon className="size-3.5 mr-1 inline-block align-[-0.125em]" />
+                      )}
+                      {row.value}
+                    </dd>
                   </div>
                 ))}
               </dl>
