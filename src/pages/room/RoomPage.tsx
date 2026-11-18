@@ -35,18 +35,13 @@ export function RoomPage() {
   }
 
   if (state === 'notFound') {
-    return (
-      <>
-        <TopBar updatedAt={null} />
-        <RoomNotFound roomId={roomId} />
-      </>
-    )
+    return <RoomNotFound roomId={roomId} />
   }
   if (state === 'error') {
     return (
       <>
         <TopBar updatedAt={null} />
-        <RoomError error={error ?? failureReason} onRetry={retry} />
+        <RoomError roomId={roomId} error={error ?? failureReason} onRetry={retry} />
       </>
     )
   }
@@ -67,6 +62,11 @@ export function RoomPage() {
         {!data.edgeOnline && <EdgeOfflineBanner />}
         <h1 className="mt-6 text-title font-black tracking-tight">{data.roomName}</h1>
         <RoomSummary summary={summary} />
+        {summary.kind === 'allUnknown' && data.edgeOnline && (
+          <p className="mt-4 text-body">
+            지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.
+          </p>
+        )}
         <div className="mt-6">
           {summary.kind === 'noSeats' ? (
             <p className="border-t-6 border-ink py-6">이 방에는 등록된 좌석이 없어요.</p>

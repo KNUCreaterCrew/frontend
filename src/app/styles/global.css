@@ -10,6 +10,9 @@ body,
 body {
   @apply bg-paper font-sans text-body font-medium text-ink;
   -webkit-font-smoothing: antialiased;
+  /* 한국어는 단어 단위로 줄을 바꾸고, 긴 ID 는 필요하면 어디서든 끊는다. */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 ::selection {

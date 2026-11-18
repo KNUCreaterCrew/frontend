@@ -71,7 +71,19 @@ describe('SeatMap 좌석 모양', () => {
     render(<SeatMap seats={[{ ...base, status: 'AWAY', hasOutlet: false }]} />)
     const button = screen.getByRole('button', { name: 'A1 짐 있음' })
     expect(within(button).getByText('짐 있음')).toBeInTheDocument()
-    expect(button).toHaveClass('pb-3')
+    const band = button.querySelector<HTMLElement>('span[aria-hidden="true"].bg-ink')
+    expect(band).not.toBeNull()
+    expect(band!.style.height).toBe('25%')
+    const content = within(button).getByText('짐 있음').parentElement as HTMLElement
+    expect(content.style.bottom).toBe('25%')
+  })
+
+  it('빗금 칸의 콘센트 아이콘은 종이색 칩 위에 놓인다', () => {
+    render(<SeatMap seats={[{ ...base, status: 'UNKNOWN', hasOutlet: true }]} />)
+    const button = screen.getByRole('button', { name: /^A1 / })
+    const icon = button.querySelector('svg')!
+    expect(icon.parentElement).not.toBe(button)
+    expect(icon.parentElement).toHaveClass('bg-paper')
   })
 
   it('알 수 없는 상태는 확인 불가와 같은 빗금이다', () => {

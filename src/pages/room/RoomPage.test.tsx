@@ -32,6 +32,16 @@ describe('방 화면', () => {
     expect(rowValue('확인 불가')).toHaveTextContent('1석')
     expect(rowValue('혼잡도')).toHaveTextContent('보통')
     expect(
+      screen
+        .getAllByText(/^(빈자리|확인 불가|전체|혼잡도)$/, { selector: 'dt' })
+        .map((e) => e.textContent),
+    ).toEqual(['빈자리', '확인 불가', '전체', '혼잡도'])
+    expect(screen.getByText('빈자리', { selector: 'dt' })).toHaveClass('whitespace-nowrap')
+    expect(screen.getByText('1', { selector: 'p[aria-hidden="true"]' })).toHaveClass('shrink-0')
+    expect(
+      screen.queryByText('지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.'),
+    ).not.toBeInTheDocument()
+    expect(
       seatButtons().map((b) => (b.getAttribute('aria-label') ?? b.textContent ?? '').slice(0, 2)),
     ).toEqual(['A1', 'A2', 'B1', 'B2'])
     expect(screen.getByText('짐 있음', { selector: 'li' })).toBeInTheDocument()
@@ -42,9 +52,16 @@ describe('방 화면', () => {
   test('all-unknown: 모름과 마지막 확인, 혼잡 없음', async () => {
     renderApp(PATH, { scenario: 'all-unknown' })
     expect(await screen.findByText('모름', { selector: '[aria-hidden="true"]' })).toBeVisible()
-    expect(screen.queryByText(/혼잡|만석/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/혼잡/)).not.toBeInTheDocument()
+    // 만석은 "만석이라는 뜻은 아니에요" 라는 부정 안내에서만 나온다.
+    for (const el of screen.queryAllByText(/만석/)) {
+      expect(el).toHaveTextContent('만석이라는 뜻은 아니에요')
+    }
     expect(rowValue('확인 불가')).toHaveTextContent('4석')
     expect(screen.getByText('마지막 확인', { selector: 'dt' })).toBeInTheDocument()
+    expect(
+      screen.getByText('지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.'),
+    ).toBeVisible()
   })
 
   test('offline: 끊김 띠가 방 이름보다 앞에 있다', async () => {
@@ -54,6 +71,9 @@ describe('방 화면', () => {
     expect(h2.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(screen.getByText(/만석이라는 뜻은 아니에요/)).toBeInTheDocument()
     expect(screen.queryByText(/^혼잡$/)).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.'),
+    ).not.toBeInTheDocument()
   })
 
   test('배포 원문: 마지막 확인이 아직 확인하지 못함', async () => {
@@ -105,6 +125,7 @@ describe('없는 방과 오류', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: '이 방을 찾을 수 없어요' }),
     ).toBeInTheDocument()
+    expect(screen.getByText(/IT4-101 방은 등록되어 있지 않아요/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '방 목록으로' })).toHaveAttribute('href', '/')
     expect(screen.queryByRole('button', { name: '다시 시도' })).not.toBeInTheDocument()
     expect(calls).toBe(1)
@@ -145,7 +166,8 @@ describe('없는 방과 오류', () => {
       }),
     )
     renderApp('/rooms/' + encodeURIComponent('A B/C'))
-    expect(await screen.findByText('요청한 방: A B/C')).toBeInTheDocument()
+    expect(await screen.findByText(/A B\/C 방은 등록되어 있지 않아요/)).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: /방 목록/ })).toHaveLength(1)
     expect(path).toBe('/api/v1/rooms/A%20B%2FC')
   })
 
@@ -153,6 +175,7 @@ describe('없는 방과 오류', () => {
     const { user } = renderApp(PATH, { scenario: 'error' })
     expect(await screen.findByText('방 정보를 불러오지 못했어요')).toBeInTheDocument()
     expect(screen.getByText('잠시 뒤 다시 시도해 주세요.')).toBeInTheDocument()
+    expect(screen.getByText(`방 ID: ${ROOM_ID}`)).toBeInTheDocument()
     server.use(roomHandler({ [ROOM_ID]: mixedRoom }))
     await user.click(screen.getByRole('button', { name: '다시 시도' }))
     expect(await screen.findByRole('heading', { level: 1, name: ROOM_NAME })).toBeInTheDocument()
@@ -199,7 +222,10 @@ describe('로딩', () => {
     renderApp(PATH, { scenario: 'loading' })
     expect(document.querySelector('[aria-busy="true"]')).toBeNull()
     await advance(250)
-    expect(document.querySelector('[aria-busy="true"]')).not.toBeNull()
+    const busy = document.querySelector('[aria-busy="true"]')
+    expect(busy).not.toBeNull()
+    expect(busy!.querySelector('.bg-surface')).toBeNull()
+    expect(busy!.querySelectorAll('.border-2.border-ink').length).toBeGreaterThanOrEqual(5)
     await advance(5000)
     expect(
       within(screen.getByRole('status')).getByText(/서버를 깨우는 중이에요/),
