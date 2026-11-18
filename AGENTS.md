@@ -26,7 +26,7 @@ TypeScript `strict` + `noUncheckedIndexedAccess`. ESLint flat(type-checked, reac
 
 | 구분   | 패키지와 버전                                                                                                                                                                                                 |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 런타임 | react, react-dom 19.3.1 / @tanstack/react-query 5.108.0 / zod 4.6.7 / react-router 8.5.1                                                                                                                      |
+| 런타임 | react, react-dom 19.3.1 / @tanstack/react-query 5.108.0 / zod 4.6.7 / react-router 8.5.1 / @radix-ui/react-dialog 1.3.1 / motion 14.14.0                                                                      |
 | 빌드   | vite 8.3.8 / @vitejs/plugin-react 6.3.0 / tailwindcss, @tailwindcss/vite 4.3.5                                                                                                                                |
 | 언어   | typescript 6.0.3                                                                                                                                                                                              |
 | lint   | eslint 9.39.5, @eslint/js 9.39.5, typescript-eslint 8.73.0, eslint-plugin-react-hooks 7.1.1, eslint-plugin-jsx-a11y 6.10.2, eslint-plugin-react-refresh 0.5.8, eslint-config-prettier 10.1.8, globals 17.14.0 |
