@@ -92,7 +92,7 @@ describe('좌석 상세 바텀시트 연결', () => {
     expect(within(dialog).getByText(/\(10:15:29\)/)).toBeVisible()
     expect(within(dialog).getByText(/\(10:16:11\)/)).toBeVisible()
     const notice = dialog.querySelector('[aria-live="polite"]')
-    expect(notice).toHaveTextContent('A1 지금 확인 불가')
+    expect(notice?.textContent).toBe('A1 지금 확인 불가, 장치 연결이 끊겼어요')
 
     sendAll(live, v3Events)
     await screen.findByRole('dialog', { name: 'A1 사용 중' })
@@ -149,7 +149,9 @@ describe('좌석 상세 바텀시트 연결', () => {
     await ready()
     await waitFor(() => expect(loc.location.search).toBe(''))
     expect(screen.queryByRole('dialog')).toBeNull()
-    for (const region of container.querySelectorAll('[aria-live="polite"]')) {
+    const regions = container.querySelectorAll('[aria-live="polite"]')
+    expect(regions).toHaveLength(2)
+    for (const region of regions) {
       expect(region.textContent).toBe('')
     }
   })
@@ -167,7 +169,7 @@ describe('좌석 상세 바텀시트 연결', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     expect(screen.getByRole('heading', { level: 1 })).toHaveFocus()
     const regions = container.querySelectorAll('[aria-live="polite"][aria-atomic="true"]')
-    expect(regions[1]).toHaveTextContent('A1 좌석 정보가 없어져 닫았어요')
+    expect(regions[1]?.textContent).toBe('A1 좌석 정보가 없어져 닫았어요')
     expect(loc.location.search).toBe('')
   })
 

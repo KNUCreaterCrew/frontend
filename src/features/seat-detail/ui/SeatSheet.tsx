@@ -138,7 +138,7 @@ function SheetLayers({
               if (shouldClose({ offsetY: info.offset.y, velocityY: info.velocity.y, height })) {
                 onClose()
               } else {
-                if (reduceMotion) dragY.set(0)
+                if (reduceMotion) dragY.jump(0)
                 else void animate(dragY, 0, TRANSITION)
               }
             }}

@@ -72,7 +72,7 @@ export function RoomPage() {
   const ready = data !== undefined
 
   useEffect(() => {
-    if (ready) void loadSeatDetail()
+    if (ready) loadSeatDetail().catch(() => {})
   }, [ready])
 
   useEffect(() => {

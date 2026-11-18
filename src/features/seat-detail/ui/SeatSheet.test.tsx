@@ -83,7 +83,7 @@ test('열린 동안 같은 좌석의 상태가 바뀌면 시트 안 알림 영�
       onCloseAutoFocus={() => {}}
     />,
   )
-  expect(live).toHaveTextContent(/^A1 지금 사용 중$/)
+  expect(live?.textContent).toBe('A1 지금 사용 중')
 })
 
 test('좌석 변화와 장치 알림이 함께 오면 둘 다 읽힌다', () => {
@@ -98,8 +98,7 @@ test('좌석 변화와 장치 알림이 함께 오면 둘 다 읽힌다', () => 
       onCloseAutoFocus={() => {}}
     />,
   )
-  expect(live).toHaveTextContent('A1 지금 확인 불가')
-  expect(live).toHaveTextContent('장치 연결이 끊겼어요')
+  expect(live?.textContent).toBe('A1 지금 확인 불가, 장치 연결이 끊겼어요')
 })
 
 test('열린 채 다른 좌석으로 바뀌면 상태가 달라도 변화 알림은 없다', () => {
@@ -130,7 +129,7 @@ test('edgeNotice 가 새 값이 되면 알림 영역에 읽힌다', () => {
       onCloseAutoFocus={() => {}}
     />,
   )
-  expect(live).toHaveTextContent('장치 연결이 끊겼어요')
+  expect(live?.textContent).toBe('장치 연결이 끊겼어요')
 })
 
 test('손잡이는 화면 읽기 도구에 숨고 막은 z-30, 시트는 z-40 이다', () => {
