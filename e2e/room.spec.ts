@@ -50,10 +50,12 @@ test('mixed: 좌석 버튼은 44px 이상이고 핵심 정보가 첫 화면 안�
     expect(box!.height, `seat ${i} height`).toBeGreaterThanOrEqual(44)
   }
   const viewportHeight = page.viewportSize()!.height
-  const row = page.locator('dt', { hasText: '확인 불가' }).first()
+  const row = page.getByRole('term').filter({ hasText: /^확인 불가$/ })
   const rowBox = await row.boundingBox()
   expect(rowBox!.y + rowBox!.height).toBeLessThanOrEqual(viewportHeight)
-  const big = await page.locator('p.font-num').first().boundingBox()
+  const bigNumber = page.locator('main p[aria-hidden="true"]').filter({ hasText: /^\d+$/ })
+  await expect(bigNumber).toHaveText('1')
+  const big = await bigNumber.boundingBox()
   expect(big!.y + big!.height).toBeLessThanOrEqual(viewportHeight)
 })
 
@@ -68,4 +70,6 @@ test('many-seats: 확대해도 좌석도 상자 안에서만 가로 스크롤된
   expect(dims.sw).toBeGreaterThan(dims.cw)
   const box = await seat.boundingBox()
   expect(box!.width).toBeGreaterThanOrEqual(44)
+  expect(box!.height).toBeGreaterThanOrEqual(43.5)
+  await expect(page.getByRole('button', { name: '전체 보기' })).toBeVisible()
 })
