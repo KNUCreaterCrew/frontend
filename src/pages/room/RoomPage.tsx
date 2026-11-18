@@ -170,11 +170,19 @@ export function RoomPage() {
   // 시트 코드를 받지 못했으면 좌석 param 을 지우고 좌석으로 돌아가 다시 누르게 한다
   const sheetLoadFailed = () => {
     setLoadFailed(true)
-    closing.current = false
-    const params = new URLSearchParams(searchRef.current)
-    params.delete(SEAT_PARAM)
-    const search = params.toString()
-    void navigate({ search: search ? `?${search}` : '' }, { replace: true })
+    // 눌러서 연 시트면 열기 전 기록으로 돌아가 죽은 항목을 남기지 않는다
+    if ((location.state as { seatSheet?: boolean } | null)?.seatSheet) {
+      if (!closing.current) {
+        closing.current = true
+        void navigate(-1)
+      }
+    } else {
+      closing.current = false
+      const params = new URLSearchParams(searchRef.current)
+      params.delete(SEAT_PARAM)
+      const search = params.toString()
+      void navigate({ search: search ? `?${search}` : '' }, { replace: true })
+    }
     const button = Array.from(document.querySelectorAll<HTMLElement>('[data-seat-id]')).find(
       (el) => el.dataset.seatId === openedSeatId.current,
     )
