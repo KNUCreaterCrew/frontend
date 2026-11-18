@@ -1,6 +1,6 @@
 # ZeroFrame Frontend
 
-빈 강의실 좌석 현황을 보여 주는 웹 앱입니다. Vite + React + TypeScript SPA 이고, 백엔드의 REST 와 WebSocket 을 같은 출처의 `/api`, `/ws` 로 부릅니다. 작업 규칙과 코드 규칙은 [AGENTS.md](AGENTS.md) 에 있습니다.
+실습실과 과방의 빈자리를 보여 주는 웹 앱입니다. Vite + React + TypeScript SPA 이고, 백엔드의 REST 와 WebSocket 을 같은 출처의 `/api`, `/ws` 로 부릅니다. 작업 규칙과 코드 규칙은 [AGENTS.md](AGENTS.md) 에 있습니다.
 
 ## 요구 사항
 
