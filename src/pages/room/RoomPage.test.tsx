@@ -259,10 +259,20 @@ describe('로딩', () => {
     onlineManager.setOnline(true)
   })
 
-  test('network 오류로 재시도하는 중 90초가 지나면 연결 확인 안내로 포기한다', async () => {
-    server.use(http.get('*/api/v1/rooms/:roomId', () => HttpResponse.error()))
+  test('재시도 요청이 매달린 채 90초가 지나면 마지막 network 오류로 연결 안내를 보인다', async () => {
+    let calls = 0
+    server.use(
+      http.get('*/api/v1/rooms/:roomId', async () => {
+        calls += 1
+        if (calls === 1) return HttpResponse.error()
+        await delay('infinite')
+        return HttpResponse.json(mixedRoom)
+      }),
+    )
     renderApp(PATH, { keepRetry: true })
-    await advance(91_000)
+    // 90초에 포기하고, 매달린 재시도가 90초 제한으로 끊기는 91초보다 앞에서 멈춘다.
+    await advance(90_500)
+    expect(calls).toBeGreaterThanOrEqual(2)
     expect(
       screen.getByRole('heading', { level: 1, name: '방 정보를 불러오지 못했어요' }),
     ).toBeInTheDocument()
