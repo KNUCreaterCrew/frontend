@@ -45,7 +45,7 @@ describe('labels', () => {
 describe('seatReasonLabel', () => {
   it.each([
     ['OCCLUDED', '무언가에 가려 자리가 보이지 않아요'],
-    ['LOW_CONFIDENCE', '자리가 잘 보이지 않아 판단하지 못했어요'],
+    ['LOW_CONFIDENCE', '비어 보이지만 아직 빈자리로 확인하지 못했어요'],
     ['MODEL_CONFLICT', '판단이 엇갈려 확인하지 못했어요'],
     ['VLM_TIMEOUT', '확인하는 데 시간이 오래 걸려 아직 몰라요'],
     ['STALE_OBSERVATION', '한동안 새로 확인하지 못했어요'],
