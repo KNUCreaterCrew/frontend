@@ -1,6 +1,6 @@
 # 프론트엔드 작업 규칙
 
-코드를 고치기 전에 읽는다. 공통 기준 문서는 `docs` 저장소의 `PROJECT.md`(완료 기준), `SEAT-STATES.md`(상태 의미와 학생에게 보이는 말), `INTERFACES.md`(REST와 WebSocket 계약), `ARCHITECTURE.md` 이다.
+코드를 고치기 전에 읽는다. 공통 기준 문서는 `docs` 저장소의 `PROJECT.md`(완료 기준), `SEAT-STATES.md`(상태 의미와 학생에게 보이는 말), `INTERFACES.md`(REST와 WebSocket 계약), `ARCHITECTURE.md` 이다. 화면의 사용자와 맥락은 `PRODUCT.md`, 시각 규칙(색, 글꼴, 좌석 4상태 표현)은 `DESIGN.md` 와 `src/app/styles/tokens.css` 가 기준이다.
 
 ## 왜 이 스택인가
 
