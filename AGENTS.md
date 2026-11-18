@@ -20,6 +20,8 @@
 
 TypeScript `strict` + `noUncheckedIndexedAccess`. ESLint flat(type-checked, react-hooks, jsx-a11y) + Prettier(`semi:false`, `singleQuote`, `printWidth:100`). pnpm, Node 24(`.nvmrc`). **이 목록 밖의 런타임 의존성은 사람 확인 후 추가한다.**
 
+테마는 `src/app/styles/tokens.css` 에서 Tailwind 기본 테마를 모두 지우고(`--*: initial`) 선언한 토큰만 둔다. 그래서 `text-2xl`, `bg-white`, `rounded-lg`, `shadow-md` 같은 기본 유틸리티는 동작하지 않는다. 새 값이 필요하면 `DESIGN.md` 와 `tokens.css` 에 먼저 더한 뒤 쓴다. 반경과 그림자 토큰은 일부러 두지 않았다.
+
 ### 설치된 버전 (2026-11-18)
 
 | 구분   | 패키지와 버전                                                                                                                                                                                                 |
