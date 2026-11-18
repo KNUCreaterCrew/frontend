@@ -91,7 +91,7 @@ config/       개발 서버 프록시
 
 - 시나리오 이름은 부팅 때 한 번 읽어 고정한다. 모르는 이름이면 알려진 이름 목록을 담은 오류가 난다. 있는 이름: `default`(= `mixed`), `mixed`, `all-unknown`, `offline`, `loading`, `error`, `not-found`, `slow-wake`, `many-seats`, `no-seats`, `live-flow`, `ws-reject`, `ws-slow-close`, `ws-down`, `live-demo`, `seat-details`, `rooms-many`, `rooms-empty`, `rooms-refresh-fail`. 방 ID 는 `IT4-101`.
 - 운영 빌드는 `import.meta.env.DEV` 분기 안의 동적 import 로 MSW 를 번들에서 뺀다. 이 분기를 깨지 않는다.
-- `default` 핸들러는 `IT4-101` 에 혼합 방(mixed)을 준다. 처리되지 않은 요청이 필요한 테스트는 `/api/v1/rooms/` 밖의 경로를 써야 한다.
+- `default` 핸들러는 `IT4-101` 에 혼합 방(mixed)을 준다. `/api/v1/rooms`(목록)와 `/api/v1/rooms/` 아래 경로는 기본으로 모두 처리된다. 처리되지 않은 요청이 필요한 테스트는 그 밖의 경로를 써야 한다.
 - 새 시나리오는 `mocks/scenarios.ts` 에 더하고, 개발 서버, Vitest, E2E 가 같은 것을 쓴다.
 
 ## 프록시
