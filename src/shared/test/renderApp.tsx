@@ -1,3 +1,4 @@
+import { StrictMode } from 'react'
 import { render, type RenderResult } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
@@ -9,17 +10,18 @@ import { server } from '@mocks/node'
 
 export function renderApp(
   path: string,
-  options?: { scenario?: string; keepRetry?: boolean },
+  options?: { scenario?: string; keepRetry?: boolean; strict?: boolean },
 ): RenderResult & { user: UserEvent } {
   if (options?.scenario) server.use(...resolveScenario(options.scenario))
   const queryClient = createQueryClient()
   if (!options?.keepRetry) queryClient.setDefaultOptions({ queries: { retry: false } })
-  const result = render(
+  const tree = (
     <AppProviders queryClient={queryClient}>
       <MemoryRouter initialEntries={[path]}>
         <AppRoutes />
       </MemoryRouter>
-    </AppProviders>,
+    </AppProviders>
   )
+  const result = render(options?.strict ? <StrictMode>{tree}</StrictMode> : tree)
   return { ...result, user: userEvent.setup() }
 }
