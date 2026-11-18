@@ -184,3 +184,49 @@ describe('SeatMap 방금 바뀐 좌석', () => {
     expect(nameCalls.count).toBe(1)
   })
 })
+
+describe('SeatMap 선택한 좌석', () => {
+  it('선택한 좌석 버튼에 굵은 테두리가 있고 data-seat-id 와 aria-haspopup 이 있다', () => {
+    render(<SeatMap seats={mixed} selectedSeatId="A-02" onSelect={() => {}} />)
+    const selected = screen.getByRole('button', { name: /^A2 / })
+    expect(selected).toHaveClass('outline-4', 'outline-offset-3', 'outline-ink')
+    expect(selected).toHaveAttribute('data-seat-id', 'A-02')
+    expect(selected).toHaveAttribute('aria-haspopup', 'dialog')
+    expect(screen.getByRole('button', { name: /^A1 / })).not.toHaveClass('outline-4')
+  })
+
+  it('좌석을 누르면 onSelect 에 seatId 가 넘어간다', async () => {
+    const onSelect = vi.fn()
+    render(<SeatMap seats={mixed} onSelect={onSelect} />)
+    await userEvent.click(screen.getByRole('button', { name: /^B1 / }))
+    expect(onSelect).toHaveBeenCalledWith('B-01')
+  })
+
+  it('강조와 선택이 같은 좌석이면 강조 테두리가 버튼 바로 뒤에 그대로 있다', () => {
+    const highlights = new Map([['A-01', 'EMPTY' as const]])
+    const { container } = render(
+      <SeatMap seats={mixed} highlights={highlights} selectedSeatId="A-01" onSelect={() => {}} />,
+    )
+    const button = screen.getByRole('button', { name: /^A1 / })
+    const ring = container.querySelector('span[aria-hidden="true"].outline-live')
+    expect(button.nextElementSibling).toBe(ring)
+    expect(ring).toHaveClass('z-10')
+  })
+
+  it('선택이 바뀌어도 해당 두 좌석 외에는 다시 그려지지 않는다', () => {
+    const onSelect = vi.fn()
+    const { rerender } = render(<SeatMap seats={mixed} selectedSeatId={null} onSelect={onSelect} />)
+    nameCalls.count = 0
+    rerender(<SeatMap seats={mixed} selectedSeatId="A-01" onSelect={onSelect} />)
+    expect(nameCalls.count).toBe(1)
+  })
+
+  it('다른 좌석 하나만 바뀌어도 onSelect 가 같으면 버튼 하나만 다시 그려진다', () => {
+    const onSelect = vi.fn()
+    const { rerender } = render(<SeatMap seats={mixed} selectedSeatId="A-01" onSelect={onSelect} />)
+    nameCalls.count = 0
+    const next = mixed.map((s, i) => (i === 1 ? { ...s, status: 'EMPTY' as const } : s))
+    rerender(<SeatMap seats={next} selectedSeatId="A-01" onSelect={onSelect} />)
+    expect(nameCalls.count).toBe(1)
+  })
+})

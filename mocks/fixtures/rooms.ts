@@ -9,6 +9,15 @@ type Reason = SeatDto['reason']
 
 const OBSERVED_AT = '2026-11-18T05:02:36Z'
 const SINCE = '2026-11-18T05:00:00Z'
+// 알 수 없음은 유효한 판정 없이 30초가 지나야 되므로 마지막 확인은 SINCE 보다 30초 이상 앞선다(04:58:00 ~ 04:59:30).
+const UNKNOWN_OBSERVED_FROM = Date.parse('2026-11-18T04:58:00Z')
+const KNOWN_STATUSES: string[] = ['OCCUPIED', 'AWAY', 'EMPTY']
+
+function defaultObservedAt(i: SeatInit): string {
+  if (KNOWN_STATUSES.includes(i.status)) return OBSERVED_AT
+  const offsetSeconds = (i.row.charCodeAt(0) * 7 + i.n * 13) % 91
+  return new Date(UNKNOWN_OBSERVED_FROM + offsetSeconds * 1000).toISOString()
+}
 
 export function buildRoom(seats: SeatDto[], overrides: Partial<RoomDto> = {}): RoomDto {
   const total = seats.length
@@ -50,7 +59,7 @@ function seat(i: SeatInit): SeatDto {
     status: i.status,
     reason: i.reason ?? null,
     status_since: i.since ?? SINCE,
-    last_observed_at: i.observedAt === undefined ? OBSERVED_AT : i.observedAt,
+    last_observed_at: i.observedAt === undefined ? defaultObservedAt(i) : i.observedAt,
     has_outlet: i.outlet ?? false,
     is_window: i.window ?? false,
     layout: { x: i.x, y: i.y, width: 64, height: 48 },
@@ -148,6 +157,31 @@ export const manySeatsRoom: RoomDto = buildRoom(
       })
     }),
   ),
+  { version: 12 },
+)
+
+const DETAIL_REASONS = [
+  'OCCLUDED',
+  'LOW_CONFIDENCE',
+  'MODEL_CONFLICT',
+  'VLM_TIMEOUT',
+  'STALE_OBSERVATION',
+  'EDGE_OFFLINE',
+]
+
+// 좌석 상세 시트의 경우마다 좌석 하나씩. status 와 reason 은 DTO 에서 문자열이라 모르는 값도 그대로 쓴다.
+export const seatDetailsRoom: RoomDto = buildRoom(
+  [
+    ...DETAIL_REASONS.map((reason, i) =>
+      seat({ row: 'A', n: i + 1, x: i * 80, y: 0, status: 'UNKNOWN', reason, window: i === 0 }),
+    ),
+    seat({ row: 'B', n: 1, x: 0, y: 64, status: 'UNKNOWN', reason: null, observedAt: null }),
+    seat({ row: 'B', n: 2, x: 80, y: 64, status: 'UNKNOWN', reason: 'SOMETHING_NEW' }),
+    seat({ row: 'B', n: 3, x: 160, y: 64, status: 'SOMETHING_NEW', reason: 'OCCLUDED' }),
+    seat({ row: 'B', n: 4, x: 240, y: 64, status: 'EMPTY', outlet: true }),
+    seat({ row: 'B', n: 5, x: 320, y: 64, status: 'OCCUPIED', window: true }),
+    seat({ row: 'B', n: 6, x: 400, y: 64, status: 'AWAY', outlet: true }),
+  ],
   { version: 12 },
 )
 

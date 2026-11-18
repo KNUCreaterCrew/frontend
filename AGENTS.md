@@ -14,8 +14,8 @@
 | 서버 상태  | TanStack Query + 순수 함수 이벤트 반영                                                                | 상태 라이브러리 단독: 재조회, 재시도, 캐시를 직접 만들어야 함                                                                                                                       |
 | 응답 검증  | zod 4                                                                                                 | 타입만: 계약과 다른 값이 조용히 틀림                                                                                                                                                |
 | 라우터     | React Router 8 (선언형 `<Routes>`)                                                                    | 데이터 라우터: 서버 상태는 TanStack Query 가 맡으므로 loader 가 필요 없음                                                                                                           |
-| 모션       | motion (필요해질 때 추가)                                                                             | CSS 전환만: 시트 드래그와 변경 강조 완성도 부족                                                                                                                                     |
-| 바텀시트   | Radix Dialog + motion 드래그 (필요해질 때 추가)                                                       | vaul: 관리 중단                                                                                                                                                                     |
+| 모션       | motion                                                                                                | CSS 전환만: 시트 드래그와 변경 강조 완성도 부족                                                                                                                                     |
+| 바텀시트   | Radix Dialog + motion 드래그                                                                          | vaul: 관리 중단                                                                                                                                                                     |
 | 테스트     | Vitest + Testing Library + MSW 3(`ws` 포함) + Playwright                                              | Storybook: 같은 상태를 세 곳에서 그림. `?scenario=` URL 로 대체                                                                                                                     |
 
 TypeScript `strict` + `noUncheckedIndexedAccess`. ESLint flat(type-checked, react-hooks, jsx-a11y) + Prettier(`semi:false`, `singleQuote`, `printWidth:100`). pnpm, Node 24(`.nvmrc`). **이 목록 밖의 런타임 의존성은 사람 확인 후 추가한다.**
@@ -26,7 +26,7 @@ TypeScript `strict` + `noUncheckedIndexedAccess`. ESLint flat(type-checked, reac
 
 | 구분   | 패키지와 버전                                                                                                                                                                                                 |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 런타임 | react, react-dom 19.3.1 / @tanstack/react-query 5.108.0 / zod 4.6.7 / react-router 8.5.1                                                                                                                      |
+| 런타임 | react, react-dom 19.3.1 / @tanstack/react-query 5.108.0 / zod 4.6.7 / react-router 8.5.1 / @radix-ui/react-dialog 1.3.1 / motion 14.14.0                                                                      |
 | 빌드   | vite 8.3.8 / @vitejs/plugin-react 6.3.0 / tailwindcss, @tailwindcss/vite 4.3.5                                                                                                                                |
 | 언어   | typescript 6.0.3                                                                                                                                                                                              |
 | lint   | eslint 9.39.5, @eslint/js 9.39.5, typescript-eslint 8.73.0, eslint-plugin-react-hooks 7.1.1, eslint-plugin-jsx-a11y 6.10.2, eslint-plugin-react-refresh 0.5.8, eslint-config-prettier 10.1.8, globals 17.14.0 |
@@ -89,7 +89,7 @@ config/       개발 서버 프록시
 
 개발 서버에서 `shouldEnableMocking({ dev, flag, search })` 가 참일 때만 켠다. 조건은 DEV 이고 (`VITE_API_MOCKING === 'enabled'` 또는 URL 에 `?scenario=<이름>`) 이다. 그 밖에는 꺼지고 프록시로 실제 백엔드에 간다.
 
-- 시나리오 이름은 부팅 때 한 번 읽어 고정한다. 모르는 이름이면 알려진 이름 목록을 담은 오류가 난다. 있는 이름: `default`(= `mixed`), `mixed`, `all-unknown`, `offline`, `loading`, `error`, `not-found`, `slow-wake`, `many-seats`, `no-seats`, `live-flow`, `ws-reject`, `ws-slow-close`, `ws-down`, `live-demo`. 방 ID 는 `IT4-101`.
+- 시나리오 이름은 부팅 때 한 번 읽어 고정한다. 모르는 이름이면 알려진 이름 목록을 담은 오류가 난다. 있는 이름: `default`(= `mixed`), `mixed`, `all-unknown`, `offline`, `loading`, `error`, `not-found`, `slow-wake`, `many-seats`, `no-seats`, `live-flow`, `ws-reject`, `ws-slow-close`, `ws-down`, `live-demo`, `seat-details`. 방 ID 는 `IT4-101`.
 - 운영 빌드는 `import.meta.env.DEV` 분기 안의 동적 import 로 MSW 를 번들에서 뺀다. 이 분기를 깨지 않는다.
 - `default` 핸들러는 `IT4-101` 에 혼합 방(mixed)을 준다. 처리되지 않은 요청이 필요한 테스트는 `/api/v1/rooms/` 밖의 경로를 써야 한다.
 - 새 시나리오는 `mocks/scenarios.ts` 에 더하고, 개발 서버, Vitest, E2E 가 같은 것을 쓴다.

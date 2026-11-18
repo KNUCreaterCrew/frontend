@@ -1,18 +1,12 @@
 import { Link } from 'react-router'
-import { formatRelative, useNow } from '@/shared/lib'
+import { formatRelative, freshnessWarning, useNow } from '@/shared/lib'
 
 type Props = { updatedAt: number | null; refreshFailed?: boolean }
 
 export function TopBar({ updatedAt, refreshFailed = false }: Props) {
   const now = useNow(1000)
-  let text: string | null = null
-  if (refreshFailed) text = '갱신하지 못했어요'
-  else if (updatedAt !== null) {
-    text =
-      now - updatedAt >= 60_000
-        ? '1분 넘게 갱신되지 않았어요'
-        : `${formatRelative(updatedAt, now)} 갱신`
-  }
+  const warning = freshnessWarning(updatedAt, refreshFailed, now)
+  const text = warning ?? (updatedAt !== null ? `${formatRelative(updatedAt, now)} 갱신` : null)
 
   return (
     <header className="flex items-center justify-between gap-3 border-b-2 border-ink text-label">

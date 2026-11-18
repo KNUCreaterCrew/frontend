@@ -39,6 +39,7 @@ const SCENARIO_NAMES = [
   'ws-slow-close',
   'ws-down',
   'live-demo',
+  'seat-details',
 ]
 
 test.each(SCENARIO_NAMES)('시나리오 %s 는 ws 핸들러를 하나 이상 가진다', (name) => {
@@ -101,6 +102,27 @@ test('배포 원문 offline 방은 last_observed_at 이 null 이다', () => {
   expect(deployedOfflineRoom.edge_online).toBe(false)
   expect(offlineRoom.seats.every((s) => s.last_observed_at !== null)).toBe(true)
 })
+
+const ROOM_SCENARIOS = SCENARIO_NAMES.filter(
+  (name) => !['loading', 'error', 'not-found', 'slow-wake'].includes(name),
+)
+
+test.each(ROOM_SCENARIOS)(
+  '시나리오 %s 의 알 수 없는 좌석은 마지막 확인이 상태 시작보다 30초 이상 앞선다',
+  async (name) => {
+    server.use(...resolveScenario(name))
+    const dto = roomDtoSchema.parse(
+      await (await fetch(`http://localhost/api/v1/rooms/${ROOM_ID}`)).json(),
+    )
+    const known = ['OCCUPIED', 'AWAY', 'EMPTY']
+    for (const seat of dto.seats) {
+      if (known.includes(seat.status) || seat.last_observed_at === null) continue
+      expect(Date.parse(seat.last_observed_at), `${name} ${seat.seat_id}`).toBeLessThanOrEqual(
+        Date.parse(seat.status_since) - 30_000,
+      )
+    }
+  },
+)
 
 async function getRoom(id: string) {
   return fetch(`http://localhost/api/v1/rooms/${id}`)
@@ -251,5 +273,34 @@ describe('시나리오는 호출마다 새로 만들어진다', () => {
       await vi.waitFor(() => expect(events).toContain('close'))
       expect(events).toEqual(['close'])
     }
+  })
+})
+
+describe('seat-details', () => {
+  test('좌석 라벨이 모두 다르고 요구한 경우를 담는다', async () => {
+    server.use(...resolveScenario('seat-details'))
+    const body = roomDtoSchema.parse(await (await getRoom(ROOM_ID)).json())
+    const labels = body.seats.map((s) => s.label)
+    expect(new Set(labels).size).toBe(labels.length)
+    const seats = toRoom(body).seats
+    const unknown = seats.filter((s) => s.status === 'UNKNOWN')
+    for (const reason of [
+      'OCCLUDED',
+      'LOW_CONFIDENCE',
+      'MODEL_CONFLICT',
+      'VLM_TIMEOUT',
+      'STALE_OBSERVATION',
+      'EDGE_OFFLINE',
+      'UNRECOGNIZED',
+      null,
+    ]) {
+      expect(unknown.some((s) => s.reason === reason)).toBe(true)
+    }
+    expect(seats.some((s) => s.status === 'UNRECOGNIZED')).toBe(true)
+    // EMPTY 는 확인한 관측이 있어야 해서 시간이 null 인 빈자리는 없다
+    expect(seats.some((s) => s.status === 'EMPTY' && s.lastObservedAt === null)).toBe(false)
+    expect(seats.some((s) => s.status === 'EMPTY' && s.lastObservedAt !== null)).toBe(true)
+    expect(seats.some((s) => s.status === 'UNKNOWN' && s.lastObservedAt === null)).toBe(true)
+    expect(seats.some((s) => s.isWindow)).toBe(true)
   })
 })

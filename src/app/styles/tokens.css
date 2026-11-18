@@ -67,11 +67,13 @@
   --spacing-12: 3rem;
   --spacing-16: 4rem;
   --spacing-tap: 2.75rem; /* 44px 터치 목표 최소 크기 */
+  --spacing-band: 0.375rem; /* 6px 바텀시트 위 상태 띠 높이 */
 
   /* 선 굵기는 Tailwind 숫자 유틸리티(border-2 등)를 쓴다. 모서리는 각지게: 반경 토큰 없음, 그림자 토큰 없음 */
 
   /* 화면 폭 */
   --breakpoint-md: 48rem; /* 768px */
+  --container-sheet: 30rem; /* 480px 데스크톱에서 바텀시트의 최대 폭 */
 
   /* 움직임 */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -94,6 +96,7 @@
 :root {
   /* 확인 불가 좌석의 빗금. 회색 면이 아니라 "모름"을 뜻하는 고유한 무늬 */
   --pattern-unknown: repeating-linear-gradient(-45deg, var(--color-ink) 0 2px, transparent 2px 9px);
+  --sheet-max-height: 85dvh; /* 바텀시트 최대 높이. 넘치면 내용만 스크롤 */
   --duration-sheet: 240ms; /* 바텀시트 열고 닫기 */
   --duration-live: 1600ms; /* 방금 바뀐 좌석 강조 한 번 */
 }

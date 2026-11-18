@@ -31,3 +31,12 @@ body {
 @utility pattern-unknown {
   background-image: var(--pattern-unknown);
 }
+
+/* 바텀시트 높이 한계와 아래 여백(safe-area). 값은 tokens.css */
+@utility max-h-sheet {
+  max-height: var(--sheet-max-height);
+}
+
+@utility pb-safe {
+  padding-bottom: max(var(--spacing-4), env(safe-area-inset-bottom));
+}
