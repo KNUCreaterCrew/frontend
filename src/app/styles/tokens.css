@@ -1,0 +1,87 @@
+/*
+ * 디자인 토큰. 기준 문서는 저장소 루트의 DESIGN.md 다.
+ * Tailwind 기본 테마를 모두 지우고 여기 선언한 값만 유틸리티로 쓴다.
+ * 새 값이 필요하면 DESIGN.md 를 먼저 고치고 여기에 더한다. 컴포넌트에 hex 나 임의 값을 쓰지 않는다.
+ * 대비는 WCAG 2.2 기준. 본문 4.5:1, 큰 글자와 아이콘 3:1 이상.
+ */
+@theme {
+  --*: initial;
+
+  /* 색 */
+  --color-paper: #f2f0ea; /* 바탕. 게시판 종이 */
+  --color-surface: #ffffff; /* 바텀시트처럼 바탕 위에 올라오는 면 */
+  --color-ink: #121212; /* 본문, 선, 사용 중 좌석 면. paper 대비 16.4:1, surface 대비 18.7:1 */
+  --color-ink-soft: #3d3b37; /* 보조 글자. paper 대비 9.8:1, surface 대비 11.2:1 */
+  --color-empty: #007a45; /* 빈자리 면과 빈자리 숫자. paper 대비 4.8:1, surface 대비 5.4:1 */
+  --color-on-empty: #ffffff; /* empty 위 글자. 5.4:1 */
+  --color-live: #c4301a; /* 방금 바뀐 좌석과 장치 끊김 안내에만. paper 대비 4.9:1, surface 대비 5.6:1 */
+  --color-on-live: #ffffff; /* live 위 글자. 5.6:1 */
+  --color-scrim: rgb(18 18 18 / 0.28); /* 바텀시트 뒤를 덮는 막. 글자를 올리지 않는다 */
+
+  /* 글꼴 */
+  --font-sans: 'Gothic A1', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-num: 'Archivo', 'Gothic A1', sans-serif; /* 숫자와 좌석 번호 */
+  --default-font-family: var(--font-sans);
+
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  /* 글자 크기. 이름은 쓰임새 */
+  --text-caption: 0.75rem; /* 12px 벽, 통로 같은 좌석도 표시 */
+  --text-caption--line-height: 1.4;
+  --text-label: 0.8125rem; /* 13px 좌석 칸 안 상태, 범례 */
+  --text-label--line-height: 1.4;
+  --text-body: 0.9375rem; /* 15px 본문 */
+  --text-body--line-height: 1.5;
+  --text-number: 1.25rem; /* 20px 요약 표의 숫자 */
+  --text-number--line-height: 1.2;
+  --text-fact: 1.375rem; /* 22px 요약 표의 첫 줄(빈자리) */
+  --text-fact--line-height: 1.2;
+  --text-alert: 1.5rem; /* 24px 장치 끊김 같은 안내 제목 */
+  --text-alert--line-height: 1.25;
+  --text-title: 1.875rem; /* 30px 방 이름 */
+  --text-title--line-height: 1.1;
+  --text-sheet: 2.125rem; /* 34px 바텀시트의 좌석 번호와 상태 */
+  --text-sheet--line-height: 1.1;
+  --text-poster-word: 4.5rem; /* 72px 숫자 대신 "모름"을 쓸 때 */
+  --text-poster-word--line-height: 0.95;
+  --text-poster: 9rem; /* 144px 빈자리 숫자 하나에만. 글자 제목에 쓰지 않는다 */
+  --text-poster--line-height: 0.82;
+
+  --tracking-tight: -0.03em;
+  --tracking-poster: -0.04em;
+
+  /* 간격. 4px 단위 */
+  --spacing-0: 0px;
+  --spacing-px: 1px;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-tap: 2.75rem; /* 44px 터치 목표 최소 크기 */
+
+  /* 선 굵기는 Tailwind 숫자 유틸리티(border-2 등)를 쓴다. 모서리는 각지게: 반경 토큰 없음, 그림자 토큰 없음 */
+
+  /* 화면 폭 */
+  --breakpoint-md: 48rem; /* 768px */
+
+  /* 움직임 */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --default-transition-duration: 160ms;
+  --default-transition-timing-function: var(--ease-out);
+}
+
+:root {
+  /* 확인 불가 좌석의 빗금. 회색 면이 아니라 "모름"을 뜻하는 고유한 무늬 */
+  --pattern-unknown: repeating-linear-gradient(-45deg, var(--color-ink) 0 2px, transparent 2px 9px);
+  --duration-sheet: 240ms; /* 바텀시트 열고 닫기 */
+  --duration-live: 1600ms; /* 방금 바뀐 좌석 강조 한 번 */
+}

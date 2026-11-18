@@ -1,6 +1,6 @@
 # 프론트엔드 작업 규칙
 
-코드를 고치기 전에 읽는다. 공통 기준 문서는 `docs` 저장소의 `PROJECT.md`(완료 기준), `SEAT-STATES.md`(상태 의미와 학생에게 보이는 말), `INTERFACES.md`(REST와 WebSocket 계약), `ARCHITECTURE.md` 이다.
+코드를 고치기 전에 읽는다. 공통 기준 문서는 `docs` 저장소의 `PROJECT.md`(완료 기준), `SEAT-STATES.md`(상태 의미와 학생에게 보이는 말), `INTERFACES.md`(REST와 WebSocket 계약), `ARCHITECTURE.md` 이다. 화면의 사용자와 맥락은 `PRODUCT.md`, 시각 규칙(색, 글꼴, 좌석 4상태 표현)은 `DESIGN.md` 와 `src/app/styles/tokens.css` 가 기준이다.
 
 ## 왜 이 스택인가
 
@@ -19,6 +19,8 @@
 | 테스트     | Vitest + Testing Library + MSW 3(`ws` 포함) + Playwright | Storybook: 같은 상태를 세 곳에서 그림. `?scenario=` URL 로 대체                                                                                                                     |
 
 TypeScript `strict` + `noUncheckedIndexedAccess`. ESLint flat(type-checked, react-hooks, jsx-a11y) + Prettier(`semi:false`, `singleQuote`, `printWidth:100`). pnpm, Node 24(`.nvmrc`). **이 목록 밖의 런타임 의존성은 사람 확인 후 추가한다.**
+
+테마는 `src/app/styles/tokens.css` 에서 Tailwind 기본 테마를 모두 지우고(`--*: initial`) 선언한 토큰만 둔다. 그래서 `text-2xl`, `bg-white`, `rounded-lg`, `shadow-md` 같은 기본 유틸리티는 동작하지 않는다. 새 값이 필요하면 `DESIGN.md` 와 `tokens.css` 에 먼저 더한 뒤 쓴다. 반경과 그림자 토큰은 일부러 두지 않았다.
 
 ### 설치된 버전 (2026-11-18)
 
