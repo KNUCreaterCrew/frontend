@@ -77,6 +77,18 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --default-transition-duration: 160ms;
   --default-transition-timing-function: var(--ease-out);
+  --animate-live: live-tighten var(--duration-live) ease-out 1;
+
+  @keyframes live-tighten {
+    from {
+      transform: scale(1.12);
+      opacity: 0.4;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
 }
 
 :root {

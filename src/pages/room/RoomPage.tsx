@@ -73,7 +73,11 @@ export function RoomPage() {
           {summary.kind === 'noSeats' ? (
             <p className="border-t-6 border-ink py-6">이 방에는 등록된 좌석이 없어요.</p>
           ) : (
-            <SeatMap seats={data.seats} onOutletsHiddenChange={setOutletsHidden} />
+            <SeatMap
+              seats={data.seats}
+              highlights={live.highlights}
+              onOutletsHiddenChange={setOutletsHidden}
+            />
           )}
         </div>
         <Legend outletsHidden={outletsHidden} />

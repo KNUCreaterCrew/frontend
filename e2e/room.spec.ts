@@ -73,3 +73,25 @@ test('many-seats: 확대해도 좌석도 상자 안에서만 가로 스크롤된
   expect(box!.height).toBeGreaterThanOrEqual(43.5)
   await expect(page.getByRole('button', { name: '전체 보기' })).toBeVisible()
 })
+
+for (const width of [360, 390]) {
+  test(`live-demo ${width}: 4초 안에 방금 문구가 보이고 가로 넘침과 콘솔 오류가 없다`, async ({
+    page,
+  }) => {
+    const errors = collectErrors(page)
+    await page.setViewportSize({ width, height: 800 })
+    await page.goto(url('live-demo'))
+    await expect(page.getByRole('button', { name: /^A1 / })).toBeVisible()
+    await expect(page.locator('main button').getByText(/^방금/)).toBeVisible({ timeout: 4_000 })
+    expect(await pageOverflow(page)).toBeLessThanOrEqual(0)
+    expect(errors).toEqual([])
+  })
+}
+
+test('live-demo: 동작 줄이기 설정이면 강조 테두리가 움직이지 않는다', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto(url('live-demo'))
+  const ring = page.locator('span.border-live').first()
+  await expect(ring).toBeVisible({ timeout: 4_000 })
+  expect(await ring.evaluate((el) => el.getAnimations().length)).toBe(0)
+})

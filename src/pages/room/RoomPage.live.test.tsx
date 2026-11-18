@@ -10,7 +10,7 @@ import {
   v2Events,
   v3Events,
 } from '@mocks/fixtures/interfacesFlow'
-import type { RoomEventDto } from '@/entities/room'
+import type { RoomDto, RoomEventDto } from '@/entities/room'
 
 const PATH = '/rooms/IT4-101'
 const ROOM_NAME = '제1실습실 (예시)'
@@ -32,6 +32,46 @@ function sendAll(live: LiveRoom, events: RoomEventDto[]) {
 
 const gets = (live: LiveRoom) => live.log.filter((entry) => entry === 'get').length
 const sockets = (live: LiveRoom) => live.log.filter((entry) => entry === 'ws').length
+
+const emptySeats: RoomDto['seats'] = ['A-01', 'A-02', 'A-03'].map((id, i) => ({
+  ...v1RoomDto.seats[0]!,
+  seat_id: id,
+  label: `A${i + 1}`,
+  status: 'EMPTY',
+  reason: null,
+  layout: { x: 120, y: 80 + i * 60, width: 64, height: 48 },
+}))
+const threeSeatRoom: RoomDto = {
+  ...v1RoomDto,
+  total_seats: 3,
+  available_seats: 3,
+  seats: emptySeats,
+}
+
+function seatChange(version: number, seatId: string): RoomEventDto {
+  return {
+    event: 'SEAT_UPDATED',
+    room_id: 'IT4-101',
+    version,
+    available_seats: 2,
+    unknown_seats: 0,
+    congestion_level: 'LOW',
+    changes: [
+      {
+        seat_id: seatId,
+        prev_status: 'EMPTY',
+        curr_status: 'OCCUPIED',
+        reason: null,
+        status_since: '2026-11-24T10:20:00+09:00',
+        last_observed_at: '2026-11-24T10:20:00+09:00',
+      },
+    ],
+  }
+}
+
+const rings = (container: HTMLElement) => container.querySelectorAll('span.border-live')
+// 요약 줄의 "방금"(상대 시각)과 구별하려고 좌석 칸 안의 칩만 센다
+const chips = (container: HTMLElement) => container.querySelectorAll('button .bg-live')
 
 function ready() {
   return screen.findByRole('heading', { level: 1, name: ROOM_NAME })
@@ -152,6 +192,44 @@ describe('실시간 반영', () => {
       ).toBeVisible()
       expect(screen.getByRole('button', { name: /^A1 확인 불가/ })).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /^A1 사용 중/ })).toBeNull()
+    })
+
+    test('평소 좌석 변경은 "방금 사용 중"으로 5초 보이고 사라진다', async () => {
+      const live = liveRoom(threeSeatRoom)
+      server.use(...live.handlers)
+      const { container } = renderApp(PATH)
+      await ready()
+      await waitFor(() => expect(live.openClients()).toBe(1))
+      expect(chips(container)).toHaveLength(0)
+      sendAll(live, [seatChange(2, 'A-02')])
+      expect(await screen.findByText('방금 사용 중')).toBeVisible()
+      expect(rings(container)).toHaveLength(1)
+      expect(screen.getByRole('button', { name: /^A2 사용 중/ })).toBeInTheDocument()
+      await advance(5000)
+      await waitFor(() => expect(rings(container)).toHaveLength(0))
+      expect(chips(container)).toHaveLength(0)
+    })
+
+    test('장치 끊김 흐름에서는 방금 표시가 없다', async () => {
+      const live = liveRoom(v1RoomDto)
+      server.use(...live.handlers)
+      const { container } = renderApp(PATH)
+      await ready()
+      await waitFor(() => expect(live.openClients()).toBe(1))
+      sendAll(live, v2Events)
+      await screen.findByRole('heading', { level: 2, name: BANNER })
+      expect(chips(container)).toHaveLength(0)
+      expect(rings(container)).toHaveLength(0)
+    })
+
+    test('3석이 연달아 바뀌면 테두리는 최근 2석만 남는다', async () => {
+      const live = liveRoom(threeSeatRoom)
+      server.use(...live.handlers)
+      const { container } = renderApp(PATH)
+      await ready()
+      await waitFor(() => expect(live.openClients()).toBe(1))
+      sendAll(live, [seatChange(2, 'A-01'), seatChange(3, 'A-02'), seatChange(4, 'A-03')])
+      await waitFor(() => expect(rings(container)).toHaveLength(2))
     })
 
     test('not-found: 연결도 조회도 한 번이고 다시 시도하지 않는다', async () => {

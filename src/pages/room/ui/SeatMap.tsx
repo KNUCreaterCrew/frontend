@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import type { Seat } from '@/entities/room'
+import { useEffect, useMemo, useState } from 'react'
+import type { Seat, SeatStatus } from '@/entities/room'
 import { useElementWidth } from '@/shared/lib'
 import {
   cellStage,
@@ -20,16 +20,25 @@ const BOX_PAD_PX = 8
 
 interface SeatMapProps {
   seats: Seat[]
+  /** 방금 바뀐 좌석과 바뀐 뒤 상태 */
+  highlights?: ReadonlyMap<string, SeatStatus>
   /** 지금 보이는 칸이 콘센트 아이콘을 숨기는지(범례 안내용) */
   onOutletsHiddenChange?: (hidden: boolean) => void
 }
 
-export function SeatMap({ seats, onOutletsHiddenChange }: SeatMapProps) {
+export function SeatMap({ seats, highlights, onOutletsHiddenChange }: SeatMapProps) {
   const [boxRef, width] = useElementWidth<HTMLDivElement>()
   const [zoomed, setZoomed] = useState(false)
 
-  const layouts = seats.map((s) => s.layout)
-  const vb = computeViewBox(layouts)
+  const layouts = useMemo(() => seats.map((s) => s.layout), [seats])
+  const vb = useMemo(() => computeViewBox(layouts), [layouts])
+  const placed = useMemo(
+    () =>
+      vb
+        ? sortSeatsForReading(seats).map((seat) => ({ seat, rect: seatRect(seat.layout, vb) }))
+        : [],
+    [seats, vb],
+  )
 
   const px = vb && width !== null ? minCellPx(layouts, vb, width) : null
   const fitStage: CellStage = px === null ? 'compact' : cellStage(px)
@@ -64,22 +73,16 @@ export function SeatMap({ seats, onOutletsHiddenChange }: SeatMapProps) {
           className="relative"
           style={{ aspectRatio: `${vb.width} / ${vb.height}`, width: `${scale * 100}%` }}
         >
-          {sortSeatsForReading(seats).map((seat) => {
-            const rect = seatRect(seat.layout, vb)
-            return (
-              <SeatButton
-                key={seat.seatId}
-                seat={seat}
-                stage={stage}
-                style={{
-                  left: `${rect.left}%`,
-                  top: `${rect.top}%`,
-                  width: `${rect.width}%`,
-                  height: `${rect.height}%`,
-                }}
-              />
-            )
-          })}
+          {placed.map(({ seat, rect }) => (
+            <SeatButton
+              key={seat.seatId}
+              seat={seat}
+              stage={stage}
+              rect={rect}
+              justChanged={highlights?.get(seat.seatId)}
+              cellPx={(px ?? 0) * scale}
+            />
+          ))}
         </div>
       </div>
       {canZoom && <MapZoomToggle zoomed={zoomed} onToggle={() => setZoomed((z) => !z)} />}

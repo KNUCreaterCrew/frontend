@@ -5,6 +5,18 @@ import { setObservedWidth } from '@/shared/test/resizeObserver'
 import { manySeatsRoom, mixedRoom } from '@mocks/fixtures/rooms'
 import { SeatMap } from './SeatMap'
 
+const nameCalls = vi.hoisted(() => ({ count: 0 }))
+vi.mock('@/entities/room', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/entities/room')>()
+  return {
+    ...actual,
+    seatAccessibleName: (seat: Parameters<typeof actual.seatAccessibleName>[0]) => {
+      nameCalls.count += 1
+      return actual.seatAccessibleName(seat)
+    },
+  }
+})
+
 const mixed = toRoom(mixedRoom).seats
 const many = toRoom(manySeatsRoom).seats
 
@@ -103,5 +115,51 @@ describe('SeatMap 좌석 모양', () => {
     )
     expect(screen.getByRole('button', { name: /^U1 / })).toHaveClass('pattern-unknown')
     expect(screen.getByRole('button', { name: /^R1 / })).toHaveClass('pattern-unknown')
+  })
+})
+
+describe('SeatMap 방금 바뀐 좌석', () => {
+  const rings = (container: HTMLElement) =>
+    container.querySelectorAll<HTMLElement>('span[aria-hidden="true"].border-live')
+
+  it('칸이 96px 이상이면 "방금 사용 중" 칩과 테두리가 보이고 접근 이름은 그대로다', () => {
+    const highlights = new Map([['A-01', 'OCCUPIED' as const]])
+    const { container } = render(<SeatMap seats={mixed} highlights={highlights} />)
+    expect(screen.getByText('방금 사용 중')).toHaveClass('bg-live', 'text-on-live')
+    expect(rings(container)).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'A1 빈자리, 콘센트 있음' })).toBeInTheDocument()
+    const ring = rings(container)[0]!
+    expect(ring.parentElement).toBe(screen.getByRole('button', { name: /^A1 / }).parentElement)
+    expect(ring).toHaveClass('pointer-events-none', 'motion-safe:animate-live')
+  })
+
+  it('강조가 없으면 칩도 테두리도 없다', () => {
+    const { container } = render(<SeatMap seats={mixed} />)
+    expect(screen.queryByText(/방금/)).not.toBeInTheDocument()
+    expect(rings(container)).toHaveLength(0)
+  })
+
+  it('칸이 64px 이상 96px 미만이면 "방금" 만 보인다', () => {
+    setObservedWidth(180)
+    const highlights = new Map([['A-01', 'OCCUPIED' as const]])
+    const { container } = render(<SeatMap seats={mixed} highlights={highlights} />)
+    expect(screen.getByText('방금')).toBeInTheDocument()
+    expect(screen.queryByText('방금 사용 중')).not.toBeInTheDocument()
+    expect(rings(container)).toHaveLength(1)
+  })
+
+  it('칸이 작아 확대 전인 좌석도는 테두리만 보인다', () => {
+    const highlights = new Map([[many[0]!.seatId, 'OCCUPIED' as const]])
+    const { container } = render(<SeatMap seats={many} highlights={highlights} />)
+    expect(screen.queryByText(/방금/)).not.toBeInTheDocument()
+    expect(rings(container)).toHaveLength(1)
+  })
+
+  it('다른 좌석 하나만 바뀌면 바뀌지 않은 좌석 버튼은 다시 그려지지 않는다', () => {
+    const { rerender } = render(<SeatMap seats={mixed} />)
+    nameCalls.count = 0
+    const next = mixed.map((s, i) => (i === 1 ? { ...s, status: 'EMPTY' as const } : s))
+    rerender(<SeatMap seats={next} />)
+    expect(nameCalls.count).toBe(1)
   })
 })
