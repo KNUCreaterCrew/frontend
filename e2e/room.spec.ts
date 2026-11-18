@@ -137,6 +137,37 @@ test('live-demo: 강조 테두리는 칸 바깥에 틈을 두고 보이고 기�
   expect(probe.inside).toBe(true)
 })
 
+test('live-demo: 움직임이 시작되는 순간에도 강조 테두리가 좌석도 안쪽 여백을 넘지 않는다', async ({
+  page,
+}) => {
+  await page.goto(url('live-demo'))
+  const ring = page.locator('span.outline-live').first()
+  await expect(ring).toBeAttached({ timeout: 10_000 })
+  const probe = await ring.evaluate((el) => {
+    // 움직임을 0초 지점에 세워 두고 잰다
+    for (const animation of el.getAnimations()) {
+      animation.pause()
+      animation.currentTime = 0
+    }
+    const style = getComputedStyle(el)
+    const scroller = el.closest('.overflow-x-auto') as HTMLElement
+    const r = el.getBoundingClientRect()
+    const s = scroller.getBoundingClientRect()
+    const reach = parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth)
+    return {
+      animations: el.getAnimations().length,
+      left: r.left - reach - (s.left + scroller.clientLeft),
+      top: r.top - reach - (s.top + scroller.clientTop),
+      right: s.left + scroller.clientLeft + scroller.clientWidth - (r.right + reach),
+      bottom: s.top + scroller.clientTop + scroller.clientHeight - (r.bottom + reach),
+    }
+  })
+  expect(probe.animations).toBeGreaterThan(0)
+  for (const gap of [probe.left, probe.top, probe.right, probe.bottom]) {
+    expect(gap).toBeGreaterThanOrEqual(-0.5)
+  }
+})
+
 test('live-demo: 동작 줄이기 설정이면 강조 테두리가 움직이지 않는다', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto(url('live-demo'))

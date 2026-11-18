@@ -81,11 +81,11 @@
 
   @keyframes live-tighten {
     from {
-      transform: scale(1.12);
-      opacity: 0.4;
+      outline-offset: 4px;
+      opacity: 0.7;
     }
     to {
-      transform: scale(1);
+      outline-offset: 2px;
       opacity: 1;
     }
   }
