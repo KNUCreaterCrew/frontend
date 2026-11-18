@@ -37,7 +37,11 @@ export function freshnessWarning(
   refreshFailed: boolean,
   now: number,
 ): string | null {
-  if (refreshFailed) return '갱신하지 못했어요'
+  if (refreshFailed) {
+    return updatedAt === null
+      ? '갱신하지 못했어요'
+      : `갱신하지 못했어요, ${formatRelative(updatedAt, now)} 정보`
+  }
   if (updatedAt !== null && now - updatedAt >= 60_000) return '1분 넘게 갱신되지 않았어요'
   return null
 }

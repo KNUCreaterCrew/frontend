@@ -16,7 +16,11 @@ export function TopBar({ updatedAt, refreshFailed = false }: Props) {
       >
         방 목록
       </Link>
-      {text && <p className="text-right font-num tabular-nums">{text}</p>}
+      {text && (
+        <p className={`text-right font-num tabular-nums ${warning ? 'font-bold' : ''}`.trim()}>
+          {text}
+        </p>
+      )}
     </header>
   )
 }

@@ -390,12 +390,12 @@ describe('방 목록 로딩과 재조회', () => {
     await onlyRow()
     mode = 'fail'
     await advance(30_000)
-    expect(await screen.findByText('갱신하지 못했어요')).toBeInTheDocument()
+    expect(await screen.findByText(/^갱신하지 못했어요/)).toHaveClass('font-bold')
     expect(screen.getByRole('link')).toBeInTheDocument()
     mode = 'ok'
     current = [item({ available_seats: 3 })]
     await advance(30_000)
-    await waitFor(() => expect(screen.queryByText('갱신하지 못했어요')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText(/^갱신하지 못했어요/)).not.toBeInTheDocument())
     expect(screen.getByRole('link').getAttribute('aria-label')).toContain('빈자리 3석')
   })
 })

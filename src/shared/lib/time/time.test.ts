@@ -77,7 +77,13 @@ describe('freshnessWarning', () => {
   it('60초부터 1분 넘게 경고', () => {
     expect(freshnessWarning(now - 60_000, false, now)).toBe('1분 넘게 갱신되지 않았어요')
   })
+  it('갱신 실패는 마지막으로 성공한 시각을 붙인다', () => {
+    expect(freshnessWarning(now - 40_000, true, now)).toBe('갱신하지 못했어요, 40초 전 정보')
+  })
+  it('갱신 시각이 없는 실패는 시각 없이', () => {
+    expect(freshnessWarning(null, true, now)).toBe('갱신하지 못했어요')
+  })
   it('갱신 실패가 우선', () => {
-    expect(freshnessWarning(now, true, now)).toBe('갱신하지 못했어요')
+    expect(freshnessWarning(now, true, now)).toBe('갱신하지 못했어요, 방금 정보')
   })
 })

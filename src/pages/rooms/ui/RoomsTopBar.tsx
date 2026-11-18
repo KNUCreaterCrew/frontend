@@ -10,7 +10,11 @@ export function RoomsTopBar({ updatedAt, refreshFailed = false }: Props) {
   return (
     <header className="flex min-h-tap items-center justify-between gap-3 border-b-2 border-ink text-label">
       <p className="text-body font-bold">ZeroFrame</p>
-      {text && <p className="text-right font-num tabular-nums">{text}</p>}
+      {text && (
+        <p className={`text-right font-num tabular-nums ${warning ? 'font-bold' : ''}`.trim()}>
+          {text}
+        </p>
+      )}
     </header>
   )
 }

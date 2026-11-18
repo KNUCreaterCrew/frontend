@@ -219,7 +219,7 @@ describe('재조회 실패', () => {
       focusManager.setFocused(false)
       focusManager.setFocused(true)
     })
-    expect(await screen.findByText('갱신하지 못했어요')).toBeInTheDocument()
+    expect(await screen.findByText(/^갱신하지 못했어요/)).toHaveClass('font-bold')
     expect(seatButtons()).toHaveLength(4)
   })
 })
