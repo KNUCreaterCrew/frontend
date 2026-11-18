@@ -130,7 +130,9 @@ describe('SeatMap 방금 바뀐 좌석', () => {
     expect(screen.getByRole('button', { name: 'A1 빈자리, 콘센트 있음' })).toBeInTheDocument()
     const ring = rings(container)[0]!
     expect(ring.parentElement).toBe(screen.getByRole('button', { name: /^A1 / }).parentElement)
-    expect(ring).toHaveClass('pointer-events-none', 'motion-safe:animate-live')
+    expect(ring).toHaveClass('pointer-events-none', 'motion-safe:animate-live', 'z-10')
+    // 같은 위치의 버튼 면에 가려지지 않도록 테두리가 버튼 바로 뒤에 온다
+    expect(screen.getByRole('button', { name: /^A1 / }).nextElementSibling).toBe(ring)
   })
 
   it('강조가 없으면 칩도 테두리도 없다', () => {

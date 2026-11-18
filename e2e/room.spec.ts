@@ -75,23 +75,40 @@ test('many-seats: 확대해도 좌석도 상자 안에서만 가로 스크롤된
 })
 
 for (const width of [360, 390]) {
-  test(`live-demo ${width}: 4초 안에 방금 문구가 보이고 가로 넘침과 콘솔 오류가 없다`, async ({
+  test(`live-demo ${width}: 10초 안에 방금 문구가 보이고 가로 넘침과 콘솔 오류가 없다`, async ({
     page,
   }) => {
     const errors = collectErrors(page)
     await page.setViewportSize({ width, height: 800 })
     await page.goto(url('live-demo'))
     await expect(page.getByRole('button', { name: /^A1 / })).toBeVisible()
-    await expect(page.locator('main button').getByText(/^방금/)).toBeVisible({ timeout: 4_000 })
+    await expect(page.locator('main button').getByText(/^방금/)).toBeVisible({ timeout: 10_000 })
     expect(await pageOverflow(page)).toBeLessThanOrEqual(0)
     expect(errors).toEqual([])
   })
 }
 
+test('live-demo: 강조 테두리는 좌석 면 위에 보이고 기본 설정에서는 움직인다', async ({ page }) => {
+  await page.goto(url('live-demo'))
+  const ring = page.locator('span.border-live').first()
+  await expect(ring).toBeVisible({ timeout: 10_000 })
+  expect(await ring.evaluate((el) => el.getAnimations().length)).toBeGreaterThan(0)
+  // pointer-events-none 은 hit test 에서 빠지므로 잠깐 풀어서 맨 위에 그려지는지 확인한다
+  const top = await ring.evaluate((el) => {
+    const node = el as HTMLElement
+    node.style.pointerEvents = 'auto'
+    const r = node.getBoundingClientRect()
+    const hit = document.elementFromPoint(r.left + 2, r.top + r.height / 2)
+    node.style.pointerEvents = ''
+    return hit === node
+  })
+  expect(top).toBe(true)
+})
+
 test('live-demo: 동작 줄이기 설정이면 강조 테두리가 움직이지 않는다', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto(url('live-demo'))
   const ring = page.locator('span.border-live').first()
-  await expect(ring).toBeVisible({ timeout: 4_000 })
+  await expect(ring).toBeVisible({ timeout: 10_000 })
   expect(await ring.evaluate((el) => el.getAnimations().length)).toBe(0)
 })

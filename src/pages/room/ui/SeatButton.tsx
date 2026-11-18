@@ -62,13 +62,6 @@ function SeatButtonView({ seat, stage, rect, justChanged, cellPx }: SeatButtonPr
 
   return (
     <>
-      {justChanged !== undefined && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute border-4 border-live motion-safe:animate-live"
-          style={style}
-        />
-      )}
       <button
         type="button"
         aria-label={seatAccessibleName(seat)}
@@ -109,6 +102,14 @@ function SeatButtonView({ seat, stage, rect, justChanged, cellPx }: SeatButtonPr
           </span>
         )}
       </button>
+      {/* 버튼 뒤에 그려야 불투명한 칸 면에 가려지지 않는다 */}
+      {justChanged !== undefined && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute z-10 border-4 border-live motion-safe:animate-live"
+          style={style}
+        />
+      )}
     </>
   )
 }
