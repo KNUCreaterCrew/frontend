@@ -1,5 +1,5 @@
 import { v2Events } from './__fixtures__'
-import { parseRoomEvent } from './events'
+import { parseRoomEvent, parseRoomMessage } from './events'
 
 const seatEvent = v2Events[1]
 const change = {
@@ -89,5 +89,26 @@ describe('parseRoomEvent', () => {
     ['시각 형식이 틀린 변경', seatText({}, { status_since: 'yesterday' })],
   ])('%s 는 null', (_name, text) => {
     expect(parseRoomEvent(text)).toBeNull()
+  })
+})
+
+describe('parseRoomMessage', () => {
+  it('아는 이벤트는 event 로 돌려준다', () => {
+    const text = JSON.stringify(v2Events[0])
+    expect(parseRoomMessage(text)).toEqual({ kind: 'event', event: parseRoomEvent(text) })
+  })
+
+  it('JSON 이고 event 가 모르는 종류이면 무시한다', () => {
+    expect(parseRoomMessage('{"event":"ROOM_RENAMED"}')).toEqual({ kind: 'ignore' })
+  })
+
+  it.each([
+    ['JSON 이 아닌 글', 'oops'],
+    ['event 가 없는 JSON', '{"room_id":"IT4-101"}'],
+    ['객체가 아닌 JSON', '[1,2]'],
+    ['필드가 빠진 SEAT_UPDATED', '{"event":"SEAT_UPDATED"}'],
+    ['시각 형식이 틀린 변경', seatText({}, { status_since: 'yesterday' })],
+  ])('%s 는 깨진 메시지이다', (_name, text) => {
+    expect(parseRoomMessage(text)).toEqual({ kind: 'invalid' })
   })
 })

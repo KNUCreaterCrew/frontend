@@ -67,14 +67,32 @@ function toRoomEvent(dto: RoomEventDto): RoomEvent {
   }
 }
 
-// 읽을 수 없거나 모르는 종류의 메시지는 null
-export function parseRoomEvent(text: string): RoomEvent | null {
+const KNOWN_EVENTS: ReadonlySet<string> = new Set(['EDGE_STATUS_CHANGED', 'SEAT_UPDATED'])
+
+export type RoomMessage =
+  | { kind: 'event'; event: RoomEvent }
+  /** JSON 이지만 모르는 event 종류: 조용히 무시한다 */
+  | { kind: 'ignore' }
+  /** 읽을 수 없거나 아는 종류인데 모양이 틀린 메시지: 방을 다시 조회한다 */
+  | { kind: 'invalid' }
+
+export function parseRoomMessage(text: string): RoomMessage {
   let json: unknown
   try {
     json = JSON.parse(text)
   } catch {
-    return null
+    return { kind: 'invalid' }
   }
+  if (typeof json !== 'object' || json === null || Array.isArray(json)) return { kind: 'invalid' }
+  const kind: unknown = (json as Record<string, unknown>).event
+  if (typeof kind !== 'string') return { kind: 'invalid' }
+  if (!KNOWN_EVENTS.has(kind)) return { kind: 'ignore' }
   const parsed = roomEventDtoSchema.safeParse(json)
-  return parsed.success ? toRoomEvent(parsed.data) : null
+  return parsed.success ? { kind: 'event', event: toRoomEvent(parsed.data) } : { kind: 'invalid' }
+}
+
+// 읽을 수 없거나 모르는 종류의 메시지는 null
+export function parseRoomEvent(text: string): RoomEvent | null {
+  const message = parseRoomMessage(text)
+  return message.kind === 'event' ? message.event : null
 }

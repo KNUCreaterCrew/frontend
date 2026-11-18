@@ -11,8 +11,8 @@ export { toRoom } from './model/mapping'
 export { getRoomSummary } from './model/summary'
 export type { RoomSummary } from './model/summary'
 export { applyRoomEvent } from './model/applyRoomEvent'
-export { parseRoomEvent } from './model/events'
-export type { RoomEventDto } from './model/events'
+export { parseRoomEvent, parseRoomMessage } from './model/events'
+export type { RoomEventDto, RoomMessage } from './model/events'
 export type {
   CongestionLevel,
   Room,
