@@ -1,5 +1,6 @@
 import type { z } from 'zod'
 import { ApiError } from './ApiError'
+import { httpUrl } from './baseUrl'
 
 type GetOptions = { signal?: AbortSignal; timeoutMs?: number }
 
@@ -35,7 +36,7 @@ async function get<T>(path: string, schema: z.ZodType<T>, options: GetOptions = 
   try {
     let res: Response
     try {
-      res = await fetch(new URL(path, location.origin), {
+      res = await fetch(httpUrl(path), {
         method: 'GET',
         headers: { Accept: 'application/json' },
         signal: controller.signal,

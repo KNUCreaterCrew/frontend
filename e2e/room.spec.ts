@@ -73,3 +73,105 @@ test('many-seats: 확대해도 좌석도 상자 안에서만 가로 스크롤된
   expect(box!.height).toBeGreaterThanOrEqual(43.5)
   await expect(page.getByRole('button', { name: '전체 보기' })).toBeVisible()
 })
+
+for (const width of [360, 390]) {
+  test(`live-demo ${width}: 10초 안에 방금 문구가 보이고 가로 넘침과 콘솔 오류가 없다`, async ({
+    page,
+  }) => {
+    const errors = collectErrors(page)
+    await page.setViewportSize({ width, height: 800 })
+    await page.goto(url('live-demo'))
+    await expect(page.getByRole('button', { name: /^A1 / })).toBeVisible()
+    await expect(page.locator('main button').getByText(/^방금/)).toBeVisible({ timeout: 10_000 })
+    expect(await pageOverflow(page)).toBeLessThanOrEqual(0)
+    expect(errors).toEqual([])
+  })
+}
+
+test('live-demo: 강조 테두리는 칸 바깥에 틈을 두고 보이고 기본 설정에서는 움직인다', async ({
+  page,
+}) => {
+  await page.goto(url('live-demo'))
+  const ring = page.locator('span.outline-live').first()
+  await expect(ring).toBeVisible({ timeout: 10_000 })
+  expect(await ring.evaluate((el) => el.getAnimations().length)).toBeGreaterThan(0)
+  // outline 은 hit test 되지 않으므로 계산된 스타일과 위치로 확인한다. 움직임을 끝낸 뒤 잰다
+  const probe = await ring.evaluate((el) => {
+    for (const animation of el.getAnimations()) animation.finish()
+    const style = getComputedStyle(el)
+    const button = el.previousElementSibling as HTMLElement
+    const scroller = el.closest('.overflow-x-auto') as HTMLElement
+    const r = el.getBoundingClientRect()
+    const b = button.getBoundingClientRect()
+    const s = scroller.getBoundingClientRect()
+    const reach = parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth)
+    const inner = {
+      left: s.left + scroller.clientLeft,
+      top: s.top + scroller.clientTop,
+      right: s.left + scroller.clientLeft + scroller.clientWidth,
+      bottom: s.top + scroller.clientTop + scroller.clientHeight,
+    }
+    return {
+      outline: [style.outlineStyle, style.outlineWidth, style.outlineOffset],
+      borderWidth: style.borderTopWidth,
+      zIndex: style.zIndex,
+      buttonTag: button.tagName,
+      sameBox:
+        Math.abs(r.left - b.left) < 0.5 &&
+        Math.abs(r.top - b.top) < 0.5 &&
+        Math.abs(r.width - b.width) < 0.5 &&
+        Math.abs(r.height - b.height) < 0.5,
+      // 테두리 바깥 끝까지 좌석도 상자 안쪽에 들어와 잘리지 않는다
+      inside:
+        r.left - reach >= inner.left &&
+        r.top - reach >= inner.top &&
+        r.right + reach <= inner.right &&
+        r.bottom + reach <= inner.bottom,
+    }
+  })
+  expect(probe.outline).toEqual(['solid', '4px', '2px'])
+  expect(probe.borderWidth).toBe('0px')
+  expect(probe.zIndex).toBe('10')
+  expect(probe.buttonTag).toBe('BUTTON')
+  expect(probe.sameBox).toBe(true)
+  expect(probe.inside).toBe(true)
+})
+
+test('live-demo: 움직임이 시작되는 순간에도 강조 테두리가 좌석도 안쪽 여백을 넘지 않는다', async ({
+  page,
+}) => {
+  await page.goto(url('live-demo'))
+  const ring = page.locator('span.outline-live').first()
+  await expect(ring).toBeAttached({ timeout: 10_000 })
+  const probe = await ring.evaluate((el) => {
+    // 움직임을 0초 지점에 세워 두고 잰다
+    for (const animation of el.getAnimations()) {
+      animation.pause()
+      animation.currentTime = 0
+    }
+    const style = getComputedStyle(el)
+    const scroller = el.closest('.overflow-x-auto') as HTMLElement
+    const r = el.getBoundingClientRect()
+    const s = scroller.getBoundingClientRect()
+    const reach = parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth)
+    return {
+      animations: el.getAnimations().length,
+      left: r.left - reach - (s.left + scroller.clientLeft),
+      top: r.top - reach - (s.top + scroller.clientTop),
+      right: s.left + scroller.clientLeft + scroller.clientWidth - (r.right + reach),
+      bottom: s.top + scroller.clientTop + scroller.clientHeight - (r.bottom + reach),
+    }
+  })
+  expect(probe.animations).toBeGreaterThan(0)
+  for (const gap of [probe.left, probe.top, probe.right, probe.bottom]) {
+    expect(gap).toBeGreaterThanOrEqual(-0.5)
+  }
+})
+
+test('live-demo: 동작 줄이기 설정이면 강조 테두리가 움직이지 않는다', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto(url('live-demo'))
+  const ring = page.locator('span.outline-live').first()
+  await expect(ring).toBeVisible({ timeout: 10_000 })
+  expect(await ring.evaluate((el) => el.getAnimations().length)).toBe(0)
+})

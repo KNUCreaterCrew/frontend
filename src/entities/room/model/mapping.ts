@@ -2,18 +2,18 @@ import { congestionLevelSchema, seatReasonSchema, seatStatusSchema } from './dto
 import type { RoomDto } from './dto'
 import type { CongestionLevel, Room, Seat, SeatReason, SeatStatus } from './types'
 
-function toStatus(raw: string): SeatStatus {
+export function toStatus(raw: string): SeatStatus {
   const parsed = seatStatusSchema.safeParse(raw)
   return parsed.success ? parsed.data : 'UNRECOGNIZED'
 }
 
-function toReason(raw: string | null): SeatReason | null {
+export function toReason(raw: string | null): SeatReason | null {
   if (raw === null) return null
   const parsed = seatReasonSchema.safeParse(raw)
   return parsed.success ? parsed.data : 'UNRECOGNIZED'
 }
 
-function toCongestion(raw: string): CongestionLevel {
+export function toCongestion(raw: string): CongestionLevel {
   const parsed = congestionLevelSchema.safeParse(raw)
   return parsed.success ? parsed.data : 'UNRECOGNIZED'
 }

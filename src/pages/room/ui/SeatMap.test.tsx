@@ -5,6 +5,18 @@ import { setObservedWidth } from '@/shared/test/resizeObserver'
 import { manySeatsRoom, mixedRoom } from '@mocks/fixtures/rooms'
 import { SeatMap } from './SeatMap'
 
+const nameCalls = vi.hoisted(() => ({ count: 0 }))
+vi.mock('@/entities/room', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/entities/room')>()
+  return {
+    ...actual,
+    seatAccessibleName: (seat: Parameters<typeof actual.seatAccessibleName>[0]) => {
+      nameCalls.count += 1
+      return actual.seatAccessibleName(seat)
+    },
+  }
+})
+
 const mixed = toRoom(mixedRoom).seats
 const many = toRoom(manySeatsRoom).seats
 
@@ -103,5 +115,72 @@ describe('SeatMap 좌석 모양', () => {
     )
     expect(screen.getByRole('button', { name: /^U1 / })).toHaveClass('pattern-unknown')
     expect(screen.getByRole('button', { name: /^R1 / })).toHaveClass('pattern-unknown')
+  })
+})
+
+describe('SeatMap 방금 바뀐 좌석', () => {
+  const rings = (container: HTMLElement) =>
+    container.querySelectorAll<HTMLElement>('span[aria-hidden="true"].outline-live')
+
+  it('칸이 96px 이상이면 "방금 빈자리" 칩과 테두리가 보이고 접근 이름은 그대로다', () => {
+    const highlights = new Map([['A-01', 'EMPTY' as const]])
+    const { container } = render(<SeatMap seats={mixed} highlights={highlights} />)
+    expect(screen.getByText('방금 빈자리')).toHaveClass('bg-live', 'text-on-live')
+    expect(rings(container)).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'A1 빈자리, 콘센트 있음' })).toBeInTheDocument()
+    const ring = rings(container)[0]!
+    expect(ring.parentElement).toBe(screen.getByRole('button', { name: /^A1 / }).parentElement)
+    expect(ring).toHaveClass('pointer-events-none', 'motion-safe:animate-live', 'z-10')
+    // 칸 면 위가 아니라 칸 바깥에 틈을 두고 두른다
+    expect(ring).toHaveClass('outline-4', 'outline-offset-2', 'outline-live')
+    expect(ring.className).not.toMatch(/\bborder/)
+    // 같은 위치의 버튼 면에 가려지지 않도록 테두리가 버튼 바로 뒤에 온다
+    expect(screen.getByRole('button', { name: /^A1 / }).nextElementSibling).toBe(ring)
+  })
+
+  it('강조한 상태가 좌석의 지금 상태와 다르면 칩도 테두리도 없고 상태 말이 보인다', () => {
+    const highlights = new Map([['A-01', 'OCCUPIED' as const]])
+    const { container } = render(<SeatMap seats={mixed} highlights={highlights} />)
+    expect(screen.queryByText(/방금/)).not.toBeInTheDocument()
+    expect(rings(container)).toHaveLength(0)
+    const seat = screen.getByRole('button', { name: /^A1 / })
+    expect(within(seat).getByText('빈자리')).toBeInTheDocument()
+  })
+
+  it('키보드 포커스를 받은 좌석은 강조 테두리보다 위에 그려져 포커스 링이 가려지지 않는다', () => {
+    const highlights = new Map([['A-01', 'EMPTY' as const]])
+    const { container } = render(<SeatMap seats={mixed} highlights={highlights} />)
+    expect(rings(container)[0]).toHaveClass('z-10')
+    expect(screen.getByRole('button', { name: /^A1 / })).toHaveClass('focus-visible:z-20')
+  })
+
+  it('강조가 없으면 칩도 테두리도 없다', () => {
+    const { container } = render(<SeatMap seats={mixed} />)
+    expect(screen.queryByText(/방금/)).not.toBeInTheDocument()
+    expect(rings(container)).toHaveLength(0)
+  })
+
+  it('칸이 64px 이상 96px 미만이면 "방금" 만 보인다', () => {
+    setObservedWidth(180)
+    const highlights = new Map([['A-01', 'EMPTY' as const]])
+    const { container } = render(<SeatMap seats={mixed} highlights={highlights} />)
+    expect(screen.getByText('방금')).toBeInTheDocument()
+    expect(screen.queryByText('방금 빈자리')).not.toBeInTheDocument()
+    expect(rings(container)).toHaveLength(1)
+  })
+
+  it('칸이 작아 확대 전인 좌석도는 테두리만 보인다', () => {
+    const highlights = new Map([[many[0]!.seatId, many[0]!.status]])
+    const { container } = render(<SeatMap seats={many} highlights={highlights} />)
+    expect(screen.queryByText(/방금/)).not.toBeInTheDocument()
+    expect(rings(container)).toHaveLength(1)
+  })
+
+  it('다른 좌석 하나만 바뀌면 바뀌지 않은 좌석 버튼은 다시 그려지지 않는다', () => {
+    const { rerender } = render(<SeatMap seats={mixed} />)
+    nameCalls.count = 0
+    const next = mixed.map((s, i) => (i === 1 ? { ...s, status: 'EMPTY' as const } : s))
+    rerender(<SeatMap seats={next} />)
+    expect(nameCalls.count).toBe(1)
   })
 })
