@@ -1,4 +1,4 @@
-import type { RoomDto } from '@/entities/room'
+import type { RoomDto, RoomSummaryDto } from '@/entities/room'
 
 export const ROOM_ID = 'IT4-101'
 const ROOM_NAME = '제1실습실 (예시)'
@@ -186,3 +186,72 @@ export const seatDetailsRoom: RoomDto = buildRoom(
 )
 
 export const noSeatsRoom: RoomDto = buildRoom([], { version: 12 })
+
+export function toListItemDto(room: RoomDto): RoomSummaryDto {
+  return {
+    room_id: room.room_id,
+    room_name: room.room_name,
+    total_seats: room.total_seats,
+    available_seats: room.available_seats,
+    unknown_seats: room.unknown_seats,
+    congestion_level: room.congestion_level,
+    edge_online: room.edge_online,
+  }
+}
+
+function seatsOf(statuses: Array<[Status, Reason?]>): SeatDto[] {
+  return statuses.map(([status, reason], i) =>
+    seat({ row: 'A', n: i + 1, x: i * 80, y: 0, status, reason }),
+  )
+}
+
+const LONG_WORD = '가나다라마바사아자차카타파하'.repeat(3)
+
+// 방 목록 시나리오(rooms-many)용 방 여섯 개. 방마다 room_id 가 다르다.
+export const manyRooms: RoomDto[] = [
+  // 확인된 여유(LOW)
+  buildRoom(seatsOf([['EMPTY'], ['EMPTY'], ['EMPTY'], ['OCCUPIED'], ['AWAY']]), {
+    room_id: ROOM_ID,
+    room_name: ROOM_NAME,
+    version: 12,
+  }),
+  // 혼잡(HIGH): 확인된 빈자리 0석에 확인 불가 2석이 섞인 경우
+  buildRoom(
+    seatsOf([
+      ['OCCUPIED'],
+      ['OCCUPIED'],
+      ['AWAY'],
+      ['OCCUPIED'],
+      ['UNKNOWN', 'OCCLUDED'],
+      ['UNKNOWN', 'LOW_CONFIDENCE'],
+    ]),
+    { room_id: 'IT4-102', room_name: '제2실습실', version: 12 },
+  ),
+  // 장치는 연결됨, 전부 확인 불가
+  buildRoom(
+    seatsOf([
+      ['UNKNOWN', 'OCCLUDED'],
+      ['UNKNOWN', 'STALE_OBSERVATION'],
+      ['UNKNOWN', 'OCCLUDED'],
+      ['UNKNOWN', 'LOW_CONFIDENCE'],
+    ]),
+    { room_id: 'IT4-103', room_name: '제3실습실', version: 12 },
+  ),
+  // 장치 끊김
+  buildRoom(
+    seatsOf([
+      ['UNKNOWN', 'EDGE_OFFLINE'],
+      ['UNKNOWN', 'EDGE_OFFLINE'],
+      ['UNKNOWN', 'EDGE_OFFLINE'],
+    ]),
+    { room_id: 'IT4-104', room_name: '제4실습실', edge_online: false, version: 12 },
+  ),
+  // 좌석 0
+  buildRoom([], { room_id: 'IT4-105', room_name: '제5실습실 (좌석 준비 중)', version: 12 }),
+  // 아주 긴 이름(공백 없는 긴 단어 포함)
+  buildRoom(seatsOf([['EMPTY'], ['OCCUPIED'], ['OCCUPIED'], ['AWAY']]), {
+    room_id: 'IT4-106',
+    room_name: `${LONG_WORD} 대형 실습실`,
+    version: 12,
+  }),
+]

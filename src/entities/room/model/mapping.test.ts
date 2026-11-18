@@ -1,6 +1,6 @@
 import { deployedRoomJson, interfacesRoomJson } from './__fixtures__'
 import { roomDtoSchema } from './dto'
-import { toRoom } from './mapping'
+import { toRoom, toRoomListItem } from './mapping'
 
 function withSeat(patch: Record<string, unknown>, room: Record<string, unknown> = {}) {
   const [first, ...rest] = interfacesRoomJson.seats
@@ -61,5 +61,35 @@ describe('toRoom', () => {
   it('모르는 congestion_level 은 UNRECOGNIZED 로 바꾼다', () => {
     const room = toRoom(withSeat({}, { congestion_level: 'FULL' }))
     expect(room.congestionLevel).toBe('UNRECOGNIZED')
+  })
+})
+
+describe('toRoomListItem', () => {
+  const dto = {
+    room_id: 'IT4-101',
+    room_name: '제1실습실 (예시)',
+    total_seats: 4,
+    available_seats: 1,
+    unknown_seats: 1,
+    congestion_level: 'MODERATE',
+    edge_online: true,
+  }
+
+  it('필드 이름을 camelCase 로 옮긴다', () => {
+    expect(toRoomListItem(dto)).toEqual({
+      roomId: 'IT4-101',
+      roomName: '제1실습실 (예시)',
+      totalSeats: 4,
+      availableSeats: 1,
+      unknownSeats: 1,
+      congestionLevel: 'MODERATE',
+      edgeOnline: true,
+    })
+  })
+
+  it('모르는 혼잡도는 UNRECOGNIZED 로 바꾼다', () => {
+    expect(toRoomListItem({ ...dto, congestion_level: 'SOMETHING' }).congestionLevel).toBe(
+      'UNRECOGNIZED',
+    )
   })
 })

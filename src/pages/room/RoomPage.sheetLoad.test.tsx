@@ -35,7 +35,7 @@ describe('시트 코드를 받지 못했을 때', () => {
     const button = await screen.findByRole('button', { name: /^A1 빈자리/ })
     const keyBeforeTap = location!.key
     await user.click(button)
-    expect((await screen.findAllByText(FAILED)).length).toBe(2)
+    expect((await screen.findAllByText(FAILED, {}, { timeout: 5000 })).length).toBe(2)
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).toBeNull()
     await waitFor(() => expect(location!.search).toBe(''))

@@ -2,7 +2,13 @@ import { ApiError } from '@/shared/api'
 import { server } from '@mocks/node'
 import { HttpResponse, http as mswHttp } from 'msw'
 import { deployedRoomJson } from '../model/__fixtures__'
-import { fetchRoom, roomKeys, roomQueryOptions } from './roomQuery'
+import {
+  fetchRoom,
+  fetchRoomList,
+  roomKeys,
+  roomListQueryOptions,
+  roomQueryOptions,
+} from './roomQuery'
 
 describe('roomQuery', () => {
   it('roomKeys.detail 은 고정된 키를 만든다', () => {
@@ -27,5 +33,46 @@ describe('roomQuery', () => {
       expect(fn(notFound), key).toBe(false)
       expect(fn(serverError), key).toBe(true)
     }
+  })
+})
+
+describe('roomListQuery', () => {
+  it('roomKeys.list 는 상세 키와 다른 고정 키이다', () => {
+    expect(roomKeys.list()).toEqual(['rooms', 'list'])
+    expect(roomKeys.list()).not.toEqual(roomKeys.detail('x'))
+    expect(roomListQueryOptions().queryKey).toEqual(['rooms', 'list'])
+  })
+
+  it('30초마다 다시 조회한다', () => {
+    expect(roomListQueryOptions().refetchInterval).toBe(30000)
+  })
+
+  it('fetchRoomList 는 응답을 RoomListItem 배열로 바꾼다', async () => {
+    server.use(
+      mswHttp.get('*/api/v1/rooms', () =>
+        HttpResponse.json([
+          {
+            room_id: 'IT4-101',
+            room_name: '제1실습실 (예시)',
+            total_seats: 4,
+            available_seats: 1,
+            unknown_seats: 1,
+            congestion_level: 'MODERATE',
+            edge_online: true,
+          },
+        ]),
+      ),
+    )
+    expect(await fetchRoomList()).toEqual([
+      {
+        roomId: 'IT4-101',
+        roomName: '제1실습실 (예시)',
+        totalSeats: 4,
+        availableSeats: 1,
+        unknownSeats: 1,
+        congestionLevel: 'MODERATE',
+        edgeOnline: true,
+      },
+    ])
   })
 })

@@ -47,6 +47,8 @@
   --text-sheet--line-height: 1.1;
   --text-poster-word: 4.5rem; /* 72px 숫자 대신 "모름"을 쓸 때 */
   --text-poster-word--line-height: 0.95;
+  --text-row-number: 3.5rem; /* 56px 방 목록 행의 빈자리 숫자 */
+  --text-row-number--line-height: 0.9;
   --text-poster: 9rem; /* 144px 빈자리 숫자 하나에만. 글자 제목에 쓰지 않는다 */
   --text-poster--line-height: 0.82;
 

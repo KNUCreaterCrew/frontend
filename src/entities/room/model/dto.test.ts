@@ -1,5 +1,5 @@
 import { deployedRoomJson, interfacesRoomJson } from './__fixtures__'
-import { roomDtoSchema } from './dto'
+import { roomDtoSchema, roomListDtoSchema } from './dto'
 
 describe('roomDtoSchema', () => {
   it('배포 응답 원문(Z, 마이크로초)을 받아들인다', () => {
@@ -38,5 +38,48 @@ describe('roomDtoSchema', () => {
       seats: [{ ...first!, status: 'RESERVED', reason: 'NEW_REASON' }, ...rest],
     })
     expect(result.success).toBe(true)
+  })
+})
+
+describe('roomListDtoSchema', () => {
+  const item = {
+    room_id: 'IT4-101',
+    room_name: '제1실습실 (예시)',
+    total_seats: 1,
+    available_seats: 0,
+    unknown_seats: 0,
+    congestion_level: 'HIGH',
+    edge_online: true,
+  }
+
+  it('요약 항목 배열을 받아들인다', () => {
+    expect(roomListDtoSchema.safeParse([item]).success).toBe(true)
+  })
+
+  it('빈 배열을 받아들인다', () => {
+    expect(roomListDtoSchema.safeParse([]).success).toBe(true)
+  })
+
+  it('전부 확인 불가이고 연결이 끊긴 항목을 받아들인다', () => {
+    const offline = {
+      ...item,
+      total_seats: 4,
+      available_seats: 0,
+      unknown_seats: 4,
+      edge_online: false,
+    }
+    expect(roomListDtoSchema.safeParse([offline]).success).toBe(true)
+  })
+
+  it('edge_online 이 빠진 항목은 실패한다', () => {
+    const rest: Record<string, unknown> = { ...item }
+    delete rest.edge_online
+    expect(roomListDtoSchema.safeParse([rest]).success).toBe(false)
+  })
+
+  it('모르는 congestion_level 도 받아들인다', () => {
+    expect(roomListDtoSchema.safeParse([{ ...item, congestion_level: 'SOMETHING' }]).success).toBe(
+      true,
+    )
   })
 })

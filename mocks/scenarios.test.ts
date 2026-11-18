@@ -1,4 +1,11 @@
-import { applyRoomEvent, parseRoomEvent, roomDtoSchema, toRoom } from '@/entities/room'
+import { HttpHandler } from 'msw'
+import {
+  applyRoomEvent,
+  parseRoomEvent,
+  roomDtoSchema,
+  roomListDtoSchema,
+  toRoom,
+} from '@/entities/room'
 import type { Room } from '@/entities/room'
 import { server } from './node'
 import {
@@ -11,6 +18,7 @@ import {
   noSeatsRoom,
   offlineRoom,
 } from './fixtures/rooms'
+import { ROOM_LIST_URL } from './handlers/rooms'
 import { resolveScenario } from './scenarios'
 
 test('default 시나리오는 핸들러 배열이다', () => {
@@ -40,6 +48,9 @@ const SCENARIO_NAMES = [
   'ws-down',
   'live-demo',
   'seat-details',
+  'rooms-many',
+  'rooms-empty',
+  'rooms-refresh-fail',
 ]
 
 test.each(SCENARIO_NAMES)('시나리오 %s 는 ws 핸들러를 하나 이상 가진다', (name) => {
@@ -104,7 +115,7 @@ test('배포 원문 offline 방은 last_observed_at 이 null 이다', () => {
 })
 
 const ROOM_SCENARIOS = SCENARIO_NAMES.filter(
-  (name) => !['loading', 'error', 'not-found', 'slow-wake'].includes(name),
+  (name) => !['loading', 'error', 'not-found', 'slow-wake', 'rooms-empty'].includes(name),
 )
 
 test.each(ROOM_SCENARIOS)(
@@ -303,4 +314,150 @@ describe('seat-details', () => {
     expect(seats.some((s) => s.status === 'UNKNOWN' && s.lastObservedAt === null)).toBe(true)
     expect(seats.some((s) => s.isWindow)).toBe(true)
   })
+})
+
+const LIST_URL = 'http://localhost/api/v1/rooms'
+const getList = () => fetch(LIST_URL)
+const SINGLE_ROOM_SCENARIOS = [
+  'default',
+  'mixed',
+  'all-unknown',
+  'offline',
+  'no-seats',
+  'many-seats',
+  'seat-details',
+]
+const SUMMARY_FIELDS = [
+  'room_id',
+  'room_name',
+  'total_seats',
+  'available_seats',
+  'unknown_seats',
+  'congestion_level',
+  'edge_online',
+] as const
+
+describe('목록 핸들러 시나리오', () => {
+  const DELAYED = ['loading', 'slow-wake']
+
+  // 기본 핸들러에도 mixed 목록이 있어서, 응답만 보면 시나리오가 목록 핸들러를 빠뜨려도 통과한다.
+  test.each(SCENARIO_NAMES)('시나리오 %s 는 목록 경로 핸들러를 직접 가진다', (name) => {
+    const owns = resolveScenario(name).filter(
+      (h) => h instanceof HttpHandler && h.info.method === 'GET' && h.info.path === ROOM_LIST_URL,
+    )
+    expect(owns).toHaveLength(1)
+  })
+
+  test.each(SCENARIO_NAMES.filter((n) => !DELAYED.includes(n)))(
+    '시나리오 %s 는 목록 요청을 처리한다',
+    async (name) => {
+      server.use(...resolveScenario(name))
+      const res = await getList()
+      expect(res.status).toBe(name === 'error' ? 500 : 200)
+      if (res.status === 200) {
+        expect(roomListDtoSchema.safeParse(await res.json()).success).toBe(true)
+      }
+    },
+  )
+
+  test.each(DELAYED)('시나리오 %s 의 목록은 상세처럼 지연된다', async (name) => {
+    vi.useFakeTimers({ toFake: ['setTimeout'] })
+    const controller = new AbortController()
+    try {
+      server.use(...resolveScenario(name))
+      let done = false
+      fetch(LIST_URL, { signal: controller.signal }).then(
+        () => (done = true),
+        () => {},
+      )
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(done).toBe(false)
+      if (name === 'slow-wake') {
+        await vi.advanceTimersByTimeAsync(40_000)
+        await vi.waitFor(() => expect(done).toBe(true))
+      }
+    } finally {
+      controller.abort()
+      vi.useRealTimers()
+    }
+  })
+
+  test.each(SINGLE_ROOM_SCENARIOS)(
+    '단일 방 시나리오 %s 의 목록 항목은 같은 시나리오 상세 응답의 요약과 같다',
+    async (name) => {
+      server.use(...resolveScenario(name))
+      const list = roomListDtoSchema.parse(await (await getList()).json())
+      const detail = roomDtoSchema.parse(await (await getRoom(ROOM_ID)).json())
+      expect(list).toHaveLength(1)
+      for (const field of SUMMARY_FIELDS) expect(list[0]![field], field).toEqual(detail[field])
+    },
+  )
+
+  test.each(['not-found', 'rooms-empty'])('시나리오 %s 의 목록은 빈 배열', async (name) => {
+    server.use(...resolveScenario(name))
+    expect(await (await getList()).json()).toEqual([])
+  })
+
+  test('rooms-many 는 서로 다른 여섯 방을 요구한 경우대로 준다', async () => {
+    server.use(...resolveScenario('rooms-many'))
+    const list = roomListDtoSchema.parse(await (await getList()).json())
+    expect(list).toHaveLength(6)
+    expect(new Set(list.map((i) => i.room_id)).size).toBe(6)
+    for (const item of list) {
+      const res = await getRoom(encodeURIComponent(item.room_id))
+      expect(res.status, item.room_id).toBe(200)
+      const detail = roomDtoSchema.parse(await res.json())
+      for (const field of SUMMARY_FIELDS) expect(item[field], field).toEqual(detail[field])
+    }
+    const known = (i: (typeof list)[number]) => i.edge_online && i.unknown_seats < i.total_seats
+    expect(list.some((i) => known(i) && i.congestion_level === 'LOW')).toBe(true)
+    expect(list.some((i) => known(i) && i.congestion_level === 'HIGH')).toBe(true)
+    // 확인한 빈자리 0석, 확인 불가가 섞이고 혼잡이라 말하는 위험한 경우
+    expect(
+      list.some(
+        (i) =>
+          i.edge_online &&
+          i.available_seats === 0 &&
+          i.unknown_seats === 2 &&
+          i.total_seats === 6 &&
+          i.congestion_level === 'HIGH',
+      ),
+    ).toBe(true)
+    expect(
+      list.some((i) => i.edge_online && i.total_seats > 0 && i.unknown_seats === i.total_seats),
+    ).toBe(true)
+    expect(
+      list.some((i) => !i.edge_online && i.total_seats > 0 && i.unknown_seats === i.total_seats),
+    ).toBe(true)
+    expect(list.some((i) => i.total_seats === 0)).toBe(true)
+    expect(list.some((i) => i.room_name.length >= 40)).toBe(true)
+    expect(list.some((i) => i.room_name.split(' ').some((w) => w.length >= 40))).toBe(true)
+  })
+
+  test('rooms-refresh-fail 은 첫 요청부터 10초 동안 200 이고 그 뒤 500', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: false, toFake: ['Date'] })
+    try {
+      vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+      server.use(...resolveScenario('rooms-refresh-fail'))
+      expect((await getList()).status).toBe(200)
+      vi.setSystemTime(new Date('2026-01-01T00:00:05Z'))
+      expect((await getList()).status).toBe(200)
+      vi.setSystemTime(new Date('2026-01-01T00:00:11Z'))
+      expect((await getList()).status).toBe(500)
+      expect((await getList()).status).toBe(500)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  test.each(['live-flow', 'ws-reject', 'ws-slow-close', 'ws-down', 'live-demo'])(
+    '시나리오 %s 의 목록은 현재 방 요약 하나',
+    async (name) => {
+      server.use(...resolveScenario(name))
+      const list = roomListDtoSchema.parse(await (await getList()).json())
+      const detail = roomDtoSchema.parse(await (await getRoom(ROOM_ID)).json())
+      expect(list).toHaveLength(1)
+      for (const field of SUMMARY_FIELDS) expect(list[0]![field], field).toEqual(detail[field])
+    },
+  )
 })

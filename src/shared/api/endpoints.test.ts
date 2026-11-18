@@ -10,3 +10,7 @@ test('방 소켓 경로도 방 ID 를 인코딩한다', () => {
   expect(endpoints.roomSocket('IT4-101')).toBe('/ws/rooms/IT4-101')
   expect(endpoints.roomSocket('A B/C')).toBe('/ws/rooms/A%20B%2FC')
 })
+
+test('방 목록 경로는 끝에 슬래시가 없다', () => {
+  expect(endpoints.rooms()).toBe('/api/v1/rooms')
+})

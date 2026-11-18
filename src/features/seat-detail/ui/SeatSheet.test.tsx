@@ -65,7 +65,7 @@ test('확인 불가 좌석은 이유 문장이 보이고 빈자리에는 없다'
 test('staleNotice 가 있으면 시트 안에 그 글자가 보인다', () => {
   renderSheet({ staleNotice: '1분 넘게 갱신되지 않았어요' })
   const dialog = screen.getByRole('dialog')
-  expect(within(dialog).getByText('1분 넘게 갱신되지 않았어요')).toBeInTheDocument()
+  expect(within(dialog).getByText('1분 넘게 갱신되지 않았어요')).toHaveClass('font-bold')
 })
 
 test('열린 동안 같은 좌석의 상태가 바뀌면 시트 안 알림 영역에 읽힌다', () => {

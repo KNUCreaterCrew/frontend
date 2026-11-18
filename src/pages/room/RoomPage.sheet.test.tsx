@@ -189,7 +189,7 @@ describe('좌석 상세 바텀시트 연결', () => {
       http.get('*/api/v1/rooms/:roomId', () => HttpResponse.json({ detail: 'x' }, { status: 500 })),
     )
     await advance(30_000)
-    expect(await within(dialog).findByText('갱신하지 못했어요')).toBeVisible()
+    expect(await within(dialog).findByText(/^갱신하지 못했어요/)).toHaveClass('font-bold')
   })
 
   test('눌러서 연 시트의 좌석이 사라지면 기록을 하나 되돌려 죽은 항목을 남기지 않는다', async () => {

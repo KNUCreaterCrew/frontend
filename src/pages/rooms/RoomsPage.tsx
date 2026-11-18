@@ -1,8 +1,64 @@
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { roomListQueryOptions } from '@/entities/room'
+import { getScreenState, useElapsed } from '@/shared/lib'
+import { RoomRow } from './ui/RoomRow'
+import { RoomsError } from './ui/RoomsError'
+import { RoomsLoading } from './ui/RoomsLoading'
+import { RoomsTopBar } from './ui/RoomsTopBar'
+
 export function RoomsPage() {
+  const [attempt, setAttempt] = useState(0)
+  const { data, status, fetchStatus, error, failureReason, dataUpdatedAt, refetch } =
+    useQuery(roomListQueryOptions())
+  const elapsedMs = useElapsed(status === 'pending' && fetchStatus !== 'paused', attempt)
+  const state = getScreenState({
+    status,
+    hasData: data !== undefined,
+    error,
+    elapsedMs,
+    fetchStatus,
+  })
+
+  // 404 도 목록에서는 오류로 다룬다
+  if (state === 'error' || state === 'notFound') {
+    return (
+      <>
+        <RoomsTopBar updatedAt={null} />
+        <RoomsError
+          error={error ?? failureReason}
+          onRetry={() => {
+            setAttempt((n) => n + 1)
+            void refetch()
+          }}
+        />
+      </>
+    )
+  }
+  if (state === 'loading' || !data) {
+    return (
+      <>
+        <RoomsTopBar updatedAt={null} />
+        <RoomsLoading elapsedMs={elapsedMs} paused={fetchStatus === 'paused'} />
+      </>
+    )
+  }
+
   return (
-    <main>
-      <h1 className="text-title font-black tracking-tight">ZeroFrame</h1>
-      <p className="mt-2">실습실 빈자리를 곧 여기서 볼 수 있어요.</p>
-    </main>
+    <>
+      <RoomsTopBar updatedAt={dataUpdatedAt} refreshFailed={state === 'refreshFailed'} />
+      <main className="mt-6">
+        <h1 className="text-title font-black tracking-tight">어느 방으로 갈까요</h1>
+        {data.length === 0 ? (
+          <p className="mt-4 text-body">아직 등록된 방이 없어요.</p>
+        ) : (
+          <ul className="mt-4 border-t-6 border-ink">
+            {data.map((room) => (
+              <RoomRow key={room.roomId} room={room} />
+            ))}
+          </ul>
+        )}
+      </main>
+    </>
   )
 }

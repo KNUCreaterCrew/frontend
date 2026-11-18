@@ -1,11 +1,12 @@
 import { queryOptions } from '@tanstack/react-query'
 import { endpoints, http, isNotFoundError } from '@/shared/api'
-import { roomDtoSchema } from '../model/dto'
-import { toRoom } from '../model/mapping'
-import type { Room } from '../model/types'
+import { roomDtoSchema, roomListDtoSchema } from '../model/dto'
+import { toRoom, toRoomListItem } from '../model/mapping'
+import type { Room, RoomListItem } from '../model/types'
 
 export const roomKeys = {
   all: ['rooms'] as const,
+  list: () => ['rooms', 'list'] as const,
   detail: (roomId: string) => ['rooms', 'detail', roomId] as const,
 }
 
@@ -28,5 +29,22 @@ export function roomQueryOptions(roomId: string) {
     refetchOnWindowFocus: unlessNotFound,
     refetchOnReconnect: unlessNotFound,
     retryOnMount: unlessNotFound,
+  })
+}
+
+export async function fetchRoomList(signal?: AbortSignal): Promise<RoomListItem[]> {
+  const dtos = await http.get(endpoints.rooms(), roomListDtoSchema, {
+    signal,
+    timeoutMs: 90_000,
+  })
+  return dtos.map(toRoomListItem)
+}
+
+// 목록 응답으로 방 상세 캐시를 채우지 않는다.
+export function roomListQueryOptions() {
+  return queryOptions({
+    queryKey: roomKeys.list(),
+    queryFn: ({ signal }) => fetchRoomList(signal),
+    refetchInterval: 30_000,
   })
 }

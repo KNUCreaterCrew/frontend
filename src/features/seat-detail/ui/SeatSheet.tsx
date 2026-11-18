@@ -178,7 +178,9 @@ function SheetLayers({
                   </div>
                 ))}
               </dl>
-              {staleNotice !== null && <p className="mt-3 text-body text-ink">{staleNotice}</p>}
+              {staleNotice !== null && (
+                <p className="mt-3 text-body font-bold text-ink">{staleNotice}</p>
+              )}
               <Button className="mt-4" onClick={onClose}>
                 닫기
               </Button>

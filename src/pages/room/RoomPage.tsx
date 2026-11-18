@@ -3,8 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router'
 import { getRoomSummary } from '@/entities/room'
 import type { Seat } from '@/entities/room'
 import { useRoomLive } from '@/features/room-live'
-import { freshnessWarning, useElapsed, useNow } from '@/shared/lib'
-import { getRoomScreenState } from './lib/screenState'
+import { freshnessWarning, getScreenState, useElapsed, useNow } from '@/shared/lib'
 import { EdgeOfflineBanner } from './ui/EdgeOfflineBanner'
 import { Legend } from './ui/Legend'
 import { RoomError } from './ui/RoomError'
@@ -54,7 +53,7 @@ export function RoomPage() {
   const live = useRoomLive(roomId)
   const { data, status, fetchStatus, error, failureReason, dataUpdatedAt } = live.query
   const elapsedMs = useElapsed(status === 'pending' && fetchStatus !== 'paused', attempt)
-  const state = getRoomScreenState({
+  const state = getScreenState({
     status,
     hasData: data !== undefined,
     error,

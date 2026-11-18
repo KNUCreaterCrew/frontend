@@ -5,15 +5,24 @@ import {
   ROOM_ID,
   allUnknownRoom,
   buildRoom,
+  manyRooms,
   manySeatsRoom,
   mixedRoom,
   noSeatsRoom,
   offlineRoom,
   seatDetailsRoom,
+  toListItemDto,
 } from './fixtures/rooms'
 import { startupRoomDto } from './fixtures/interfacesFlow'
 import type { LiveRoom } from './handlers/rooms'
-import { liveRoom, quietRoomSocket, rejectingRoomSocket, roomHandler } from './handlers/rooms'
+import {
+  ROOM_LIST_URL,
+  liveRoom,
+  quietRoomSocket,
+  rejectingRoomSocket,
+  roomHandler,
+  roomListHandler,
+} from './handlers/rooms'
 
 const ROOM_URL = '*/api/v1/rooms/:roomId'
 
@@ -123,23 +132,37 @@ function liveDemoHandlers(base: RoomDto): MockHandler[] {
   return room.handlers
 }
 
-const mixed = () => [roomHandler({ [ROOM_ID]: mixedRoom }), quietRoomSocket()]
+// 방 하나짜리 시나리오: 상세와 목록이 같은 방을 본다.
+const single = (room: RoomDto) => () => [
+  roomHandler({ [ROOM_ID]: room }),
+  roomListHandler([toListItemDto(room)]),
+  quietRoomSocket(),
+]
+
+const mixed = single(mixedRoom)
 
 // 호출할 때마다 새 핸들러를 만든다(연결 수, 로그, 타이머 상태를 시나리오 사이에 공유하지 않는다).
 export const scenarios: Record<string, () => MockHandler[]> = {
   default: mixed,
   mixed,
-  'all-unknown': () => [roomHandler({ [ROOM_ID]: allUnknownRoom }), quietRoomSocket()],
-  offline: () => [roomHandler({ [ROOM_ID]: offlineRoom }), quietRoomSocket()],
+  'all-unknown': single(allUnknownRoom),
+  offline: single(offlineRoom),
   loading: () => [
     http.get(ROOM_URL, async () => {
       await delay('infinite')
       return HttpResponse.json(mixedRoom)
     }),
+    http.get(ROOM_LIST_URL, async () => {
+      await delay('infinite')
+      return HttpResponse.json([toListItemDto(mixedRoom)])
+    }),
     quietRoomSocket(),
   ],
   error: () => [
     http.get(ROOM_URL, () =>
+      HttpResponse.json({ detail: '일시적인 오류입니다.' }, { status: 500 }),
+    ),
+    http.get(ROOM_LIST_URL, () =>
       HttpResponse.json({ detail: '일시적인 오류입니다.' }, { status: 500 }),
     ),
     quietRoomSocket(),
@@ -148,12 +171,17 @@ export const scenarios: Record<string, () => MockHandler[]> = {
     http.get(ROOM_URL, () =>
       HttpResponse.json({ detail: '등록되지 않은 방입니다.' }, { status: 404 }),
     ),
+    roomListHandler([]),
     rejectingRoomSocket(),
   ],
   'slow-wake': () => [
     http.get(ROOM_URL, async () => {
       await delay(65_000)
       return HttpResponse.json(mixedRoom)
+    }),
+    http.get(ROOM_LIST_URL, async () => {
+      await delay(65_000)
+      return HttpResponse.json([toListItemDto(mixedRoom)])
     }),
     quietRoomSocket(),
   ],
@@ -162,9 +190,32 @@ export const scenarios: Record<string, () => MockHandler[]> = {
   'ws-slow-close': () => liveRoom(mixedRoom, { closeAfterOpen: 1013 }).handlers,
   'ws-down': () => liveRoom(mixedRoom, { alwaysReject: true }).handlers,
   'live-demo': () => liveDemoHandlers(mixedRoom),
-  'many-seats': () => [roomHandler({ [ROOM_ID]: manySeatsRoom }), quietRoomSocket()],
-  'seat-details': () => [roomHandler({ [ROOM_ID]: seatDetailsRoom }), quietRoomSocket()],
-  'no-seats': () => [roomHandler({ [ROOM_ID]: noSeatsRoom }), quietRoomSocket()],
+  'many-seats': single(manySeatsRoom),
+  'seat-details': single(seatDetailsRoom),
+  'no-seats': single(noSeatsRoom),
+  'rooms-many': () => [
+    roomHandler(Object.fromEntries(manyRooms.map((room) => [room.room_id, room]))),
+    roomListHandler(manyRooms.map(toListItemDto)),
+    quietRoomSocket(),
+  ],
+  'rooms-empty': () => [roomHandler({}), roomListHandler([]), quietRoomSocket()],
+  // 첫 목록 요청부터 10초 동안만 정상이고 이후는 500. 개발 서버의 StrictMode 가 시작 때 요청을
+  // 두 번 보내도 첫 화면은 정상으로 뜨고, 30초 재조회가 실패하는 화면을 보기 위한 것.
+  'rooms-refresh-fail': () => {
+    let firstAt: number | undefined
+    return [
+      roomHandler({ [ROOM_ID]: mixedRoom }),
+      http.get(ROOM_LIST_URL, () => {
+        const now = Date.now()
+        firstAt ??= now
+        if (now - firstAt > 10_000) {
+          return HttpResponse.json({ detail: '일시적인 오류입니다.' }, { status: 500 })
+        }
+        return HttpResponse.json([toListItemDto(mixedRoom)])
+      }),
+      quietRoomSocket(),
+    ]
+  },
 }
 
 export function resolveScenario(name: string): MockHandler[] {

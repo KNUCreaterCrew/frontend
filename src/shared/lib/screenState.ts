@@ -10,15 +10,15 @@ export function getLoadingStage(elapsedMs: number): LoadingStage {
   return 'initial'
 }
 
-export type RoomScreenState = 'loading' | 'error' | 'notFound' | 'ready' | 'refreshFailed'
+export type ScreenState = 'loading' | 'error' | 'notFound' | 'ready' | 'refreshFailed'
 
-export function getRoomScreenState(input: {
+export function getScreenState(input: {
   status: 'pending' | 'error' | 'success'
   hasData: boolean
   error: unknown
   elapsedMs: number
   fetchStatus: 'fetching' | 'paused' | 'idle'
-}): RoomScreenState {
+}): ScreenState {
   const { status, hasData, error, elapsedMs, fetchStatus } = input
   if (hasData) return status === 'error' ? 'refreshFailed' : 'ready'
   if (status === 'error') return isNotFoundError(error) ? 'notFound' : 'error'
