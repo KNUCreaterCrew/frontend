@@ -276,7 +276,10 @@ describe('seat-details', () => {
       expect(unknown.some((s) => s.reason === reason)).toBe(true)
     }
     expect(seats.some((s) => s.status === 'UNRECOGNIZED')).toBe(true)
-    expect(seats.some((s) => s.status === 'EMPTY' && s.lastObservedAt === null)).toBe(true)
+    // EMPTY 는 확인한 관측이 있어야 해서 시간이 null 인 빈자리는 없다
+    expect(seats.some((s) => s.status === 'EMPTY' && s.lastObservedAt === null)).toBe(false)
+    expect(seats.some((s) => s.status === 'EMPTY' && s.lastObservedAt !== null)).toBe(true)
+    expect(seats.some((s) => s.status === 'UNKNOWN' && s.lastObservedAt === null)).toBe(true)
     expect(seats.some((s) => s.isWindow)).toBe(true)
   })
 })

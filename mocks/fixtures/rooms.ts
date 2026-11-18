@@ -166,10 +166,10 @@ export const seatDetailsRoom: RoomDto = buildRoom(
     ...DETAIL_REASONS.map((reason, i) =>
       seat({ row: 'A', n: i + 1, x: i * 80, y: 0, status: 'UNKNOWN', reason, window: i === 0 }),
     ),
-    seat({ row: 'B', n: 1, x: 0, y: 64, status: 'UNKNOWN', reason: null }),
+    seat({ row: 'B', n: 1, x: 0, y: 64, status: 'UNKNOWN', reason: null, observedAt: null }),
     seat({ row: 'B', n: 2, x: 80, y: 64, status: 'UNKNOWN', reason: 'SOMETHING_NEW' }),
     seat({ row: 'B', n: 3, x: 160, y: 64, status: 'SOMETHING_NEW', reason: 'OCCLUDED' }),
-    seat({ row: 'B', n: 4, x: 240, y: 64, status: 'EMPTY', observedAt: null, outlet: true }),
+    seat({ row: 'B', n: 4, x: 240, y: 64, status: 'EMPTY', outlet: true }),
     seat({ row: 'B', n: 5, x: 320, y: 64, status: 'OCCUPIED', window: true }),
     seat({ row: 'B', n: 6, x: 400, y: 64, status: 'AWAY', outlet: true }),
   ],

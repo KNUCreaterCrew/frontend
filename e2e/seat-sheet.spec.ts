@@ -241,7 +241,7 @@ test('seat-details: 이유별 문구와 값이 없을 때의 문구가 정확히
     ['A6', '장치 연결이 끊겨 지금은 확인할 수 없어요'],
     ['B1', '이유 정보가 없어요'],
     ['B2', '이유를 알 수 없어요'],
-    ['B4', '아직 확인하지 못함'],
+    ['B1', '아직 확인하지 못함'],
   ]
   for (const [label, text] of cases) {
     const seat = seatButton(page, label)
