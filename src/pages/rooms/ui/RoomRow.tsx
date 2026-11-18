@@ -5,6 +5,7 @@ import type { RoomListItem } from '@/entities/room'
 const OFFLINE = '장치 연결이 끊겼어요'
 const NO_READING = '아직 자리를 확인하지 못했어요'
 const NO_SEATS = '등록된 좌석이 없어요'
+const unknownSeatsSentence = (n: number) => `확인하지 못한 자리가 ${n}석 있어요`
 
 const ROW = 'border-b-2 border-ink'
 const LINK =
@@ -84,9 +85,20 @@ export function RoomRow({ room }: { room: RoomListItem }) {
   }
 
   const congestion = congestionLabel(summary.congestionLevel)
-  const name =
-    `${room.roomName}, 빈자리 ${summary.availableSeats}석, ${unknown}, ${total}, ${congestion}` +
-    (summary.edgeOnline ? '' : `, ${OFFLINE}`)
+  const sentences = [
+    ...(summary.availableSeats === 0 && summary.unknownSeats >= 1
+      ? [unknownSeatsSentence(summary.unknownSeats)]
+      : []),
+    ...(summary.edgeOnline ? [] : [OFFLINE]),
+  ]
+  const name = [
+    room.roomName,
+    `빈자리 ${summary.availableSeats}석`,
+    unknown,
+    total,
+    congestion,
+    ...sentences,
+  ].join(', ')
   return (
     <li className={ROW}>
       <Link to={to} aria-label={name} className={LINK}>
@@ -107,7 +119,11 @@ export function RoomRow({ room }: { room: RoomListItem }) {
               <Fact term="혼잡도" value={congestion} />
             </dl>
           </div>
-          {!summary.edgeOnline && <span className={SENTENCE}>{OFFLINE}</span>}
+          {sentences.map((text) => (
+            <span key={text} className={SENTENCE}>
+              {text}
+            </span>
+          ))}
         </div>
       </Link>
     </li>

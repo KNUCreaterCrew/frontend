@@ -91,6 +91,53 @@ describe('방 목록 화면 행', () => {
     expect(row.getByText('0')).toBeInTheDocument()
     expect(row.getByText('혼잡')).toBeInTheDocument()
     expect(row.queryByText('모름')).not.toBeInTheDocument()
+    expect(row.queryByText(/확인하지 못한 자리가/)).not.toBeInTheDocument()
+  })
+
+  test('rooms-many 둘째 행(0석, 확인 불가 2석, HIGH): 확인하지 못한 자리 문장과 링크 이름', async () => {
+    renderApp('/', { scenario: 'rooms-many' })
+    const list = await screen.findByRole('list')
+    const link = within(list).getByRole('link', { name: /^제2실습실/ })
+    expect(link).toHaveAccessibleName(
+      '제2실습실, 빈자리 0석, 확인 불가 2석, 전체 6석, 혼잡, 확인하지 못한 자리가 2석 있어요',
+    )
+    const sentence = within(link).getByText('확인하지 못한 자리가 2석 있어요')
+    expect(sentence).toHaveClass('font-bold')
+    expect(sentence.closest('dl')).toBeNull()
+  })
+
+  test('빈자리 0석 + 확인 불가 + 장치 끊김: 문장 둘, 확인하지 못한 자리가 먼저', async () => {
+    useList([
+      item({
+        total_seats: 6,
+        available_seats: 0,
+        unknown_seats: 2,
+        congestion_level: 'HIGH',
+        edge_online: false,
+      }),
+    ])
+    renderApp('/')
+    const link = await onlyRow()
+    const first = within(link).getByText('확인하지 못한 자리가 2석 있어요')
+    const second = within(link).getByText('장치 연결이 끊겼어요')
+    expect(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(link).toHaveAccessibleName(
+      `${NAME}, 빈자리 0석, 확인 불가 2석, 전체 6석, 혼잡, 확인하지 못한 자리가 2석 있어요, 장치 연결이 끊겼어요`,
+    )
+  })
+
+  test('빈자리가 1석 이상이면 확인 불가가 있어도 문장이 없다', async () => {
+    useList([item()])
+    renderApp('/')
+    expect(within(await onlyRow()).queryByText(/확인하지 못한 자리가/)).not.toBeInTheDocument()
+  })
+
+  test('혼잡도 값은 다른 표 값과 같은 크기와 굵기', async () => {
+    useList([item()])
+    renderApp('/')
+    const row = within(await onlyRow())
+    const style = (el: HTMLElement) => el.className
+    expect(style(row.getByText('보통'))).toBe(style(row.getByText('4석')))
   })
 
   test('좌석 0: 등록된 좌석이 없어요, 링크 유지', async () => {
