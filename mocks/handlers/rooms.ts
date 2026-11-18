@@ -1,8 +1,17 @@
 import { HttpResponse, http, ws } from 'msw'
 import type { RequestHandler, WebSocketHandler } from 'msw'
-import type { RoomDto, RoomEventDto } from '@/entities/room'
+import type { RoomDto, RoomEventDto, RoomSummaryDto } from '@/entities/room'
+import { toListItemDto } from '../fixtures/rooms'
 
 export type MockHandler = RequestHandler | WebSocketHandler
+
+export const ROOM_LIST_URL = '*/api/v1/rooms'
+
+export function roomListHandler(items: RoomSummaryDto[] | (() => RoomSummaryDto[])) {
+  return http.get(ROOM_LIST_URL, () =>
+    HttpResponse.json(typeof items === 'function' ? items() : items),
+  )
+}
 
 export function roomHandler(rooms: Record<string, RoomDto>) {
   return http.get('*/api/v1/rooms/:roomId', ({ params }) => {
@@ -64,6 +73,9 @@ export function liveRoom(initial: RoomDto, options: LiveRoomOptions = {}): LiveR
     return HttpResponse.json(room)
   })
 
+  // 목록 응답은 현재 방에서 요청마다 만든다. 상세와 순서를 겨루는 log 에는 넣지 않는다.
+  const listHandler = roomListHandler(() => [toListItemDto(room)])
+
   const socketHandler = link.addEventListener('connection', ({ client }) => {
     log.push('ws')
     connections += 1
@@ -86,7 +98,7 @@ export function liveRoom(initial: RoomDto, options: LiveRoomOptions = {}): LiveR
   })
 
   return {
-    handlers: [getHandler, socketHandler],
+    handlers: [getHandler, listHandler, socketHandler],
     send: (event) => {
       for (const c of clients) c.send(JSON.stringify(event))
     },

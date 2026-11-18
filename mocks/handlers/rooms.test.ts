@@ -1,7 +1,9 @@
 import { v1Events, v1RoomDto, startupRoomDto } from '../fixtures/interfacesFlow'
 import { server } from '../node'
 import { ROOM_ID } from '../fixtures/rooms'
-import { liveRoom } from './rooms'
+import { roomListDtoSchema } from '@/entities/room'
+import { mixedRoom, toListItemDto } from '../fixtures/rooms'
+import { liveRoom, roomHandler, roomListHandler } from './rooms'
 
 const WS = `ws://localhost/ws/rooms/${ROOM_ID}`
 const GET = `http://localhost/api/v1/rooms/${ROOM_ID}`
@@ -117,4 +119,55 @@ test('alwaysReject 는 모든 연결을 닫는다', async () => {
     const c = connect()
     await until(() => c.events.includes('close'))
   }
+})
+
+const LIST = 'http://localhost/api/v1/rooms'
+
+describe('목록 핸들러', () => {
+  test('roomListHandler 는 목록 경로에 배열을 주고 상세 경로는 처리하지 않는다', async () => {
+    const items = [{ ...toListItemDto(mixedRoom), room_name: '목록 전용 이름' }]
+    server.use(roomListHandler(items))
+    const res = await fetch(LIST)
+    expect(res.status).toBe(200)
+    expect(roomListDtoSchema.parse(await res.json())).toEqual(items)
+    // 상세 경로는 목록 핸들러가 아니라 기본 핸들러가 받는다
+    const detail = (await (await fetch(GET)).json()) as { seats?: unknown; room_name: string }
+    expect(detail.seats).toBeDefined()
+    expect(detail.room_name).not.toBe('목록 전용 이름')
+  })
+
+  test('함수를 받으면 요청마다 다시 계산한다', async () => {
+    let n = 0
+    server.use(roomListHandler(() => [{ ...toListItemDto(mixedRoom), available_seats: (n += 1) }]))
+    const first = roomListDtoSchema.parse(await (await fetch(LIST)).json())
+    const second = roomListDtoSchema.parse(await (await fetch(LIST)).json())
+    expect([first[0]!.available_seats, second[0]!.available_seats]).toEqual([1, 2])
+  })
+
+  test('상세 핸들러는 목록 경로를 처리하지 않는다', async () => {
+    server.use(roomHandler({ [ROOM_ID]: { ...mixedRoom, room_name: '상세 전용 이름' } }))
+    const body = (await (await fetch(LIST)).json()) as Array<{ room_name: string }>
+    expect(Array.isArray(body)).toBe(true)
+    expect(body.every((i) => i.room_name !== '상세 전용 이름')).toBe(true)
+  })
+
+  test('liveRoom 의 목록 응답은 setRoom 뒤 새 집계를 따라간다', async () => {
+    const live = liveRoom(startupRoomDto)
+    server.use(...live.handlers)
+    const before = roomListDtoSchema.parse(await (await fetch(LIST)).json())
+    expect(before[0]).toEqual(toListItemDto(startupRoomDto))
+    live.setRoom(v1RoomDto)
+    const after = roomListDtoSchema.parse(await (await fetch(LIST)).json())
+    expect(after[0]).toEqual(toListItemDto(v1RoomDto))
+    expect(after[0]).not.toEqual(before[0])
+  })
+
+  test('목록 GET 은 liveRoom log 에 남지 않는다', async () => {
+    const live = liveRoom(startupRoomDto)
+    server.use(...live.handlers)
+    await fetch(LIST)
+    await fetch(GET)
+    await fetch(LIST)
+    expect(live.log).toEqual(['get'])
+  })
 })
