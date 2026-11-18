@@ -97,6 +97,7 @@ function liveDemoHandlers(base: RoomDto): MockHandler[] {
         )
       }
     }
+    room.setRoom(snapshot())
     emit(room, before)
   }
 
@@ -110,50 +111,50 @@ function liveDemoHandlers(base: RoomDto): MockHandler[] {
       }
     },
   })
-  const getLatest = http.get('*/api/v1/rooms/:roomId', () => HttpResponse.json(snapshot()))
-  return [getLatest, ...room.handlers.slice(1)]
+  return room.handlers
 }
 
-const mixed = [roomHandler({ [ROOM_ID]: mixedRoom }), quietRoomSocket()]
+const mixed = () => [roomHandler({ [ROOM_ID]: mixedRoom }), quietRoomSocket()]
 
-export const scenarios: Record<string, MockHandler[]> = {
+// 호출할 때마다 새 핸들러를 만든다(연결 수, 로그, 타이머 상태를 시나리오 사이에 공유하지 않는다).
+export const scenarios: Record<string, () => MockHandler[]> = {
   default: mixed,
   mixed,
-  'all-unknown': [roomHandler({ [ROOM_ID]: allUnknownRoom }), quietRoomSocket()],
-  offline: [roomHandler({ [ROOM_ID]: offlineRoom }), quietRoomSocket()],
-  loading: [
+  'all-unknown': () => [roomHandler({ [ROOM_ID]: allUnknownRoom }), quietRoomSocket()],
+  offline: () => [roomHandler({ [ROOM_ID]: offlineRoom }), quietRoomSocket()],
+  loading: () => [
     http.get(ROOM_URL, async () => {
       await delay('infinite')
       return HttpResponse.json(mixedRoom)
     }),
     quietRoomSocket(),
   ],
-  error: [
+  error: () => [
     http.get(ROOM_URL, () =>
       HttpResponse.json({ detail: '일시적인 오류입니다.' }, { status: 500 }),
     ),
     quietRoomSocket(),
   ],
-  'not-found': [
+  'not-found': () => [
     http.get(ROOM_URL, () =>
       HttpResponse.json({ detail: '등록되지 않은 방입니다.' }, { status: 404 }),
     ),
     rejectingRoomSocket(),
   ],
-  'slow-wake': [
+  'slow-wake': () => [
     http.get(ROOM_URL, async () => {
       await delay(65_000)
       return HttpResponse.json(mixedRoom)
     }),
     quietRoomSocket(),
   ],
-  'live-flow': liveRoom(startupRoomDto).handlers,
-  'ws-reject': liveRoom(mixedRoom, { rejectFirst: true }).handlers,
-  'ws-slow-close': liveRoom(mixedRoom, { closeAfterOpen: 1013 }).handlers,
-  'ws-down': liveRoom(mixedRoom, { alwaysReject: true }).handlers,
-  'live-demo': liveDemoHandlers(mixedRoom),
-  'many-seats': [roomHandler({ [ROOM_ID]: manySeatsRoom }), quietRoomSocket()],
-  'no-seats': [roomHandler({ [ROOM_ID]: noSeatsRoom }), quietRoomSocket()],
+  'live-flow': () => liveRoom(startupRoomDto).handlers,
+  'ws-reject': () => liveRoom(mixedRoom, { rejectFirst: true }).handlers,
+  'ws-slow-close': () => liveRoom(mixedRoom, { closeAfterOpen: 1013 }).handlers,
+  'ws-down': () => liveRoom(mixedRoom, { alwaysReject: true }).handlers,
+  'live-demo': () => liveDemoHandlers(mixedRoom),
+  'many-seats': () => [roomHandler({ [ROOM_ID]: manySeatsRoom }), quietRoomSocket()],
+  'no-seats': () => [roomHandler({ [ROOM_ID]: noSeatsRoom }), quietRoomSocket()],
 }
 
 export function resolveScenario(name: string): MockHandler[] {
@@ -162,5 +163,5 @@ export function resolveScenario(name: string): MockHandler[] {
     const known = Object.keys(scenarios).join(', ')
     throw new Error(`알 수 없는 시나리오: ${name} (알려진 이름: ${known})`)
   }
-  return found
+  return found()
 }

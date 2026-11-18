@@ -89,13 +89,19 @@ test('rejectFirst 는 첫 연결만 닫고 메시지를 보내지 않는다', as
   second.socket.close()
 })
 
-test('closeAfterOpen 은 첫 연결만 연 직후 그 코드로 닫는다', async () => {
+test('closeAfterOpen 은 첫 연결만 open 이후 그 코드로 닫는다', async () => {
   const live = liveRoom(startupRoomDto, { closeAfterOpen: 1013 })
   server.use(...live.handlers)
   const codes: number[] = []
+  const order: string[] = []
   const first = new WebSocket(WS)
-  first.addEventListener('close', (e) => codes.push(e.code))
+  first.addEventListener('open', () => order.push('open'))
+  first.addEventListener('close', (e) => {
+    order.push('close')
+    codes.push(e.code)
+  })
   await until(() => codes.length === 1)
+  expect(order).toEqual(['open', 'close'])
   expect(codes).toEqual([1013])
   const second = connect()
   await until(() => second.events.includes('open'))

@@ -78,7 +78,11 @@ export function liveRoom(initial: RoomDto, options: LiveRoomOptions = {}): LiveR
       clients.delete(client)
       notify()
     })
-    if (options.closeAfterOpen !== undefined && first) client.close(options.closeAfterOpen)
+    if (options.closeAfterOpen !== undefined && first) {
+      // 연결 리스너 안에서 바로 닫으면 open 없이 닫히므로 open 이 지난 뒤에 닫는다.
+      const code = options.closeAfterOpen
+      setTimeout(() => client.close(code), 0)
+    }
   })
 
   return {

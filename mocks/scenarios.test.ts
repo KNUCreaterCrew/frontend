@@ -1,4 +1,5 @@
-import { roomDtoSchema } from '@/entities/room'
+import { applyRoomEvent, parseRoomEvent, roomDtoSchema, toRoom } from '@/entities/room'
+import type { Room } from '@/entities/room'
 import { server } from './node'
 import {
   ROOM_ID,
@@ -163,5 +164,92 @@ describe('live-demo', () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
     server.use(...resolveScenario('live-demo'))
     expect(vi.getTimerCount()).toBe(0)
+  })
+})
+
+describe('live-demo 흐름', () => {
+  afterEach(() => vi.useRealTimers())
+
+  test('7단계 동안 받은 이벤트를 적용하면 GET 과 같은 방이 되고 단계 규칙을 지킨다', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
+    server.use(...resolveScenario('live-demo'))
+    const texts: string[] = []
+    const socket = new WebSocket(`ws://localhost/ws/rooms/${ROOM_ID}`)
+    socket.addEventListener('message', (e) => texts.push(String(e.data)))
+    await vi.waitFor(() => expect(socket.readyState).toBe(1))
+
+    let room: Room = toRoom(mixedRoom)
+    const unknownSeat = mixedRoom.seats.find((s) => s.status === 'UNKNOWN')!
+    const log: Array<{ step: number; kinds: string[]; version: number }> = []
+    for (let step = 1; step <= 7; step++) {
+      const before = texts.length
+      await vi.advanceTimersByTimeAsync(3000)
+      await vi.waitFor(() => expect(texts.length).toBeGreaterThan(before))
+      const events = texts.slice(before).map((t) => parseRoomEvent(t)!)
+      for (const event of events) {
+        const applied = applyRoomEvent(room, event)
+        expect(applied.needsRefetch).toBe(false)
+        room = applied.room
+      }
+      const versions = new Set(events.map((e) => e.version))
+      expect(versions).toEqual(new Set([12 + step]))
+      log.push({ step, kinds: events.map((e) => e.type), version: 12 + step })
+
+      const dto = roomDtoSchema.parse(await (await getRoom(ROOM_ID)).json())
+      const expected = toRoom(dto)
+      expect(dto.version).toBe(12 + step)
+      expect(room.edgeOnline).toBe(expected.edgeOnline)
+      expect(room.seats.map((s) => [s.seatId, s.rawStatus, s.reason])).toEqual(
+        expected.seats.map((s) => [s.seatId, s.rawStatus, s.reason]),
+      )
+      expect(room.seats.filter((s) => s.rawStatus === 'EMPTY').length).toBe(dto.available_seats)
+      expect(room.seats.filter((s) => s.rawStatus === 'UNKNOWN').length).toBe(dto.unknown_seats)
+      if (step < 6) {
+        const seat = dto.seats.find((s) => s.seat_id === unknownSeat.seat_id)!
+        expect(seat.reason).toBe(unknownSeat.reason)
+      }
+    }
+    expect(log[5]!.kinds).toEqual(['EDGE_STATUS_CHANGED', 'SEAT_UPDATED'])
+    expect(log[6]!.kinds).toEqual(['EDGE_STATUS_CHANGED', 'SEAT_UPDATED'])
+    for (const entry of log.slice(0, 5)) expect(entry.kinds).toEqual(['SEAT_UPDATED'])
+    expect(room.edgeOnline).toBe(true)
+    socket.close()
+  })
+
+  test('6번째 단계는 전 좌석 UNKNOWN/EDGE_OFFLINE 이고 다음 단계가 이전 상태를 복구한다', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
+    server.use(...resolveScenario('live-demo'))
+    const socket = new WebSocket(`ws://localhost/ws/rooms/${ROOM_ID}`)
+    await vi.waitFor(() => expect(socket.readyState).toBe(1))
+    const statuses: string[][] = []
+    for (let step = 1; step <= 7; step++) {
+      await vi.advanceTimersByTimeAsync(3000)
+      const dto = roomDtoSchema.parse(await (await getRoom(ROOM_ID)).json())
+      statuses.push(dto.seats.map((s) => `${s.status}/${s.reason}`))
+      if (step === 6) {
+        expect(dto.edge_online).toBe(false)
+        expect(dto.seats.every((s) => s.status === 'UNKNOWN' && s.reason === 'EDGE_OFFLINE')).toBe(
+          true,
+        )
+      }
+    }
+    expect(statuses[6]!.some((s) => s === 'UNKNOWN/OCCLUDED')).toBe(true)
+    expect(statuses[6]!.some((s) => s.includes('EDGE_OFFLINE'))).toBe(false)
+    expect(statuses[6]).toEqual(statuses[4])
+    socket.close()
+  })
+})
+
+describe('시나리오는 호출마다 새로 만들어진다', () => {
+  test('ws-reject 를 두 번 풀면 각자 첫 연결을 거절한다', async () => {
+    for (let round = 0; round < 2; round++) {
+      server.resetHandlers()
+      server.use(...resolveScenario('ws-reject'))
+      const events: string[] = []
+      const socket = new WebSocket(`ws://localhost/ws/rooms/${ROOM_ID}`)
+      for (const name of ['open', 'close']) socket.addEventListener(name, () => events.push(name))
+      await vi.waitFor(() => expect(events).toContain('close'))
+      expect(events).toEqual(['close'])
+    }
   })
 })
