@@ -6,7 +6,12 @@ export {
   seatStatusSchema,
 } from './model/dto'
 export type { RoomDto } from './model/dto'
-export { congestionLabel, seatAccessibleName, seatStatusLabel } from './model/labels'
+export {
+  congestionLabel,
+  seatAccessibleName,
+  seatReasonLabel,
+  seatStatusLabel,
+} from './model/labels'
 export { toRoom } from './model/mapping'
 export { getRoomSummary } from './model/summary'
 export type { RoomSummary } from './model/summary'
