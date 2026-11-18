@@ -64,7 +64,7 @@ $env:BACKEND_ORIGIN='https://zeroframe-backend-p1wa.onrender.com'; pnpm dev
 
 백엔드 없이 화면만 볼 때는 MSW 로 응답을 흉내 냅니다. 개발 서버에서만 켜집니다.
 
-- 주소에 `?scenario=<이름>` 을 붙입니다. 지금 있는 시나리오는 `default` 하나입니다: `http://localhost:5173/?scenario=default`. 모르는 이름이면 알려진 이름을 담은 오류가 납니다.
+- 주소에 `?scenario=<이름>` 을 붙입니다. 시나리오: `default`(= `mixed`), `mixed`, `all-unknown`, `offline`, `loading`, `error`, `not-found`, `slow-wake`, `many-seats`, `no-seats`. 방 화면 예: `http://localhost:5173/rooms/IT4-101?scenario=offline`. 모르는 이름이면 알려진 이름을 담은 오류가 납니다.
 - 또는 `.env.local` 에 `VITE_API_MOCKING=enabled` 를 적고 `pnpm dev` 를 실행합니다. 한 번만 쓸 때는 셸에서 지정합니다.
 
 ```sh
