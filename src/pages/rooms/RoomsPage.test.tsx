@@ -277,6 +277,18 @@ describe('방 목록 행 구성', () => {
     expect(within(dl).getByText('보통')).toBeInTheDocument()
   })
 
+  test('여백 칸은 행 높이 전체를 채우고 위아래 여백은 내용 쪽에 있다', async () => {
+    useList([item({ total_seats: 4, available_seats: 0, unknown_seats: 4 })])
+    renderApp('/')
+    const link = await onlyRow()
+    expect(link).toHaveClass('min-h-tap', 'gap-1')
+    expect(link).not.toHaveClass('py-4', 'gap-3')
+    const gutter = link.firstElementChild!
+    expect(gutter).toHaveClass('w-band', 'pattern-unknown')
+    expect(gutter.className).not.toMatch(/\b(p|m)[ytb]-/)
+    expect(link.lastElementChild).toHaveClass('py-4')
+  })
+
   test('방 이름은 링크처럼 밑줄이 있다', async () => {
     useList([item()])
     renderApp('/')

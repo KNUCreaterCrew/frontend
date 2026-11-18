@@ -19,7 +19,7 @@ export function RoomsLoading({
       {showSkeleton && (
         <div aria-busy="true" className="mt-4 border-t-6 border-ink">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="flex gap-3 border-b-2 border-ink py-4">
+            <div key={i} className="flex gap-1 border-b-2 border-ink py-4">
               <span aria-hidden="true" className="w-band shrink-0" />
               <div className="min-w-0 flex-1">
                 <div className="flex h-6 items-center">

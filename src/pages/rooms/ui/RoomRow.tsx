@@ -9,7 +9,7 @@ const unknownSeatsSentence = (n: number) => `확인하지 못한 자리가 ${n}�
 
 const ROW = 'border-b-2 border-ink'
 const LINK =
-  'flex min-h-tap gap-3 py-4 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink'
+  'flex min-h-tap gap-1 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink'
 const NAME = 'block text-fact font-black break-keep wrap-anywhere underline underline-offset-4'
 const NUMBER = 'font-num text-row-number tracking-tight tabular-nums'
 const COLUMN = 'w-1/3 shrink-0'
@@ -43,7 +43,7 @@ export function RoomRow({ room }: { room: RoomListItem }) {
       <li className={ROW}>
         <Link to={to} aria-label={`${room.roomName}, ${NO_SEATS}`} className={LINK}>
           <Gutter />
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 py-4">
             <span className={NAME}>{room.roomName}</span>
             <span className="mt-2 block text-body">{NO_SEATS}</span>
           </div>
@@ -65,7 +65,7 @@ export function RoomRow({ room }: { room: RoomListItem }) {
           className={LINK}
         >
           <Gutter unknown />
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 py-4">
             <span className={NAME}>{room.roomName}</span>
             <div className="mt-2 flex items-start gap-4">
               <div className={COLUMN}>
@@ -103,7 +103,7 @@ export function RoomRow({ room }: { room: RoomListItem }) {
     <li className={ROW}>
       <Link to={to} aria-label={name} className={LINK}>
         <Gutter />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 py-4">
           <span className={NAME}>{room.roomName}</span>
           <div className="mt-2 flex items-start gap-4">
             <div className={COLUMN}>
