@@ -143,14 +143,19 @@ describe('실시간 반영', () => {
       await waitFor(() => expect(gets(live)).toBe(2))
       sendAll(live, v2Events)
       expect(await screen.findByRole('button', { name: /^A1 확인 불가/ })).toBeInTheDocument()
+      // 붙잡힌 응답은 v1 스냅샷이지만 방 이름이 달라서, 응답이 반영됐는지 화면에서 알 수 있다
+      live.setRoom({ ...v1RoomDto, room_name: '응답 도착 확인용 이름' })
       release()
       await advance(200)
+      expect(
+        await screen.findByRole('heading', { level: 1, name: '응답 도착 확인용 이름' }),
+      ).toBeVisible()
       expect(screen.getByRole('button', { name: /^A1 확인 불가/ })).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /^A1 사용 중/ })).toBeNull()
     })
 
     test('not-found: 연결도 조회도 한 번이고 다시 시도하지 않는다', async () => {
-      const live = liveRoom(v1RoomDto)
+      const live = liveRoom(v1RoomDto, { alwaysReject: true })
       let calls = 0
       server.use(
         http.get('*/api/v1/rooms/:roomId', () => {
