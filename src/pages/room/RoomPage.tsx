@@ -17,6 +17,7 @@ export function RoomPage() {
   const { roomId = '' } = useParams()
   const queryClient = useQueryClient()
   const [attempt, setAttempt] = useState(0)
+  const [outletsHidden, setOutletsHidden] = useState(false)
   const { data, status, fetchStatus, error, failureReason, dataUpdatedAt } = useQuery(
     roomQueryOptions(roomId),
   )
@@ -71,10 +72,10 @@ export function RoomPage() {
           {summary.kind === 'noSeats' ? (
             <p className="border-t-6 border-ink py-6">이 방에는 등록된 좌석이 없어요.</p>
           ) : (
-            <SeatMap seats={data.seats} />
+            <SeatMap seats={data.seats} onOutletsHiddenChange={setOutletsHidden} />
           )}
         </div>
-        <Legend />
+        <Legend outletsHidden={outletsHidden} />
       </main>
     </>
   )

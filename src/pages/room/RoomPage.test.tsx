@@ -102,6 +102,20 @@ describe('방 화면', () => {
     expect(seatButtons()).toHaveLength(0)
   })
 
+  test('many-seats: 콘센트 아이콘이 숨은 동안 범례가 확대 안내를 붙인다', async () => {
+    const { user } = renderApp(PATH, { scenario: 'many-seats' })
+    await screen.findByRole('heading', { level: 1, name: ROOM_NAME })
+    expect(await screen.findByText('확대하면 보여요')).toBeVisible()
+    await user.click(screen.getByRole('button', { name: '확대' }))
+    expect(screen.queryByText('확대하면 보여요')).not.toBeInTheDocument()
+  })
+
+  test('mixed: 콘센트 확대 안내는 없다', async () => {
+    renderApp(PATH, { scenario: 'mixed' })
+    await screen.findByRole('heading', { level: 1, name: ROOM_NAME })
+    expect(screen.queryByText('확대하면 보여요')).not.toBeInTheDocument()
+  })
+
   test('many-seats: 좌석 40개와 확대 버튼', async () => {
     renderApp(PATH, { scenario: 'many-seats' })
     await screen.findByRole('heading', { level: 1, name: ROOM_NAME })

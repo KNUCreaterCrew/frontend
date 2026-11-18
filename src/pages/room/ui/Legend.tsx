@@ -2,7 +2,7 @@ import { OutletIcon } from '@/shared/ui'
 
 const SWATCH = 'inline-block h-3 w-5 shrink-0'
 
-export function Legend() {
+export function Legend({ outletsHidden = false }: { outletsHidden?: boolean }) {
   return (
     <ul className="grid grid-cols-2 gap-x-3 gap-y-2 py-4 text-label">
       <li className="flex items-center gap-2">
@@ -26,7 +26,10 @@ export function Legend() {
       </li>
       <li className="flex items-center gap-2">
         <OutletIcon className="size-3 shrink-0" />
-        콘센트
+        <span>
+          콘센트
+          {outletsHidden && <span className="block text-label">확대하면 보여요</span>}
+        </span>
       </li>
     </ul>
   )
