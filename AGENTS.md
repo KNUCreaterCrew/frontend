@@ -67,10 +67,11 @@ config/       개발 서버 프록시
 
 1. API 는 `shared/api` 의 `endpoints`(as const)와 `http`(fetch 래퍼, 실패는 `ApiError` 하나로)로 부르고 응답은 zod 로 파싱한다. 컴포넌트에서 fetch 를 직접 부르지 않는다.
 2. 서버 상태는 TanStack Query 만. queryKey 는 `roomKeys` 팩토리로만 만든다.
-3. 실시간 동기화는 순수 함수 `applyRoomEvent(snapshot, event)` 와 `version` 버퍼 로직으로 분리해 단위 테스트한다(INTERFACES.md 예시 흐름 10:15:30 → 10:15:40 → 10:16:11 → 10:17:05 를 그대로 입력과 기대값으로). 훅은 연결, 재연결, 30초 재조회, 종료 코드(4404 → 재연결 안 함, 1013 과 기타 → 재연결 + 재조회)만 맡는다. 반영은 `queryClient.setQueryData`.
+3. 실시간 동기화는 순수 함수 `applyRoomEvent(snapshot, event)` 와 `version` 버퍼 로직으로 분리해 단위 테스트한다(INTERFACES.md 예시 흐름 10:15:30 → 10:15:40 → 10:16:11 → 10:17:05 를 그대로 입력과 기대값으로). 훅은 연결, 재연결, 30초 재조회, 끊김 처리(방 조회 404 → 재연결 안 함, 그 밖의 끊김 → 재연결 + 재조회)만 맡는다. 반영은 `queryClient.setQueryData`.
    - 순서는 바꾸지 않는다: **WebSocket 연결 → 방 조회 → 조회 응답의 `version` 이하 이벤트 버리기 → 30초마다 방 다시 조회**. 조회 응답 전에 온 이벤트는 모아 두었다가 이 규칙으로 거른다.
    - 비교 기준은 방 조회 응답의 `version` 이다. 이벤트를 반영해도 기준을 올리지 않는다(같은 `version` 의 `EDGE_STATUS_CHANGED` 와 `SEAT_UPDATED` 가 함께 올 수 있다). 기준은 방을 다시 조회할 때만 새 응답의 값으로 바꾼다.
-   - 방 조회가 404 이면 WebSocket 을 닫고(연결을 먼저 열었으므로 여는 것을 막을 수는 없다) 다시 연결하지 않으며 방이 없다고 표시한다. 배포 서버에서는 `4404` 종료가 웹에 오지 않는다(KNUCreaterCrew/backend#32).
+   - 없는 방은 서버가 WebSocket 연결 전에 HTTP 404 로 거절한다. 브라우저에는 이유 없는 실패(`1006`)로만 보이므로 종료 코드로 판단하지 않는다. 방 조회가 404 이면 다시 연결하지 않고 방이 없다고 표시한다. 조회 결과가 오기 전에 연결 실패가 먼저 올 수 있으니, 재연결은 방 조회 결과를 확인한 뒤에 한다(KNUCreaterCrew/backend#32).
+   - `1013` 도 중간 프록시를 거치면 `1006` 으로 보일 수 있다. 종료 코드로 갈라 처리하지 않고, 404 가 아닌 끊김은 모두 재연결 + 재조회로 다룬다.
    - 근거: [INTERFACES.md 3. 웹이 이후 변경을 받습니다](https://github.com/KNUCreaterCrew/docs/blob/main/INTERFACES.md#3-웹이-이후-변경을-받습니다)
 4. 모르는 상태와 사유 코드는 기본값으로 덮지 않고 "알 수 없는 상태"로 보인다.
 5. 시각은 `shared/lib/time` 한 곳에서. 목록은 "12초 전", 상세는 KST 절대 시각. `last_observed_at: null` 은 "아직 확인하지 못함".

@@ -58,7 +58,7 @@ $env:BACKEND_ORIGIN='https://zeroframe-backend-p1wa.onrender.com'; pnpm dev
 
 - 15분 동안 요청이 없으면 서버가 잠들고, 첫 응답까지 약 1분 걸릴 수 있습니다. 첫 조회가 오래 걸리면 기다렸다가 다시 열어 봅니다.
 - 서버가 다시 시작되면 모든 좌석이 확인 불가로 시작하고, 장치의 다음 보고가 상태를 채웁니다. 장치가 꺼져 있으면 `IT4-101` 은 전 좌석 확인 불가로 보입니다.
-- 없는 방의 WebSocket 이 `4404` 로 닫히지 않습니다([backend#32](https://github.com/KNUCreaterCrew/backend/issues/32)). 로컬 백엔드에서는 `4404` 가 옵니다.
+- 없는 방의 WebSocket 은 서버가 연결 전에 HTTP 404 로 거절합니다. 브라우저에는 이유 없는 연결 실패(종료 코드 `1006`)로만 보이므로, 방이 없다는 판단은 방 조회의 404 로 합니다([backend#32](https://github.com/KNUCreaterCrew/backend/issues/32)).
 
 ### 모의 데이터로 실행
 
