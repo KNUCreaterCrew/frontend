@@ -33,7 +33,16 @@ const SCENARIO_NAMES = [
   'slow-wake',
   'many-seats',
   'no-seats',
+  'live-flow',
+  'ws-reject',
+  'ws-slow-close',
+  'ws-down',
+  'live-demo',
 ]
+
+test.each(SCENARIO_NAMES)('시나리오 %s 는 ws 핸들러를 하나 이상 가진다', (name) => {
+  expect(resolveScenario(name).some((h) => h.constructor.name === 'WebSocketHandler')).toBe(true)
+})
 
 test.each(SCENARIO_NAMES)('시나리오 %s 가 풀린다', (name) => {
   expect(resolveScenario(name).length).toBeGreaterThan(0)
@@ -126,5 +135,33 @@ describe('핸들러', () => {
     const body = roomDtoSchema.parse(await (await getRoom(ROOM_ID)).json())
     expect(body.seats).toEqual([])
     expect(body.congestion_level).toBe('HIGH')
+  })
+})
+
+describe('live-demo', () => {
+  afterEach(() => vi.useRealTimers())
+
+  test('연결이 있을 때만 3초마다 SEAT_UPDATED 를 보내고 마지막 연결이 닫히면 멈춘다', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
+    server.use(...resolveScenario('live-demo'))
+    const messages: Array<{ event: string; version: number; changes?: unknown[] }> = []
+    const socket = new WebSocket(`ws://localhost/ws/rooms/${ROOM_ID}`)
+    socket.addEventListener('message', (e) =>
+      messages.push(JSON.parse(String(e.data)) as (typeof messages)[number]),
+    )
+    await vi.waitFor(() => expect(socket.readyState).toBe(1))
+    await vi.advanceTimersByTimeAsync(3000)
+    await vi.waitFor(() => expect(messages.length).toBe(1))
+    expect(messages[0]).toMatchObject({ event: 'SEAT_UPDATED', version: 13 })
+    const body = roomDtoSchema.parse(await (await getRoom(ROOM_ID)).json())
+    expect(body.version).toBe(13)
+    socket.close()
+    await vi.waitFor(() => expect(vi.getTimerCount()).toBe(0))
+  })
+
+  test('연결이 없으면 타이머가 돌지 않는다', () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
+    server.use(...resolveScenario('live-demo'))
+    expect(vi.getTimerCount()).toBe(0)
   })
 })
