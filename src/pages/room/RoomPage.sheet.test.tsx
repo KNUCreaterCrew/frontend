@@ -1,4 +1,4 @@
-import { act, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import type { Location } from 'react-router'
 import { renderApp } from '@/shared/test/renderApp'
@@ -165,11 +165,20 @@ describe('좌석 상세 바텀시트 연결', () => {
         'IT4-101': { ...mixedRoom, seats: mixedRoom.seats.filter((s) => s.seat_id !== 'A-01') },
       }),
     )
+    const regions = container.querySelectorAll('[aria-live="polite"][aria-atomic="true"]')
+    // 알림 글자가 생기는 순간 화면 읽기 도구가 가리고 있는 영역 안이면 읽히지 않는다
+    const hiddenWhenWritten: boolean[] = []
+    const observer = new MutationObserver(() => {
+      if (regions[1]?.textContent)
+        hiddenWhenWritten.push(regions[1].closest('[aria-hidden="true"]') !== null)
+    })
+    observer.observe(regions[1]!, { childList: true, characterData: true, subtree: true })
     await advance(30_000)
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     expect(screen.getByRole('heading', { level: 1 })).toHaveFocus()
-    const regions = container.querySelectorAll('[aria-live="polite"][aria-atomic="true"]')
-    expect(regions[1]?.textContent).toBe('A1 좌석 정보가 없어져 닫았어요')
+    await waitFor(() => expect(regions[1]?.textContent).toBe('A1 좌석 정보가 없어져 닫았어요'))
+    observer.disconnect()
+    expect(hiddenWhenWritten).toEqual([false])
     expect(loc.location.search).toBe('')
   })
 
@@ -181,5 +190,42 @@ describe('좌석 상세 바텀시트 연결', () => {
     )
     await advance(30_000)
     expect(await within(dialog).findByText('갱신하지 못했어요')).toBeVisible()
+  })
+
+  test('눌러서 연 시트의 좌석이 사라지면 기록을 하나 되돌려 죽은 항목을 남기지 않는다', async () => {
+    const keys: string[] = []
+    const loc = tracker()
+    const { user } = renderApp(PATH, {
+      history: [`${PATH}?x=prev`],
+      onLocation: (l) => {
+        keys.push(l.key)
+        loc.onLocation(l)
+      },
+    })
+    await user.click(await seatButton(/^A1 빈자리/))
+    await screen.findByRole('dialog', { name: 'A1 빈자리' })
+    const before = keys[keys.length - 2]
+    server.use(
+      roomHandler({
+        'IT4-101': { ...mixedRoom, seats: mixedRoom.seats.filter((s) => s.seat_id !== 'A-01') },
+      }),
+    )
+    await advance(30_000)
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(loc.location.key).toBe(before)
+    expect(loc.location.search).toBe('')
+  })
+
+  test('연달아 두 번 닫아도 기록은 한 칸만 되돌아간다', async () => {
+    const loc = tracker()
+    const { user } = renderApp(PATH, { history: [`${PATH}?x=prev`], onLocation: loc.onLocation })
+    await user.click(await seatButton(/^A1 빈자리/))
+    const close = await screen.findByRole('button', { name: '닫기' })
+    act(() => {
+      fireEvent.click(close)
+      fireEvent.click(close)
+    })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(loc.location.search).toBe('')
   })
 })

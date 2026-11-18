@@ -16,6 +16,8 @@ export function renderApp(
     keepRetry?: boolean
     strict?: boolean
     onLocation?: (location: Location) => void
+    // path 앞에 쌓아 둘 이전 기록. 마지막이 path 이고 거기서 시작한다
+    history?: string[]
   },
 ): RenderResult & { user: UserEvent } {
   if (options?.scenario) server.use(...resolveScenario(options.scenario))
@@ -23,7 +25,7 @@ export function renderApp(
   if (!options?.keepRetry) queryClient.setDefaultOptions({ queries: { retry: false } })
   const tree = (
     <AppProviders queryClient={queryClient}>
-      <MemoryRouter initialEntries={[path]}>
+      <MemoryRouter initialEntries={[...(options?.history ?? []), path]}>
         {options?.onLocation && <LocationProbe onLocation={options.onLocation} />}
         <AppRoutes />
       </MemoryRouter>
