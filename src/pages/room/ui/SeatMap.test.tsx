@@ -49,3 +49,33 @@ describe('SeatMap', () => {
     expect(screen.getByRole('button', { name: /^A1 / })).toHaveTextContent('A1')
   })
 })
+
+describe('SeatMap 좌석 모양', () => {
+  const base = mixed[0]!
+
+  it('짐 있음 좌석은 full 단계에서 상태 말이 보이고 띠 위에 놓인다', () => {
+    render(<SeatMap seats={[{ ...base, status: 'AWAY', hasOutlet: false }]} />)
+    const button = screen.getByRole('button', { name: 'A1 짐 있음' })
+    expect(within(button).getByText('짐 있음')).toBeInTheDocument()
+    expect(button).toHaveClass('pb-3')
+  })
+
+  it('알 수 없는 상태는 확인 불가와 같은 빗금이다', () => {
+    render(
+      <SeatMap
+        seats={[
+          { ...base, seatId: 'u', label: 'U1', status: 'UNKNOWN' },
+          {
+            ...base,
+            seatId: 'r',
+            label: 'R1',
+            status: 'UNRECOGNIZED',
+            layout: { x: 80, y: 0, width: 64, height: 48 },
+          },
+        ]}
+      />,
+    )
+    expect(screen.getByRole('button', { name: /^U1 / })).toHaveClass('pattern-unknown')
+    expect(screen.getByRole('button', { name: /^R1 / })).toHaveClass('pattern-unknown')
+  })
+})

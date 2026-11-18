@@ -29,7 +29,7 @@ export function SeatMap({ seats }: { seats: Seat[] }) {
 
   return (
     <div>
-      <div ref={boxRef} className="overflow-x-auto border-t-6 border-ink pt-2">
+      <div ref={boxRef} className="overflow-x-auto border-t-6 border-ink p-2">
         <div
           className="relative"
           style={{ aspectRatio: `${vb.width} / ${vb.height}`, width: `${scale * 100}%` }}
