@@ -145,7 +145,7 @@ function SheetLayers({
           >
             <div
               aria-hidden="true"
-              className={`h-1.5 w-full shrink-0 ${BAND_CLASS[content.band]}`}
+              className={`h-band w-full shrink-0 ${BAND_CLASS[content.band]}`}
             />
             <div className="touch-none px-4" onPointerDown={startDrag}>
               <div className="py-3">

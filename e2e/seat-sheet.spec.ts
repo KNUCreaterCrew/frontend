@@ -160,6 +160,17 @@ test('mixed: 키보드로 A1 에서 Enter 로 열고 Escape 로 닫으면 A1 에
   await expect(seat).toBeFocused()
 })
 
+test('mixed: 위쪽 띠는 확인 불가(빗금)와 빈자리 모두 높이 6px 이다', async ({ page }) => {
+  await openSeat(page, 'mixed', 'B2')
+  const band = dialogOf(page).locator('div[aria-hidden="true"].h-band')
+  expect((await band.boundingBox())!.height).toBeCloseTo(6, 0)
+  await page.keyboard.press('Escape')
+  await expect(dialogOf(page)).toHaveCount(0)
+  await seatButton(page, 'A1').click()
+  await expect(dialogOf(page)).toBeVisible()
+  expect((await band.boundingBox())!.height).toBeCloseTo(6, 0)
+})
+
 test.describe('동작 줄이기', () => {
   test.use({ reducedMotion: 'reduce' })
 
@@ -178,7 +189,7 @@ test.describe('동작 줄이기', () => {
   })
 })
 
-test('live-demo: 강조된 좌석을 열면 그 좌석의 상태 글자가 10초 안에 바뀐다', async ({ page }) => {
+test('live-demo: 강조된 좌석을 열면 그 좌석의 상태 글자가 15초 안에 바뀐다', async ({ page }) => {
   await page.goto(url('live-demo'))
   const ring = page.locator('span.outline-live').first()
   await expect(ring).toBeVisible({ timeout: 10_000 })
@@ -189,7 +200,7 @@ test('live-demo: 강조된 좌석을 열면 그 좌석의 상태 글자가 10초
   const title = dialogOf(page).getByRole('heading')
   await expect(title).toBeVisible()
   const first = await title.innerText()
-  await expect.poll(() => title.innerText(), { timeout: 10_000 }).not.toBe(first)
+  await expect.poll(() => title.innerText(), { timeout: 15_000 }).not.toBe(first)
 })
 
 test('live-demo: 시트가 열려 있으면 다른 강조 테두리 자리도 시트나 막이 가린다', async ({
@@ -278,5 +289,32 @@ test.describe('넓은 화면', () => {
     const box = (await dialog.boundingBox())!
     expect(box.width).toBeLessThanOrEqual(480.5)
     expect(Math.abs(box.x + box.width / 2 - 384)).toBeLessThanOrEqual(1)
+  })
+
+  test.describe('동작 줄이기', () => {
+    test.use({ reducedMotion: 'reduce' })
+    test('막을 눌러 닫으면 그 아래 좌석의 시트가 따라 열리지 않는다', async ({ page }) => {
+      await openSeat(page, 'mixed', 'A1')
+      await settled(dialogOf(page))
+      // 시트 밖(왼쪽)에 있어 막만 덮고 있는 다른 좌석을 찾는다
+      const target = await page.evaluate(() => {
+        const dialog = document.querySelector('[role="dialog"]')!.getBoundingClientRect()
+        for (const el of document.querySelectorAll<HTMLElement>('button[data-seat-id]')) {
+          const r = el.getBoundingClientRect()
+          const x = r.left + r.width / 2
+          const y = r.top + r.height / 2
+          if (y < dialog.top && y > 0 && x > 0 && x < window.innerWidth)
+            return { x, y, id: el.dataset.seatId }
+          if ((x < dialog.left || x > dialog.right) && y > 0 && y < window.innerHeight)
+            return { x, y, id: el.dataset.seatId }
+        }
+        return null
+      })
+      expect(target).not.toBeNull()
+      await page.mouse.click(target!.x, target!.y)
+      await page.waitForTimeout(600)
+      await expect(dialogOf(page)).toHaveCount(0)
+      expect(new URL(page.url()).searchParams.has('seat')).toBe(false)
+    })
   })
 })

@@ -67,6 +67,7 @@
   --spacing-12: 3rem;
   --spacing-16: 4rem;
   --spacing-tap: 2.75rem; /* 44px 터치 목표 최소 크기 */
+  --spacing-band: 0.375rem; /* 6px 바텀시트 위 상태 띠 높이 */
 
   /* 선 굵기는 Tailwind 숫자 유틸리티(border-2 등)를 쓴다. 모서리는 각지게: 반경 토큰 없음, 그림자 토큰 없음 */
 
