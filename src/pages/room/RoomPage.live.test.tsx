@@ -69,7 +69,7 @@ function seatChange(version: number, seatId: string): RoomEventDto {
   }
 }
 
-const rings = (container: HTMLElement) => container.querySelectorAll('span.border-live')
+const rings = (container: HTMLElement) => container.querySelectorAll('span.outline-live')
 // 요약 줄의 "방금"(상대 시각)과 구별하려고 좌석 칸 안의 칩만 센다
 const chips = (container: HTMLElement) => container.querySelectorAll('button .bg-live')
 

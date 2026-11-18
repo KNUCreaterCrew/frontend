@@ -26,6 +26,15 @@ interface SeatMapProps {
   onOutletsHiddenChange?: (hidden: boolean) => void
 }
 
+// 강조한 상태가 좌석의 지금 상태와 같을 때만 강조한다(다시 조회해 다른 상태가 된 좌석 등)
+function justChanged(
+  highlights: ReadonlyMap<string, SeatStatus> | undefined,
+  seat: Seat,
+): SeatStatus | undefined {
+  const status = highlights?.get(seat.seatId)
+  return status === seat.status ? status : undefined
+}
+
 export function SeatMap({ seats, highlights, onOutletsHiddenChange }: SeatMapProps) {
   const [boxRef, width] = useElementWidth<HTMLDivElement>()
   const [zoomed, setZoomed] = useState(false)
@@ -79,7 +88,7 @@ export function SeatMap({ seats, highlights, onOutletsHiddenChange }: SeatMapPro
               seat={seat}
               stage={stage}
               rect={rect}
-              justChanged={highlights?.get(seat.seatId)}
+              justChanged={justChanged(highlights, seat)}
               cellPx={(px ?? 0) * scale}
             />
           ))}

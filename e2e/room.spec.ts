@@ -88,27 +88,59 @@ for (const width of [360, 390]) {
   })
 }
 
-test('live-demo: 강조 테두리는 좌석 면 위에 보이고 기본 설정에서는 움직인다', async ({ page }) => {
+test('live-demo: 강조 테두리는 칸 바깥에 틈을 두고 보이고 기본 설정에서는 움직인다', async ({
+  page,
+}) => {
   await page.goto(url('live-demo'))
-  const ring = page.locator('span.border-live').first()
+  const ring = page.locator('span.outline-live').first()
   await expect(ring).toBeVisible({ timeout: 10_000 })
   expect(await ring.evaluate((el) => el.getAnimations().length)).toBeGreaterThan(0)
-  // pointer-events-none 은 hit test 에서 빠지므로 잠깐 풀어서 맨 위에 그려지는지 확인한다
-  const top = await ring.evaluate((el) => {
-    const node = el as HTMLElement
-    node.style.pointerEvents = 'auto'
-    const r = node.getBoundingClientRect()
-    const hit = document.elementFromPoint(r.left + 2, r.top + r.height / 2)
-    node.style.pointerEvents = ''
-    return hit === node
+  // outline 은 hit test 되지 않으므로 계산된 스타일과 위치로 확인한다. 움직임을 끝낸 뒤 잰다
+  const probe = await ring.evaluate((el) => {
+    for (const animation of el.getAnimations()) animation.finish()
+    const style = getComputedStyle(el)
+    const button = el.previousElementSibling as HTMLElement
+    const scroller = el.closest('.overflow-x-auto') as HTMLElement
+    const r = el.getBoundingClientRect()
+    const b = button.getBoundingClientRect()
+    const s = scroller.getBoundingClientRect()
+    const reach = parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth)
+    const inner = {
+      left: s.left + scroller.clientLeft,
+      top: s.top + scroller.clientTop,
+      right: s.left + scroller.clientLeft + scroller.clientWidth,
+      bottom: s.top + scroller.clientTop + scroller.clientHeight,
+    }
+    return {
+      outline: [style.outlineStyle, style.outlineWidth, style.outlineOffset],
+      borderWidth: style.borderTopWidth,
+      zIndex: style.zIndex,
+      buttonTag: button.tagName,
+      sameBox:
+        Math.abs(r.left - b.left) < 0.5 &&
+        Math.abs(r.top - b.top) < 0.5 &&
+        Math.abs(r.width - b.width) < 0.5 &&
+        Math.abs(r.height - b.height) < 0.5,
+      // 테두리 바깥 끝까지 좌석도 상자 안쪽에 들어와 잘리지 않는다
+      inside:
+        r.left - reach >= inner.left &&
+        r.top - reach >= inner.top &&
+        r.right + reach <= inner.right &&
+        r.bottom + reach <= inner.bottom,
+    }
   })
-  expect(top).toBe(true)
+  expect(probe.outline).toEqual(['solid', '4px', '2px'])
+  expect(probe.borderWidth).toBe('0px')
+  expect(probe.zIndex).toBe('10')
+  expect(probe.buttonTag).toBe('BUTTON')
+  expect(probe.sameBox).toBe(true)
+  expect(probe.inside).toBe(true)
 })
 
 test('live-demo: 동작 줄이기 설정이면 강조 테두리가 움직이지 않는다', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto(url('live-demo'))
-  const ring = page.locator('span.border-live').first()
+  const ring = page.locator('span.outline-live').first()
   await expect(ring).toBeVisible({ timeout: 10_000 })
   expect(await ring.evaluate((el) => el.getAnimations().length)).toBe(0)
 })

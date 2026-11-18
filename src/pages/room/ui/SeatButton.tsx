@@ -66,7 +66,7 @@ function SeatButtonView({ seat, stage, rect, justChanged, cellPx }: SeatButtonPr
         type="button"
         aria-label={seatAccessibleName(seat)}
         style={style}
-        className={`absolute overflow-hidden text-left focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink ${FACE[seat.status]}`}
+        className={`absolute overflow-hidden text-left focus-visible:z-20 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink ${FACE[seat.status]}`}
       >
         {away && (
           <span
@@ -102,11 +102,12 @@ function SeatButtonView({ seat, stage, rect, justChanged, cellPx }: SeatButtonPr
           </span>
         )}
       </button>
-      {/* 버튼 뒤에 그려야 불투명한 칸 면에 가려지지 않는다 */}
+      {/* 칸 바깥에 종이색 틈을 두고 두른다. 같은 색 계열 면(빈자리 초록) 위에서도 테두리가 구별된다.
+          버튼 뒤에 그려야 이웃 칸에 가려지지 않는다 */}
       {justChanged !== undefined && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute z-10 border-4 border-live motion-safe:animate-live"
+          className="pointer-events-none absolute z-10 outline-4 outline-offset-2 outline-live motion-safe:animate-live"
           style={style}
         />
       )}
