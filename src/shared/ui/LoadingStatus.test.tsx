@@ -4,7 +4,7 @@ import { LoadingStatus } from './LoadingStatus'
 describe('LoadingStatus', () => {
   test('처음에는 빈 안내', () => {
     render(<LoadingStatus elapsedMs={0} />)
-    expect(screen.getByRole('status')).toHaveTextContent('')
+    expect(screen.getByRole('status')).toBeEmptyDOMElement()
   })
   test('5초 넘으면 깨우는 중', () => {
     render(<LoadingStatus elapsedMs={5000} />)
