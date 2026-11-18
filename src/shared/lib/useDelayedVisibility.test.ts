@@ -38,4 +38,29 @@ describe('useDelayedVisibility', () => {
     advance(1000)
     expect(result.current).toBe(false)
   })
+
+  it('최소 표시 시간은 처음 보인 때(200ms)부터 잰다', () => {
+    const { result, rerender } = renderHook(({ a }) => useDelayedVisibility(a), {
+      initialProps: { a: true },
+    })
+    advance(200)
+    advance(250)
+    rerender({ a: false })
+    advance(149)
+    expect(result.current).toBe(true)
+    advance(1)
+    expect(result.current).toBe(false)
+  })
+
+  it('최소 표시 시간 안에 다시 켜지면 깜빡이지 않고 유지한다', () => {
+    const { result, rerender } = renderHook(({ a }) => useDelayedVisibility(a), {
+      initialProps: { a: true },
+    })
+    advance(250)
+    rerender({ a: false })
+    advance(100)
+    rerender({ a: true })
+    advance(1000)
+    expect(result.current).toBe(true)
+  })
 })

@@ -10,21 +10,27 @@ export function useDelayedVisibility(
   { delayMs = 200, minVisibleMs = 400 }: Options = {},
 ): boolean {
   const [visible, setVisible] = useState(false)
+  const visibleRef = useRef(false)
   const shownAt = useRef(0)
 
   useEffect(() => {
     if (active) {
+      if (visibleRef.current) return
       const id = setTimeout(() => {
         shownAt.current = Date.now()
+        visibleRef.current = true
         setVisible(true)
       }, delayMs)
       return () => clearTimeout(id)
     }
-    if (!visible) return
+    if (!visibleRef.current) return
     const remaining = Math.max(0, minVisibleMs - (Date.now() - shownAt.current))
-    const id = setTimeout(() => setVisible(false), remaining)
+    const id = setTimeout(() => {
+      visibleRef.current = false
+      setVisible(false)
+    }, remaining)
     return () => clearTimeout(id)
-  }, [active, delayMs, minVisibleMs, visible])
+  }, [active, delayMs, minVisibleMs])
 
   return visible
 }
