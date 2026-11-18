@@ -17,9 +17,17 @@ export function RoomPage() {
   const { roomId = '' } = useParams()
   const queryClient = useQueryClient()
   const [attempt, setAttempt] = useState(0)
-  const { data, status, error, dataUpdatedAt } = useQuery(roomQueryOptions(roomId))
+  const { data, status, fetchStatus, error, failureReason, dataUpdatedAt } = useQuery(
+    roomQueryOptions(roomId),
+  )
   const elapsedMs = useElapsed(status === 'pending', attempt)
-  const state = getRoomScreenState({ status, hasData: data !== undefined, error, elapsedMs })
+  const state = getRoomScreenState({
+    status,
+    hasData: data !== undefined,
+    error,
+    elapsedMs,
+    fetchStatus,
+  })
 
   const retry = () => {
     setAttempt((n) => n + 1)
@@ -38,7 +46,7 @@ export function RoomPage() {
     return (
       <>
         <TopBar updatedAt={null} />
-        <RoomError error={error} onRetry={retry} />
+        <RoomError error={error ?? failureReason} onRetry={retry} />
       </>
     )
   }
@@ -46,7 +54,7 @@ export function RoomPage() {
     return (
       <>
         <TopBar updatedAt={null} />
-        <RoomLoading elapsedMs={elapsedMs} />
+        <RoomLoading elapsedMs={elapsedMs} paused={fetchStatus === 'paused'} />
       </>
     )
   }

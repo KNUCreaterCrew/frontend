@@ -1,3 +1,4 @@
+import { ApiError } from '@/shared/api'
 import { server } from '@mocks/node'
 import { HttpResponse, http as mswHttp } from 'msw'
 import { deployedRoomJson } from '../model/__fixtures__'
@@ -14,5 +15,17 @@ describe('roomQuery', () => {
     const room = await fetchRoom('IT4-101')
     expect(room.roomName).toBe('제1실습실 (예시)')
     expect(room.seats).toHaveLength(4)
+  })
+
+  it('404 로 실패한 조회는 포커스, 재연결, 다시 마운트에서 다시 부르지 않는다', () => {
+    const opts = roomQueryOptions('IT4-101')
+    const q = (error: unknown) => ({ state: { error } }) as never
+    const notFound = q(new ApiError('http', { status: 404 }))
+    const serverError = q(new ApiError('http', { status: 500 }))
+    for (const key of ['refetchOnWindowFocus', 'refetchOnReconnect', 'retryOnMount'] as const) {
+      const fn = opts[key] as unknown as (query: never) => boolean
+      expect(fn(notFound), key).toBe(false)
+      expect(fn(serverError), key).toBe(true)
+    }
   })
 })

@@ -1,5 +1,5 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
-import { focusManager } from '@tanstack/react-query'
+import { focusManager, onlineManager } from '@tanstack/react-query'
 import { HttpResponse, http } from 'msw'
 import { renderApp } from '@/shared/test/renderApp'
 import { server } from '@mocks/node'
@@ -88,6 +88,11 @@ describe('방 화면', () => {
 })
 
 describe('없는 방과 오류', () => {
+  afterEach(() => {
+    focusManager.setFocused(undefined)
+    onlineManager.setOnline(true)
+  })
+
   test('not-found: 안내와 목록 링크, 다시 시도 없음, 요청은 한 번', async () => {
     let calls = 0
     server.use(
@@ -103,6 +108,32 @@ describe('없는 방과 오류', () => {
     expect(screen.getByRole('link', { name: '방 목록으로' })).toHaveAttribute('href', '/')
     expect(screen.queryByRole('button', { name: '다시 시도' })).not.toBeInTheDocument()
     expect(calls).toBe(1)
+  })
+
+  test('not-found: 창이 다시 포커스돼도 다시 조회하지 않고 화면이 그대로다', async () => {
+    let calls = 0
+    server.use(
+      http.get('*/api/v1/rooms/:roomId', () => {
+        calls += 1
+        return HttpResponse.json({ detail: '없음' }, { status: 404 })
+      }),
+    )
+    renderApp(PATH)
+    await screen.findByRole('heading', { level: 1, name: '이 방을 찾을 수 없어요' })
+    act(() => {
+      focusManager.setFocused(false)
+      focusManager.setFocused(true)
+    })
+    await new Promise((r) => setTimeout(r, 50))
+    expect(calls).toBe(1)
+    expect(screen.getByRole('heading', { level: 1, name: '이 방을 찾을 수 없어요' })).toBeVisible()
+  })
+
+  test('네트워크 오류는 연결 확인 안내', async () => {
+    server.use(http.get('*/api/v1/rooms/:roomId', () => HttpResponse.error()))
+    renderApp(PATH)
+    expect(await screen.findByText('방 정보를 불러오지 못했어요')).toBeInTheDocument()
+    expect(screen.getByText('인터넷 연결을 확인해 주세요.')).toBeInTheDocument()
   })
 
   test('방 ID 는 인코딩해서 요청하고 원래 모양으로 보인다', async () => {
@@ -142,6 +173,19 @@ describe('재조회 실패', () => {
     })
     expect(await screen.findByText('갱신하지 못했어요')).toBeInTheDocument()
     expect(seatButtons()).toHaveLength(4)
+  })
+})
+
+describe('오프라인 로딩', () => {
+  afterEach(() => onlineManager.setOnline(true))
+
+  test('인터넷이 없으면 연결 안내 한 줄이 보인다', async () => {
+    onlineManager.setOnline(false)
+    renderApp(PATH, { scenario: 'mixed' })
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      '인터넷에 연결되어 있지 않아요. 연결되면 바로 불러올게요.',
+    )
+    expect(screen.queryByText(/서버를 깨우는 중이에요/)).not.toBeInTheDocument()
   })
 })
 

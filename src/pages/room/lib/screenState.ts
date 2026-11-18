@@ -17,10 +17,12 @@ export function getRoomScreenState(input: {
   hasData: boolean
   error: unknown
   elapsedMs: number
+  fetchStatus: 'fetching' | 'paused' | 'idle'
 }): RoomScreenState {
-  const { status, hasData, error, elapsedMs } = input
+  const { status, hasData, error, elapsedMs, fetchStatus } = input
   if (hasData) return status === 'error' ? 'refreshFailed' : 'ready'
   if (status === 'error') return isNotFoundError(error) ? 'notFound' : 'error'
-  if (status === 'pending' && elapsedMs >= LOADING.giveUpMs) return 'error'
+  if (status === 'pending' && fetchStatus !== 'paused' && elapsedMs >= LOADING.giveUpMs)
+    return 'error'
   return 'loading'
 }

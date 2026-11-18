@@ -6,14 +6,22 @@ const NOTICE = {
   slow: '생각보다 오래 걸려요. 조금만 더 기다려 주세요.',
 } as const
 
-export function RoomLoading({ elapsedMs }: { elapsedMs: number }) {
+const OFFLINE = '인터넷에 연결되어 있지 않아요. 연결되면 바로 불러올게요.'
+
+export function RoomLoading({
+  elapsedMs,
+  paused = false,
+}: {
+  elapsedMs: number
+  paused?: boolean
+}) {
   const showSkeleton = useDelayedVisibility(true)
   const stage = getLoadingStage(elapsedMs)
 
   return (
     <main className="mt-6">
       <p role="status" className="font-bold">
-        {stage === 'initial' ? '' : NOTICE[stage]}
+        {paused ? OFFLINE : stage === 'initial' ? '' : NOTICE[stage]}
       </p>
       {showSkeleton && (
         <div aria-busy="true" className="mt-4">
