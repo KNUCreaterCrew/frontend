@@ -36,23 +36,29 @@ pnpm dev
 
 ### 배포된 백엔드에 붙이기
 
-시드 데이터가 있는 배포 서버를 쓰려면 `BACKEND_ORIGIN` 을 바꿉니다. 가장 간단한 방법은 `.env.local`(git 에 올라가지 않음)에 한 줄 적는 것입니다. `VITE_` 접두사가 없어서 브라우저 코드에는 들어가지 않습니다.
+백엔드는 Render 무료 플랜에 배포돼 있습니다. 주소와 주의점은 공통 명세의 [연결할 서버](https://github.com/KNUCreaterCrew/docs/blob/main/INTERFACES.md#연결할-서버) 절이 기준입니다. 배포 서버를 쓰려면 `BACKEND_ORIGIN` 을 바꿉니다. 가장 간단한 방법은 `.env.local`(git 에 올라가지 않음)에 한 줄 적는 것입니다. `VITE_` 접두사가 없어서 브라우저 코드에는 들어가지 않습니다.
 
 ```sh
 # .env.local
-BACKEND_ORIGIN=https://example.com
+BACKEND_ORIGIN=https://zeroframe-backend-p1wa.onrender.com
 ```
 
 한 번만 쓸 때는 셸에서 지정합니다.
 
 ```sh
 # Git Bash, macOS, Linux
-BACKEND_ORIGIN=https://example.com pnpm dev
+BACKEND_ORIGIN=https://zeroframe-backend-p1wa.onrender.com pnpm dev
 # PowerShell
-$env:BACKEND_ORIGIN='https://example.com'; pnpm dev
+$env:BACKEND_ORIGIN='https://zeroframe-backend-p1wa.onrender.com'; pnpm dev
 ```
 
-`https` 면 WebSocket 은 `wss` 로 연결됩니다.
+`https` 면 WebSocket 은 `wss` 로 연결됩니다. 브라우저는 개발 서버(같은 출처)에만 요청하므로 개발 중에는 백엔드 CORS 설정이 필요 없습니다.
+
+배포 서버에서 알아 둘 것:
+
+- 15분 동안 요청이 없으면 서버가 잠들고, 첫 응답까지 약 1분 걸릴 수 있습니다. 첫 조회가 오래 걸리면 기다렸다가 다시 열어 봅니다.
+- 서버가 다시 시작되면 모든 좌석이 확인 불가로 시작하고, 장치의 다음 보고가 상태를 채웁니다. 장치가 꺼져 있으면 `IT4-101` 은 전 좌석 확인 불가로 보입니다.
+- 없는 방의 WebSocket 이 `4404` 로 닫히지 않습니다([backend#32](https://github.com/KNUCreaterCrew/backend/issues/32)). 로컬 백엔드에서는 `4404` 가 옵니다.
 
 ### 모의 데이터로 실행
 
