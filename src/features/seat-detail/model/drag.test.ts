@@ -14,3 +14,7 @@ test.each([
 ])('높이 400 에서 %j 은 닫힘 %s', (input, expected) => {
   expect(shouldClose({ ...input, height: 400 })).toBe(expected)
 })
+
+test('높이를 아직 재지 못했고(0) 움직이지 않았으면 닫지 않는다', () => {
+  expect(shouldClose({ offsetY: 0, velocityY: 0, height: 0 })).toBe(false)
+})

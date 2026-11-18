@@ -7,5 +7,7 @@ export function shouldClose(input: {
   velocityY: number
   height: number
 }): boolean {
-  return input.offsetY >= input.height * DRAG_CLOSE_RATIO || input.velocityY >= DRAG_CLOSE_VELOCITY
+  const farEnough =
+    input.height > 0 && input.offsetY > 0 && input.offsetY >= input.height * DRAG_CLOSE_RATIO
+  return farEnough || input.velocityY >= DRAG_CLOSE_VELOCITY
 }
