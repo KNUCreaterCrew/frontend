@@ -7,7 +7,7 @@ import type { CellStage } from '../lib/geometry'
 const FACE: Record<SeatStatus, string> = {
   EMPTY: 'bg-empty text-on-empty',
   OCCUPIED: 'bg-ink text-paper',
-  AWAY: 'border-3 border-ink bg-paper text-ink',
+  AWAY: 'border-3 border-ink bg-linear-to-b from-paper from-75% to-ink to-75% text-ink',
   UNKNOWN: 'pattern-unknown border-2 border-ink bg-paper text-ink',
   UNRECOGNIZED: 'pattern-unknown border-2 border-ink bg-paper text-ink',
 }
@@ -34,9 +34,6 @@ export function SeatButton({ seat, stage, style }: SeatButtonProps) {
       style={style}
       className={`absolute flex flex-col justify-between overflow-hidden p-1 text-left focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink ${FACE[seat.status]}`}
     >
-      {seat.status === 'AWAY' && (
-        <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/4 bg-ink" />
-      )}
       {showText && (
         <>
           <span
