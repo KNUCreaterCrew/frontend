@@ -169,6 +169,74 @@ describe('방 목록 화면 행', () => {
   })
 })
 
+describe('방 목록 행 구성', () => {
+  const OFFLINE = '장치 연결이 끊겼어요'
+  const NO_READING = '아직 자리를 확인하지 못했어요'
+
+  function sentenceOutsideTable(link: HTMLElement, text: string) {
+    const sentence = within(link).getByText(text)
+    expect(sentence.closest('dl')).toBeNull()
+    expect(sentence).toHaveClass('font-bold')
+    const dl = link.querySelector('dl')!
+    // 표 칸 안이 아니라 숫자와 표 묶음 아래, 행 전체 폭
+    expect(dl.parentElement).not.toContainElement(sentence)
+    expect(dl.compareDocumentPosition(sentence) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    return dl
+  }
+
+  test('확인된 방: 큰 숫자 위에 빈자리 라벨이 글자로 보인다', async () => {
+    useList([item()])
+    renderApp('/')
+    const label = within(await onlyRow()).getByText('빈자리')
+    expect(label).toHaveClass('text-label')
+    expect(label.parentElement).toContainElement(within(label.parentElement!).getByText('1'))
+  })
+
+  test('전부 확인 불가: 모름 위에도 빈자리 라벨이 보인다', async () => {
+    useList([item({ total_seats: 4, available_seats: 0, unknown_seats: 4 })])
+    renderApp('/')
+    const row = within(await onlyRow())
+    const label = row.getByText('빈자리')
+    expect(label.parentElement).toContainElement(row.getByText('모름'))
+    expect(row.getByText('모름')).toHaveClass('text-title', 'font-black')
+  })
+
+  test('좌석 0인 방에는 빈자리 라벨이 없다', async () => {
+    useList([item({ total_seats: 0, available_seats: 0, unknown_seats: 0 })])
+    renderApp('/')
+    expect(within(await onlyRow()).queryByText('빈자리')).not.toBeInTheDocument()
+  })
+
+  test('전부 확인 불가: 표에는 확인 불가와 전체만, 상태 문장은 표 아래 굵은 줄', async () => {
+    useList([item({ total_seats: 4, available_seats: 0, unknown_seats: 4, edge_online: false })])
+    renderApp('/')
+    const link = await onlyRow()
+    const dl = sentenceOutsideTable(link, OFFLINE)
+    expect(within(dl).getAllByText(/석$/)).toHaveLength(2)
+    expect(within(dl).queryByText(OFFLINE)).not.toBeInTheDocument()
+  })
+
+  test('연결됨 + 전부 확인 불가도 같은 자리에 문장', async () => {
+    useList([item({ total_seats: 4, available_seats: 0, unknown_seats: 4 })])
+    renderApp('/')
+    sentenceOutsideTable(await onlyRow(), NO_READING)
+  })
+
+  test('확인된 방 + 장치 끊김: 혼잡도는 표에 두고 문장은 표 아래', async () => {
+    useList([item({ edge_online: false })])
+    renderApp('/')
+    const link = await onlyRow()
+    const dl = sentenceOutsideTable(link, OFFLINE)
+    expect(within(dl).getByText('보통')).toBeInTheDocument()
+  })
+
+  test('방 이름은 링크처럼 밑줄이 있다', async () => {
+    useList([item()])
+    renderApp('/')
+    expect(within(await onlyRow()).getByText(NAME)).toHaveClass('underline', 'underline-offset-4')
+  })
+})
+
 describe('방 목록 상태', () => {
   test('빈 목록', async () => {
     renderApp('/', { scenario: 'rooms-empty' })
@@ -223,7 +291,10 @@ describe('방 목록 로딩과 재조회', () => {
     await advance(250)
     const busy = document.querySelector('[aria-busy="true"]')
     expect(busy).not.toBeNull()
-    expect(busy!.querySelectorAll('.border-2.border-ink').length).toBeGreaterThanOrEqual(3)
+    // 실제 행 모양: 행마다 아래 2px 선, 상자 테두리는 없다
+    expect(busy!.children).toHaveLength(3)
+    for (const row of Array.from(busy!.children)) expect(row).toHaveClass('border-b-2')
+    expect(busy!.querySelector('.border-2')).toBeNull()
     await advance(5000)
     expect(screen.getByRole('status')).toHaveTextContent('서버를 깨우는 중이에요')
     await advance(55_000)
