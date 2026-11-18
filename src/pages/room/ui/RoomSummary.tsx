@@ -1,14 +1,15 @@
+import type { ReactNode } from 'react'
 import { congestionLabel } from '@/entities/room'
 import type { RoomSummary as Summary } from '@/entities/room'
-import { formatLastObserved, useNow } from '@/shared/lib'
+import { formatKstTime, formatRelative, useNow } from '@/shared/lib'
 
-function Row({ term, value, first = false }: { term: string; value: string; first?: boolean }) {
+function Row({ term, value, first = false }: { term: string; value: ReactNode; first?: boolean }) {
   return (
-    <div className="flex items-baseline justify-between gap-3 border-t border-ink py-2 first:border-t-0">
+    <div className="flex flex-wrap items-baseline justify-between gap-x-3 border-t border-ink py-2 first:border-t-0">
       <dt className={`whitespace-nowrap ${first ? 'text-fact font-black' : 'font-bold'}`}>
         {term}
       </dt>
-      <dd className="font-num text-number font-bold tabular-nums">{value}</dd>
+      <dd className="ml-auto text-right font-num text-number font-bold tabular-nums">{value}</dd>
     </div>
   )
 }
@@ -37,6 +38,17 @@ function Big({ summary }: { summary: Summary }) {
   return null
 }
 
+// 줄이 바뀔 수 있는 곳은 상대 시각과 (시각) 사이뿐이다.
+function LastObserved({ iso, now }: { iso: string | null; now: number }) {
+  if (iso === null) return '아직 확인하지 못함'
+  return (
+    <>
+      <span className="whitespace-nowrap">{formatRelative(iso, now)}</span>{' '}
+      <span className="whitespace-nowrap">({formatKstTime(iso)})</span>
+    </>
+  )
+}
+
 export function RoomSummary({ summary }: { summary: Summary }) {
   const now = useNow(1000)
   const total = summary.kind === 'noSeats' ? 0 : summary.totalSeats
@@ -59,7 +71,10 @@ export function RoomSummary({ summary }: { summary: Summary }) {
           <Row term="혼잡도" value={congestionLabel(summary.congestionLevel)} />
         )}
         {summary.kind === 'allUnknown' && (
-          <Row term="마지막 확인" value={formatLastObserved(summary.latestObservedAt, now)} />
+          <Row
+            term="마지막 확인"
+            value={<LastObserved iso={summary.latestObservedAt} now={now} />}
+          />
         )}
       </dl>
     </div>

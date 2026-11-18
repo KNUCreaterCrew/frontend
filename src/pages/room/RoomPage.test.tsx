@@ -64,6 +64,17 @@ describe('방 화면', () => {
     ).toBeVisible()
   })
 
+  test('마지막 확인 시각은 상대 시각과 (시:분:초)만 끊을 수 있다', async () => {
+    renderApp(PATH, { scenario: 'all-unknown' })
+    await screen.findByRole('heading', { level: 1, name: ROOM_NAME })
+    const dd = rowValue('마지막 확인')
+    expect(dd.textContent).toMatch(/^.+ \(\d\d:\d\d:\d\d\)$/)
+    const chunks = Array.from(dd.querySelectorAll('span.whitespace-nowrap'))
+    expect(chunks).toHaveLength(2)
+    expect(chunks[1]).toHaveTextContent(/^\(\d\d:\d\d:\d\d\)$/)
+    expect(chunks[0]).not.toHaveTextContent('(')
+  })
+
   test('offline: 끊김 띠가 방 이름보다 앞에 있다', async () => {
     renderApp(PATH, { scenario: 'offline' })
     const h1 = await screen.findByRole('heading', { level: 1, name: ROOM_NAME })

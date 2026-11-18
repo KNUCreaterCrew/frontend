@@ -5,7 +5,7 @@ export function RoomNotFound({ roomId }: { roomId: string }) {
     <main className="mt-6">
       <h1 className="text-title font-black tracking-tight">이 방을 찾을 수 없어요</h1>
       <p className="mt-2">
-        {`${roomId} 방은 등록되어 있지 않아요. QR 이 바뀌었을 수 있으니 방 목록에서 골라 주세요.`}
+        {`${roomId} 방은 등록되어 있지 않아요. QR이 바뀌었을 수 있으니 방 목록에서 골라 주세요.`}
       </p>
       <Link
         to="/"
