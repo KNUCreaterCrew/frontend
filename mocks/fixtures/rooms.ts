@@ -151,4 +151,29 @@ export const manySeatsRoom: RoomDto = buildRoom(
   { version: 12 },
 )
 
+const DETAIL_REASONS = [
+  'OCCLUDED',
+  'LOW_CONFIDENCE',
+  'MODEL_CONFLICT',
+  'VLM_TIMEOUT',
+  'STALE_OBSERVATION',
+  'EDGE_OFFLINE',
+]
+
+// 좌석 상세 시트의 경우마다 좌석 하나씩. status 와 reason 은 DTO 에서 문자열이라 모르는 값도 그대로 쓴다.
+export const seatDetailsRoom: RoomDto = buildRoom(
+  [
+    ...DETAIL_REASONS.map((reason, i) =>
+      seat({ row: 'A', n: i + 1, x: i * 80, y: 0, status: 'UNKNOWN', reason, window: i === 0 }),
+    ),
+    seat({ row: 'B', n: 1, x: 0, y: 64, status: 'UNKNOWN', reason: null }),
+    seat({ row: 'B', n: 2, x: 80, y: 64, status: 'UNKNOWN', reason: 'SOMETHING_NEW' }),
+    seat({ row: 'B', n: 3, x: 160, y: 64, status: 'SOMETHING_NEW', reason: 'OCCLUDED' }),
+    seat({ row: 'B', n: 4, x: 240, y: 64, status: 'EMPTY', observedAt: null, outlet: true }),
+    seat({ row: 'B', n: 5, x: 320, y: 64, status: 'OCCUPIED', window: true }),
+    seat({ row: 'B', n: 6, x: 400, y: 64, status: 'AWAY', outlet: true }),
+  ],
+  { version: 12 },
+)
+
 export const noSeatsRoom: RoomDto = buildRoom([], { version: 12 })

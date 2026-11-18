@@ -39,6 +39,7 @@ const SCENARIO_NAMES = [
   'ws-slow-close',
   'ws-down',
   'live-demo',
+  'seat-details',
 ]
 
 test.each(SCENARIO_NAMES)('시나리오 %s 는 ws 핸들러를 하나 이상 가진다', (name) => {
@@ -251,5 +252,31 @@ describe('시나리오는 호출마다 새로 만들어진다', () => {
       await vi.waitFor(() => expect(events).toContain('close'))
       expect(events).toEqual(['close'])
     }
+  })
+})
+
+describe('seat-details', () => {
+  test('좌석 라벨이 모두 다르고 요구한 경우를 담는다', async () => {
+    server.use(...resolveScenario('seat-details'))
+    const body = roomDtoSchema.parse(await (await getRoom(ROOM_ID)).json())
+    const labels = body.seats.map((s) => s.label)
+    expect(new Set(labels).size).toBe(labels.length)
+    const seats = toRoom(body).seats
+    const unknown = seats.filter((s) => s.status === 'UNKNOWN')
+    for (const reason of [
+      'OCCLUDED',
+      'LOW_CONFIDENCE',
+      'MODEL_CONFLICT',
+      'VLM_TIMEOUT',
+      'STALE_OBSERVATION',
+      'EDGE_OFFLINE',
+      'UNRECOGNIZED',
+      null,
+    ]) {
+      expect(unknown.some((s) => s.reason === reason)).toBe(true)
+    }
+    expect(seats.some((s) => s.status === 'UNRECOGNIZED')).toBe(true)
+    expect(seats.some((s) => s.status === 'EMPTY' && s.lastObservedAt === null)).toBe(true)
+    expect(seats.some((s) => s.isWindow)).toBe(true)
   })
 })

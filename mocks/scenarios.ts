@@ -9,6 +9,7 @@ import {
   mixedRoom,
   noSeatsRoom,
   offlineRoom,
+  seatDetailsRoom,
 } from './fixtures/rooms'
 import { startupRoomDto } from './fixtures/interfacesFlow'
 import type { LiveRoom } from './handlers/rooms'
@@ -154,6 +155,7 @@ export const scenarios: Record<string, () => MockHandler[]> = {
   'ws-down': () => liveRoom(mixedRoom, { alwaysReject: true }).handlers,
   'live-demo': () => liveDemoHandlers(mixedRoom),
   'many-seats': () => [roomHandler({ [ROOM_ID]: manySeatsRoom }), quietRoomSocket()],
+  'seat-details': () => [roomHandler({ [ROOM_ID]: seatDetailsRoom }), quietRoomSocket()],
   'no-seats': () => [roomHandler({ [ROOM_ID]: noSeatsRoom }), quietRoomSocket()],
 }
 
