@@ -1,2 +1,2 @@
-export { formatKstTime, formatLastObserved, formatRelative } from './time'
+export { formatKstTime, formatRelative, lastObservedParts } from './time'
 export { useNow } from './useNow'

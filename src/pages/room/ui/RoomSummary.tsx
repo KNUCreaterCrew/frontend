@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { congestionLabel } from '@/entities/room'
 import type { RoomSummary as Summary } from '@/entities/room'
-import { formatKstTime, formatRelative, useNow } from '@/shared/lib'
+import { lastObservedParts, useNow } from '@/shared/lib'
 
 function Row({ term, value, first = false }: { term: string; value: ReactNode; first?: boolean }) {
   return (
@@ -40,11 +40,12 @@ function Big({ summary }: { summary: Summary }) {
 
 // 줄이 바뀔 수 있는 곳은 상대 시각과 (시각) 사이뿐이다.
 function LastObserved({ iso, now }: { iso: string | null; now: number }) {
-  if (iso === null) return '아직 확인하지 못함'
+  const parts = lastObservedParts(iso, now)
+  if (parts === null) return '아직 확인하지 못함'
   return (
     <>
-      <span className="whitespace-nowrap">{formatRelative(iso, now)}</span>{' '}
-      <span className="whitespace-nowrap">({formatKstTime(iso)})</span>
+      <span className="whitespace-nowrap">{parts.relative}</span>{' '}
+      <span className="whitespace-nowrap">({parts.time})</span>
     </>
   )
 }

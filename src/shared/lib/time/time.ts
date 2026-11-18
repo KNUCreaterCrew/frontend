@@ -20,7 +20,11 @@ export function formatKstTime(iso: string): string {
   return kstFormat.format(new Date(iso))
 }
 
-export function formatLastObserved(iso: string | null, now: number): string {
-  if (iso === null) return '아직 확인하지 못함'
-  return `${formatRelative(iso, now)} (${formatKstTime(iso)})`
+// 상대 시각과 KST 절대 시각을 나눠서 준다. null 이면 화면이 "아직 확인하지 못함"을 쓴다.
+export function lastObservedParts(
+  iso: string | null,
+  now: number,
+): { relative: string; time: string } | null {
+  if (iso === null) return null
+  return { relative: formatRelative(iso, now), time: formatKstTime(iso) }
 }

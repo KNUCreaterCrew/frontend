@@ -9,6 +9,7 @@ import {
   sortSeatsForReading,
   viewBoxString,
   zoomScale,
+  zoomScaleWithCutEdge,
 } from './geometry'
 
 const mixed = toRoom(mixedRoom).seats.map((s) => s.layout)
@@ -78,6 +79,42 @@ describe('minCellPx와 zoomScale', () => {
 
   it('이미 충분히 크면 배율 1', () => {
     expect(zoomScale(100)).toBe(1)
+  })
+})
+
+describe('zoomScaleWithCutEdge', () => {
+  const vb = computeViewBox(many)!
+
+  function visibleFractionAtEdge(scale: number): number | null {
+    const edge = vb.width / scale
+    for (const l of many) {
+      const left = l.x - vb.minX
+      if (left < edge && edge < left + l.width) return (edge - left) / l.width
+    }
+    return null
+  }
+
+  it.each([312, 342])(
+    '내용 폭 %ipx: 오른쪽 끝 칸이 25% 에서 75% 만 보이고 배율은 줄지 않는다',
+    (w) => {
+      const s0 = zoomScale(minCellSidePx(many, vb, w))
+      const s = zoomScaleWithCutEdge(many, vb, s0)
+      expect(s).toBeGreaterThanOrEqual(s0)
+      const f = visibleFractionAtEdge(s)
+      expect(f).not.toBeNull()
+      expect(f!).toBeGreaterThanOrEqual(0.25)
+      expect(f!).toBeLessThanOrEqual(0.75)
+    },
+  )
+
+  it('이미 가운데가 잘려 있으면 그대로 둔다', () => {
+    const s0 = vb.width / (80 * 4 + 32)
+    expect(zoomScaleWithCutEdge(many, vb, s0)).toBe(s0)
+  })
+
+  it('끝이 칸 사이 틈에 닿으면 그 앞 칸의 가운데로 맞춘다', () => {
+    const s0 = vb.width / (80 * 4 + 70)
+    expect(zoomScaleWithCutEdge(many, vb, s0)).toBeCloseTo(vb.width / (80 * 4 + 32), 6)
   })
 })
 

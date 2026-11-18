@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Seat } from '@/entities/room'
 import { useElementWidth } from '@/shared/lib'
 import {
@@ -9,24 +9,41 @@ import {
   seatRect,
   sortSeatsForReading,
   zoomScale,
+  zoomScaleWithCutEdge,
 } from '../lib/geometry'
 import type { CellStage } from '../lib/geometry'
 import { MapZoomToggle } from './MapZoomToggle'
 import { SeatButton } from './SeatButton'
 
-export function SeatMap({ seats }: { seats: Seat[] }) {
+interface SeatMapProps {
+  seats: Seat[]
+  /** 지금 보이는 칸이 콘센트 아이콘을 숨기는지(범례 안내용) */
+  onOutletsHiddenChange?: (hidden: boolean) => void
+}
+
+export function SeatMap({ seats, onOutletsHiddenChange }: SeatMapProps) {
   const [boxRef, width] = useElementWidth<HTMLDivElement>()
   const [zoomed, setZoomed] = useState(false)
 
   const layouts = seats.map((s) => s.layout)
   const vb = computeViewBox(layouts)
-  if (!vb) return null
 
-  const px = width === null ? null : minCellPx(layouts, vb, width)
+  const px = vb && width !== null ? minCellPx(layouts, vb, width) : null
   const fitStage: CellStage = px === null ? 'compact' : cellStage(px)
   const canZoom = fitStage === 'zoom' && width !== null
-  const scale = canZoom && zoomed ? zoomScale(minCellSidePx(layouts, vb, width)) : 1
   const stage: CellStage = canZoom && zoomed ? 'compact' : fitStage
+  const outletsHidden = stage === 'zoom'
+
+  useEffect(() => {
+    onOutletsHiddenChange?.(outletsHidden)
+  }, [outletsHidden, onOutletsHiddenChange])
+
+  if (!vb) return null
+
+  const scale =
+    canZoom && zoomed
+      ? zoomScaleWithCutEdge(layouts, vb, zoomScale(minCellSidePx(layouts, vb, width)))
+      : 1
 
   return (
     <div>

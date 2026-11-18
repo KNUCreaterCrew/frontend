@@ -56,6 +56,23 @@ export function zoomScale(px: number): number {
   return Math.max(1, TAP_PX / px)
 }
 
+// 확대했을 때 오른쪽 끝에서 칸이 반드시 일부 잘려 보이게 배율을 조금 키운다.
+// 끝이 이미 어떤 칸을 25% 에서 75% 만 보이게 자르면 그대로 둔다. 배율은 줄지 않는다.
+export function zoomScaleWithCutEdge(layouts: SeatLayout[], vb: ViewBox, s0: number): number {
+  const edge = vb.width / s0
+  const cells = layouts.map((l) => ({ left: l.x - vb.minX, width: l.width }))
+  for (const c of cells) {
+    if (c.left < edge && edge < c.left + c.width) {
+      const visible = (edge - c.left) / c.width
+      if (visible >= 0.25 && visible <= 0.75) return s0
+    }
+  }
+  const fits = cells.filter((c) => c.left + 0.5 * c.width <= edge)
+  if (fits.length === 0) return s0
+  const target = fits.reduce((a, b) => (b.left > a.left ? b : a))
+  return Math.max(s0, vb.width / (target.left + 0.5 * target.width))
+}
+
 export function sortSeatsForReading<T extends { layout: SeatLayout }>(seats: T[]): T[] {
   return [...seats].sort((a, b) => a.layout.y - b.layout.y || a.layout.x - b.layout.x)
 }

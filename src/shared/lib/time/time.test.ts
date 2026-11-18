@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatKstTime, formatLastObserved, formatRelative } from './time'
+import { formatKstTime, lastObservedParts, formatRelative } from './time'
 
 const now = Date.parse('2026-11-18T05:02:48Z')
 
@@ -33,11 +33,14 @@ describe('formatKstTime', () => {
   })
 })
 
-describe('formatLastObserved', () => {
-  it('null 은 아직 확인하지 못함', () => {
-    expect(formatLastObserved(null, now)).toBe('아직 확인하지 못함')
+describe('lastObservedParts', () => {
+  it('null 은 null', () => {
+    expect(lastObservedParts(null, now)).toBeNull()
   })
-  it('상대와 절대 시각을 함께', () => {
-    expect(formatLastObserved('2026-11-18T05:02:36Z', now)).toBe('12초 전 (14:02:36)')
+  it('상대 시각과 절대 시각을 나눠서 준다', () => {
+    expect(lastObservedParts('2026-11-18T05:02:36Z', now)).toEqual({
+      relative: '12초 전',
+      time: '14:02:36',
+    })
   })
 })
