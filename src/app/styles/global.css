@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './tokens.css';
 
 html,
 body,
@@ -6,10 +7,19 @@ body,
   @apply min-h-dvh;
 }
 
+body {
+  @apply bg-paper font-sans text-body text-ink;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  @apply bg-ink text-paper;
+}
+
 /* 화면 가장자리 여백. 노치와 둥근 모서리에 글자가 가리지 않게 safe-area 를 함께 본다. */
 #root {
-  padding-top: max(--spacing(4), env(safe-area-inset-top));
-  padding-right: max(--spacing(4), env(safe-area-inset-right));
-  padding-bottom: max(--spacing(4), env(safe-area-inset-bottom));
-  padding-left: max(--spacing(4), env(safe-area-inset-left));
+  padding-top: max(var(--spacing-4), env(safe-area-inset-top));
+  padding-right: max(var(--spacing-4), env(safe-area-inset-right));
+  padding-bottom: max(var(--spacing-4), env(safe-area-inset-bottom));
+  padding-left: max(var(--spacing-4), env(safe-area-inset-left));
 }
