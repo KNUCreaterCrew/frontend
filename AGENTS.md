@@ -6,17 +6,17 @@
 
 앱의 성격: 화면 2~3개(방 선택, 좌석도, 선택 기능 `/admin`), 로그인과 SEO 없음, 데이터는 전부 실시간이라 서버 렌더링으로 미리 그릴 것이 없음, WebSocket 은 브라우저가 백엔드에 직접 연결, 좌석 배치는 백엔드가 주는 `layout` 좌표로 그림, 시연은 휴대폰 QR 접속.
 
-| 결정       | 고른 것                                                  | 버린 것과 이유                                                                                                                                                                      |
-| ---------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 프레임워크 | Vite + React SPA                                         | Next.js: SSR/RSC 이득 없음(실시간 데이터, SEO 없음), 하이드레이션과 서버 런타임 배포만 늘어남. SPA 는 정적 파일이라 어디든 올리고, 백엔드와 같은 출처로 서빙해 CORS 를 없앨 수 있음 |
-| 좌석도     | SVG (`layout` → `viewBox` 자동 계산)                     | Canvas: 좌석 수십 개 규모에서 이득 없고 접근성과 토큰 적용이 어려움                                                                                                                 |
-| 스타일     | Tailwind CSS v4 + 토큰만 있는 테마                       | CSS Modules: 토큰 강제가 약함                                                                                                                                                       |
-| 서버 상태  | TanStack Query + 순수 함수 이벤트 반영                   | 상태 라이브러리 단독: 재조회, 재시도, 캐시를 직접 만들어야 함                                                                                                                       |
-| 응답 검증  | zod 4                                                    | 타입만: 계약과 다른 값이 조용히 틀림                                                                                                                                                |
-| 라우터     | React Router 8 (선언형 `<Routes>`)                       | 데이터 라우터: 서버 상태는 TanStack Query 가 맡으므로 loader 가 필요 없음                                                                                                           |
-| 모션       | motion (필요해질 때 추가)                                | CSS 전환만: 시트 드래그와 변경 강조 완성도 부족                                                                                                                                     |
-| 바텀시트   | Radix Dialog + motion 드래그 (필요해질 때 추가)          | vaul: 관리 중단                                                                                                                                                                     |
-| 테스트     | Vitest + Testing Library + MSW 3(`ws` 포함) + Playwright | Storybook: 같은 상태를 세 곳에서 그림. `?scenario=` URL 로 대체                                                                                                                     |
+| 결정       | 고른 것                                                                                               | 버린 것과 이유                                                                                                                                                                      |
+| ---------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 프레임워크 | Vite + React SPA                                                                                      | Next.js: SSR/RSC 이득 없음(실시간 데이터, SEO 없음), 하이드레이션과 서버 런타임 배포만 늘어남. SPA 는 정적 파일이라 어디든 올리고, 백엔드와 같은 출처로 서빙해 CORS 를 없앨 수 있음 |
+| 좌석도     | `layout` → `viewBox` 비율로 위치 계산, 좌석은 HTML `<button>` 을 % 절대 위치로 배치, SVG 는 바탕 선만 | 전부 SVG: 좌석이 많아 줄이면 글자도 작아지고 포커스와 화면 읽기를 직접 만들어야 함. Canvas: 접근성과 토큰 적용이 어려움                                                             |
+| 스타일     | Tailwind CSS v4 + 토큰만 있는 테마                                                                    | CSS Modules: 토큰 강제가 약함                                                                                                                                                       |
+| 서버 상태  | TanStack Query + 순수 함수 이벤트 반영                                                                | 상태 라이브러리 단독: 재조회, 재시도, 캐시를 직접 만들어야 함                                                                                                                       |
+| 응답 검증  | zod 4                                                                                                 | 타입만: 계약과 다른 값이 조용히 틀림                                                                                                                                                |
+| 라우터     | React Router 8 (선언형 `<Routes>`)                                                                    | 데이터 라우터: 서버 상태는 TanStack Query 가 맡으므로 loader 가 필요 없음                                                                                                           |
+| 모션       | motion (필요해질 때 추가)                                                                             | CSS 전환만: 시트 드래그와 변경 강조 완성도 부족                                                                                                                                     |
+| 바텀시트   | Radix Dialog + motion 드래그 (필요해질 때 추가)                                                       | vaul: 관리 중단                                                                                                                                                                     |
+| 테스트     | Vitest + Testing Library + MSW 3(`ws` 포함) + Playwright                                              | Storybook: 같은 상태를 세 곳에서 그림. `?scenario=` URL 로 대체                                                                                                                     |
 
 TypeScript `strict` + `noUncheckedIndexedAccess`. ESLint flat(type-checked, react-hooks, jsx-a11y) + Prettier(`semi:false`, `singleQuote`, `printWidth:100`). pnpm, Node 24(`.nvmrc`). **이 목록 밖의 런타임 의존성은 사람 확인 후 추가한다.**
 
@@ -77,7 +77,7 @@ config/       개발 서버 프록시
    - 근거: [INTERFACES.md 3. 웹이 이후 변경을 받습니다](https://github.com/KNUCreaterCrew/docs/blob/main/INTERFACES.md#3-웹이-이후-변경을-받습니다)
 4. 모르는 상태와 사유 코드는 기본값으로 덮지 않고 "알 수 없는 상태"로 보인다.
 5. 시각은 `shared/lib/time` 한 곳에서. 목록은 "12초 전", 상세는 KST 절대 시각. `last_observed_at: null` 은 "아직 확인하지 못함".
-6. 화면 상태는 `loading | error | ready | refreshFailed`. 스켈레톤은 200ms 지연 후 표시, 한 번 보이면 최소 400ms.
+6. 화면 상태는 `loading | error | notFound | ready | refreshFailed`. `notFound` 는 방 조회 404 이고 재시도하지 않는다. 스켈레톤은 200ms 지연 후 표시, 한 번 보이면 최소 400ms. 서버가 잠들었을 때: 5초 넘으면 "깨우는 중" 안내, 60초 넘으면 "오래 걸림" 안내, 90초에 포기하고 오류 화면. 재시도는 network 오류와 http 502/503/504 만, 최대 8번, 대기 `min(1000 * 2 ** attempt, 10000)`ms.
 7. 공용 컴포넌트는 네이티브 요소 속성을 확장(`type="button"` 기본, `...rest`), `focus-visible` 링, 아이콘 `aria-hidden`.
 8. 60fps 값(드래그, 시트 위치)은 state 가 아니라 MotionValue 와 ref.
 9. 테스트는 `renderApp(path)` 로 앱을 띄우고 role 과 name 으로 단언. MSW `onUnhandledFrame: 'error'`. WebSocket 은 MSW `ws` 로 흉내 낸다.
@@ -87,8 +87,9 @@ config/       개발 서버 프록시
 
 개발 서버에서 `shouldEnableMocking({ dev, flag, search })` 가 참일 때만 켠다. 조건은 DEV 이고 (`VITE_API_MOCKING === 'enabled'` 또는 URL 에 `?scenario=<이름>`) 이다. 그 밖에는 꺼지고 프록시로 실제 백엔드에 간다.
 
-- 시나리오 이름은 부팅 때 한 번 읽어 고정한다. 모르는 이름이면 알려진 이름 목록을 담은 오류가 난다. 지금 있는 이름은 `default` 하나다.
+- 시나리오 이름은 부팅 때 한 번 읽어 고정한다. 모르는 이름이면 알려진 이름 목록을 담은 오류가 난다. 있는 이름: `default`(= `mixed`), `mixed`, `all-unknown`, `offline`, `loading`, `error`, `not-found`, `slow-wake`, `many-seats`, `no-seats`. 방 ID 는 `IT4-101`.
 - 운영 빌드는 `import.meta.env.DEV` 분기 안의 동적 import 로 MSW 를 번들에서 뺀다. 이 분기를 깨지 않는다.
+- `default` 핸들러는 `IT4-101` 에 혼합 방(mixed)을 준다. 처리되지 않은 요청이 필요한 테스트는 `/api/v1/rooms/` 밖의 경로를 써야 한다.
 - 새 시나리오는 `mocks/scenarios.ts` 에 더하고, 개발 서버, Vitest, E2E 가 같은 것을 쓴다.
 
 ## 프록시

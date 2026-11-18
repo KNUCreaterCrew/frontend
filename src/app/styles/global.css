@@ -10,6 +10,9 @@ body,
 body {
   @apply bg-paper font-sans text-body font-medium text-ink;
   -webkit-font-smoothing: antialiased;
+  /* 한국어는 단어 단위로 줄을 바꾸고, 긴 ID 는 필요하면 어디서든 끊는다. */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 ::selection {
@@ -22,4 +25,9 @@ body {
   padding-right: max(var(--spacing-4), env(safe-area-inset-right));
   padding-bottom: max(var(--spacing-4), env(safe-area-inset-bottom));
   padding-left: max(var(--spacing-4), env(safe-area-inset-left));
+}
+
+/* 확인 불가 좌석의 빗금. 무늬 정의는 tokens.css 의 --pattern-unknown */
+@utility pattern-unknown {
+  background-image: var(--pattern-unknown);
 }
