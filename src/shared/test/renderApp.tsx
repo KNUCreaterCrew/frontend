@@ -4,8 +4,14 @@ import { MemoryRouter } from 'react-router'
 import { AppProviders } from '@/app/providers'
 import { createQueryClient } from '@/app/queryClient'
 import { AppRoutes } from '@/app/routes'
+import { resolveScenario } from '@mocks/scenarios'
+import { server } from '@mocks/node'
 
-export function renderApp(path: string): RenderResult & { user: UserEvent } {
+export function renderApp(
+  path: string,
+  options?: { scenario?: string },
+): RenderResult & { user: UserEvent } {
+  if (options?.scenario) server.use(...resolveScenario(options.scenario))
   const queryClient = createQueryClient()
   queryClient.setDefaultOptions({ queries: { retry: false } })
   const result = render(
