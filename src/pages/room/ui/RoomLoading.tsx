@@ -17,8 +17,10 @@ export function RoomLoading({ elapsedMs }: { elapsedMs: number }) {
       </p>
       {showSkeleton && (
         <div aria-busy="true" className="mt-4">
-          <div className="h-32 bg-surface" />
-          <div className="h-48 mt-6 bg-surface" />
+          <div className="h-16 bg-surface" />
+          <div className="mt-2 h-16 bg-surface" />
+          <div className="mt-6 h-16 bg-surface" />
+          <div className="mt-2 h-16 bg-surface" />
         </div>
       )}
     </main>
