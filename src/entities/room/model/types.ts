@@ -37,6 +37,16 @@ export interface Room {
   seats: Seat[]
 }
 
+export interface RoomListItem {
+  roomId: string
+  roomName: string
+  totalSeats: number
+  availableSeats: number
+  unknownSeats: number
+  congestionLevel: CongestionLevel
+  edgeOnline: boolean
+}
+
 export interface SeatChange {
   seatId: string
   prevStatus: SeatStatus

@@ -1,7 +1,8 @@
 import { deployedRoomJson } from './__fixtures__'
 import { roomDtoSchema } from './dto'
 import { toRoom } from './mapping'
-import { getRoomSummary } from './summary'
+import { getRoomListSummary, getRoomSummary } from './summary'
+import type { RoomListItem } from './types'
 
 function seat(
   id: string,
@@ -93,6 +94,76 @@ describe('getRoomSummary', () => {
     expect(getRoomSummary(r)).toMatchObject({
       kind: 'allUnknown',
       latestObservedAt: '2026-11-18T09:30:00Z',
+    })
+  })
+})
+
+describe('getRoomListSummary', () => {
+  const base: RoomListItem = {
+    roomId: 'IT4-101',
+    roomName: '제1실습실 (예시)',
+    totalSeats: 4,
+    availableSeats: 1,
+    unknownSeats: 1,
+    congestionLevel: 'MODERATE',
+    edgeOnline: true,
+  }
+
+  it('확인된 좌석이 있으면 known 이다', () => {
+    expect(getRoomListSummary(base)).toEqual({
+      kind: 'known',
+      availableSeats: 1,
+      totalSeats: 4,
+      unknownSeats: 1,
+      congestionLevel: 'MODERATE',
+      edgeOnline: true,
+    })
+  })
+
+  it('전부 확인 불가이고 연결이 끊기면 allUnknown 이고 혼잡도 키가 없다', () => {
+    const summary = getRoomListSummary({
+      ...base,
+      availableSeats: 0,
+      unknownSeats: 4,
+      congestionLevel: 'HIGH',
+      edgeOnline: false,
+    })
+    expect(summary).toEqual({
+      kind: 'allUnknown',
+      totalSeats: 4,
+      unknownSeats: 4,
+      edgeOnline: false,
+    })
+    expect('congestionLevel' in summary).toBe(false)
+  })
+
+  it('연결됨이어도 전부 확인 불가이면 allUnknown 이다', () => {
+    expect(
+      getRoomListSummary({ ...base, totalSeats: 3, availableSeats: 0, unknownSeats: 3 }),
+    ).toEqual({ kind: 'allUnknown', totalSeats: 3, unknownSeats: 3, edgeOnline: true })
+  })
+
+  it('좌석이 0개이면 noSeats 이다', () => {
+    expect(
+      getRoomListSummary({ ...base, totalSeats: 0, availableSeats: 0, unknownSeats: 0 }),
+    ).toEqual({ kind: 'noSeats' })
+  })
+
+  it('연결이 끊겨도 확인된 좌석이 있으면 known 이고 edgeOnline 을 싣는다', () => {
+    expect(
+      getRoomListSummary({
+        ...base,
+        availableSeats: 2,
+        congestionLevel: 'LOW',
+        edgeOnline: false,
+      }),
+    ).toEqual({
+      kind: 'known',
+      availableSeats: 2,
+      totalSeats: 4,
+      unknownSeats: 1,
+      congestionLevel: 'LOW',
+      edgeOnline: false,
     })
   })
 })

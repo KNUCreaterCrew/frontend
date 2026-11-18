@@ -1,4 +1,4 @@
-import type { CongestionLevel, Room } from './types'
+import type { CongestionLevel, Room, RoomListItem } from './types'
 
 export type RoomSummary =
   | { kind: 'noSeats' }
@@ -46,5 +46,37 @@ export function getRoomSummary(room: Room): RoomSummary {
     totalSeats: room.totalSeats,
     unknownSeats: room.unknownSeats,
     congestionLevel: room.congestionLevel,
+  }
+}
+
+export type RoomListSummary =
+  | { kind: 'noSeats' }
+  | { kind: 'allUnknown'; totalSeats: number; unknownSeats: number; edgeOnline: boolean }
+  | {
+      kind: 'known'
+      availableSeats: number
+      totalSeats: number
+      unknownSeats: number
+      congestionLevel: CongestionLevel
+      edgeOnline: boolean
+    }
+
+export function getRoomListSummary(item: RoomListItem): RoomListSummary {
+  if (item.totalSeats === 0) return { kind: 'noSeats' }
+  if (item.unknownSeats === item.totalSeats) {
+    return {
+      kind: 'allUnknown',
+      totalSeats: item.totalSeats,
+      unknownSeats: item.unknownSeats,
+      edgeOnline: item.edgeOnline,
+    }
+  }
+  return {
+    kind: 'known',
+    availableSeats: item.availableSeats,
+    totalSeats: item.totalSeats,
+    unknownSeats: item.unknownSeats,
+    congestionLevel: item.congestionLevel,
+    edgeOnline: item.edgeOnline,
   }
 }

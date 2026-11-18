@@ -33,7 +33,7 @@ const seatDtoSchema = z.object({
   layout: seatLayoutDtoSchema,
 })
 
-export const roomDtoSchema = z.object({
+export const roomSummaryDtoSchema = z.object({
   room_id: z.string(),
   room_name: z.string(),
   total_seats: z.int(),
@@ -41,8 +41,15 @@ export const roomDtoSchema = z.object({
   unknown_seats: z.int(),
   congestion_level: z.string(),
   edge_online: z.boolean(),
+})
+
+export const roomDtoSchema = roomSummaryDtoSchema.extend({
   version: z.int(),
   seats: z.array(seatDtoSchema),
 })
 
+export const roomListDtoSchema = z.array(roomSummaryDtoSchema)
+
+export type RoomSummaryDto = z.infer<typeof roomSummaryDtoSchema>
 export type RoomDto = z.infer<typeof roomDtoSchema>
+export type RoomListDto = z.infer<typeof roomListDtoSchema>

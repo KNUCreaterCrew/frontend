@@ -1,6 +1,6 @@
 import { congestionLevelSchema, seatReasonSchema, seatStatusSchema } from './dto'
-import type { RoomDto } from './dto'
-import type { CongestionLevel, Room, Seat, SeatReason, SeatStatus } from './types'
+import type { RoomDto, RoomSummaryDto } from './dto'
+import type { CongestionLevel, Room, RoomListItem, Seat, SeatReason, SeatStatus } from './types'
 
 export function toStatus(raw: string): SeatStatus {
   const parsed = seatStatusSchema.safeParse(raw)
@@ -44,5 +44,17 @@ export function toRoom(dto: RoomDto): Room {
     edgeOnline: dto.edge_online,
     version: dto.version,
     seats: dto.seats.map(toSeat),
+  }
+}
+
+export function toRoomListItem(dto: RoomSummaryDto): RoomListItem {
+  return {
+    roomId: dto.room_id,
+    roomName: dto.room_name,
+    totalSeats: dto.total_seats,
+    availableSeats: dto.available_seats,
+    unknownSeats: dto.unknown_seats,
+    congestionLevel: toCongestion(dto.congestion_level),
+    edgeOnline: dto.edge_online,
   }
 }
