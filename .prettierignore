@@ -1,8 +1,8 @@
 pnpm-lock.yaml
 dist
+dist-mock
 coverage
 playwright-report
 test-results
-public/mockServiceWorker.js
 /.*/
 !/.github/

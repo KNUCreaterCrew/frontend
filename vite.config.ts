@@ -1,5 +1,6 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { msw } from 'msw/vite'
 import { fileURLToPath } from 'node:url'
 import { loadEnv } from 'vite'
 import { defineConfig } from 'vitest/config'
@@ -13,7 +14,11 @@ export default defineConfig(({ command, mode }) => {
     value: loadEnv(mode, process.cwd(), 'VITE_').VITE_API_ORIGIN,
   })
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      ...(command === 'serve' || mode === 'mock' ? [msw({ mode: 'worker-only' })] : []),
+    ],
     server: {
       proxy: createProxy(loadEnv(mode, process.cwd(), '').BACKEND_ORIGIN || undefined),
     },
