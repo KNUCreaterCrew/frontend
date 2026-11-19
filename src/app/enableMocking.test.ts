@@ -9,3 +9,50 @@ test.each([
 ])('shouldEnableMocking(%o) 는 %s', (input, expected) => {
   expect(shouldEnableMocking(input)).toBe(expected)
 })
+
+describe('미리보기 빌드(MODE mock)', () => {
+  const start = vi.fn().mockResolvedValue(undefined)
+
+  beforeEach(() => {
+    vi.resetModules()
+    start.mockClear()
+    vi.doMock('@mocks/browser', () => ({ worker: { use: vi.fn(), start } }))
+  })
+
+  afterEach(() => {
+    vi.doUnmock('@mocks/browser')
+    vi.unstubAllEnvs()
+    sessionStorage.clear()
+    window.history.replaceState(null, '', '/')
+  })
+
+  test('?scenario=offline 이면 고르고 기억하고 시작한다', async () => {
+    vi.stubEnv('MODE', 'mock')
+    vi.stubEnv('DEV', false)
+    window.history.replaceState(null, '', '/?scenario=offline')
+    const { enableMocking } = await import('./enableMocking')
+    await expect(enableMocking()).resolves.toEqual({ scenario: 'offline', unknownScenario: null })
+    expect(sessionStorage.getItem('zf-preview-scenario')).toBe('offline')
+    expect(start).toHaveBeenCalledTimes(1)
+  })
+
+  test('모르는 이름이면 default 와 이름을 돌려주고 throw 하지 않는다', async () => {
+    vi.stubEnv('MODE', 'mock')
+    vi.stubEnv('DEV', false)
+    window.history.replaceState(null, '', '/?scenario=nope')
+    const { enableMocking } = await import('./enableMocking')
+    await expect(enableMocking()).resolves.toEqual({
+      scenario: 'default',
+      unknownScenario: 'nope',
+    })
+  })
+
+  test('운영 빌드(MODE production)는 null 이고 시작하지 않는다', async () => {
+    vi.stubEnv('MODE', 'production')
+    vi.stubEnv('DEV', false)
+    const { enableMocking, isPreviewBuild } = await import('./enableMocking')
+    await expect(enableMocking()).resolves.toBeNull()
+    expect(start).not.toHaveBeenCalled()
+    expect(isPreviewBuild()).toBe(false)
+  })
+})
