@@ -4,7 +4,7 @@ import { renderApp } from '@/shared/test/renderApp'
 test('첫 화면에 방 목록 제목이 보인다', async () => {
   renderApp('/')
   expect(
-    await screen.findByRole('heading', { level: 1, name: '어느 방으로 갈까요' }),
+    await screen.findByRole('heading', { level: 1, name: '방을 골라 주세요' }),
   ).toBeInTheDocument()
 })
 

@@ -32,5 +32,5 @@ test('앱 경로는 띠와 앱 화면이 함께 나온다', async () => {
   renderRoot('/')
   expect(screen.getByRole('complementary', { name: '미리보기 안내' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: '시나리오 바꾸기' })).toBeInTheDocument()
-  expect(await screen.findByRole('heading', { level: 1, name: '어느 방으로 갈까요' })).toBeVisible()
+  expect(await screen.findByRole('heading', { level: 1, name: '방을 골라 주세요' })).toBeVisible()
 })

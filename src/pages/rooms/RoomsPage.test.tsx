@@ -6,7 +6,7 @@ import { server } from '@mocks/node'
 import { ROOM_LIST_URL, roomListHandler } from '@mocks/handlers/rooms'
 import { manyRooms, mixedRoom, toListItemDto } from '@mocks/fixtures/rooms'
 
-const TITLE = '어느 방으로 갈까요'
+const TITLE = '방을 골라 주세요'
 const NAME = '제1실습실 (예시)'
 
 function item(over: Partial<RoomSummaryDto> = {}): RoomSummaryDto {

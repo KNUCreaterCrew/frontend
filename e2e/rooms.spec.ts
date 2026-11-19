@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 const url = (scenario: string) => `/?scenario=${scenario}`
-const H1 = '어느 방으로 갈까요'
+const H1 = '방을 골라 주세요'
 
 function collectErrors(page: Page) {
   const errors: string[] = []
