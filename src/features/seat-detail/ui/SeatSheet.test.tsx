@@ -136,7 +136,7 @@ test('손잡이는 화면 읽기 도구에 숨고 막은 z-30, 시트는 z-40 �
   renderSheet()
   const dialog = screen.getByRole('dialog')
   expect(dialog).toHaveClass('z-40')
-  expect(dialog.querySelector('[aria-hidden="true"].w-8.h-1')).not.toBeNull()
+  expect(dialog.querySelector('[aria-hidden="true"].w-10.h-1')).not.toBeNull()
   const overlay = document.querySelector('.z-30')
   expect(overlay).not.toBeNull()
   expect(overlay).toHaveClass('fixed', 'inset-0')

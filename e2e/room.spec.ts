@@ -97,9 +97,10 @@ test('live-demo: 강조 테두리는 칸 바깥에 틈을 두고 보이고 기�
   expect(await ring.evaluate((el) => el.getAnimations().length)).toBeGreaterThan(0)
   // outline 은 hit test 되지 않으므로 계산된 스타일과 위치로 확인한다. 움직임을 끝낸 뒤 잰다
   const probe = await ring.evaluate((el) => {
-    for (const animation of el.getAnimations()) animation.finish()
-    const style = getComputedStyle(el)
     const button = el.previousElementSibling as HTMLElement
+    // 테두리의 조임과 좌석 칸의 뒤집힘을 모두 끝낸 뒤 잰다
+    for (const animation of [...el.getAnimations(), ...button.getAnimations()]) animation.finish()
+    const style = getComputedStyle(el)
     const scroller = el.closest('.overflow-x-auto') as HTMLElement
     const r = el.getBoundingClientRect()
     const b = button.getBoundingClientRect()

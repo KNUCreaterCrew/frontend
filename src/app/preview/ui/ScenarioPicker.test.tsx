@@ -85,7 +85,7 @@ test('소개와 설명에 곧은 큰따옴표가 없다', () => {
 
 test('지금 시나리오 행만 6px 칸을 채운다', () => {
   renderPicker({ scenario: 'offline', unknownScenario: null })
-  const filled = document.querySelectorAll('li > span[aria-hidden="true"].bg-ink')
+  const filled = document.querySelectorAll('li > span[aria-hidden="true"].bg-empty')
   expect(filled).toHaveLength(1)
   expect(filled[0]?.closest('li')).toHaveTextContent('offline')
 })

@@ -5,11 +5,12 @@ import { OutletIcon } from '@/shared/ui'
 import type { CellStage } from '../lib/geometry'
 
 const FACE: Record<SeatStatus, string> = {
-  EMPTY: 'bg-empty text-on-empty',
-  OCCUPIED: 'bg-ink text-paper',
-  AWAY: 'border-3 border-ink bg-paper text-ink',
-  UNKNOWN: 'pattern-unknown border-2 border-ink bg-paper text-ink',
-  UNRECOGNIZED: 'pattern-unknown border-2 border-ink bg-paper text-ink',
+  // 빈자리만 칠한 면이고 그림자로 떠 있다. 나머지는 바닥판에 붙은 면과 테두리로 구분한다
+  EMPTY: 'bg-empty text-on-empty shadow-seat',
+  OCCUPIED: 'border border-line-strong bg-occupied text-ink',
+  AWAY: 'border border-line-strong bg-surface text-ink',
+  UNKNOWN: 'pattern-unknown border border-line-strong bg-surface text-ink',
+  UNRECOGNIZED: 'pattern-unknown border border-line-strong bg-surface text-ink',
 }
 
 function isHatched(status: SeatStatus): boolean {
@@ -63,7 +64,7 @@ function SeatButtonView({
   const showText = stage !== 'zoom'
   const hatched = isHatched(seat.status)
   const away = seat.status === 'AWAY'
-  const chip = hatched ? 'self-start bg-paper px-1' : ''
+  const chip = hatched ? 'self-start rounded-chip bg-surface px-2 py-px' : ''
 
   const justLabel =
     justChanged === undefined
@@ -81,7 +82,7 @@ function SeatButtonView({
         data-seat-id={seat.seatId}
         onClick={() => onSelect?.(seat.seatId)}
         style={style}
-        className={`absolute overflow-hidden text-left focus-visible:z-20 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink ${FACE[seat.status]} ${selected ? 'outline-4 outline-offset-3 outline-ink' : ''}`}
+        className={`absolute overflow-hidden rounded-seat text-left transition focus-visible:z-20 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent motion-safe:hover:-translate-y-px ${FACE[seat.status]} ${selected ? 'outline-4 outline-offset-3 outline-ink' : ''} ${justChanged !== undefined ? 'motion-safe:animate-flip' : ''}`}
       >
         {away && (
           <span
@@ -92,37 +93,39 @@ function SeatButtonView({
         )}
         {showText && (
           <span
-            className="absolute inset-x-0 top-0 flex flex-col justify-between p-1"
+            className={`absolute inset-x-0 top-0 flex flex-col justify-between ${stage === 'full' ? 'p-2' : 'p-1'}`}
             style={{ bottom: away ? '25%' : 0 }}
           >
             <span
-              className={`font-num font-extrabold tabular-nums ${stage === 'full' ? 'text-number' : 'text-label'} ${chip}`}
+              className={`num font-bold ${stage === 'full' ? 'text-number' : 'text-label'} ${chip}`}
             >
               {seat.label}
             </span>
             {stage === 'full' && (
               <span
-                className={`text-label font-bold ${
-                  justLabel === null ? chip : 'self-start bg-live px-1 text-on-live'
+                className={`text-label font-medium ${
+                  justLabel === null ? chip : 'self-start rounded-chip bg-live px-1 text-on-live'
                 }`}
               >
                 {justLabel ?? seatStatusLabel(seat.status)}
               </span>
             )}
             {seat.hasOutlet && (
-              <span className={`absolute top-1 right-1 ${hatched ? 'bg-paper p-px' : ''}`}>
-                <OutletIcon className="size-3" />
+              <span
+                className={`absolute ${stage === 'full' ? 'top-2 right-2' : 'top-1 right-1'} ${hatched ? 'rounded-chip bg-surface p-px' : ''}`}
+              >
+                <OutletIcon className={stage === 'full' ? 'size-4' : 'size-3'} />
               </span>
             )}
           </span>
         )}
       </button>
-      {/* 칸 바깥에 종이색 틈을 두고 두른다. 같은 색 계열 면(빈자리 초록) 위에서도 테두리가 구별된다.
+      {/* 칸 바깥에 바닥판 색 틈을 두고 두른다. 밝기가 비슷한 빈자리 틸 면 위에서도 테두리가 구별된다.
           버튼 뒤에 그려야 이웃 칸에 가려지지 않는다 */}
       {justChanged !== undefined && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute z-10 outline-4 outline-offset-2 outline-live motion-safe:animate-live"
+          className="pointer-events-none absolute z-10 rounded-seat outline-4 outline-offset-2 outline-live motion-safe:animate-live"
           style={style}
         />
       )}

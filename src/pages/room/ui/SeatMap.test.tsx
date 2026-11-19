@@ -64,7 +64,8 @@ describe('SeatMap', () => {
     const { container } = render(<SeatMap seats={many} />)
     await user.click(screen.getByRole('button', { name: '확대' }))
     const stage = container.querySelector<HTMLElement>('.relative')!
-    expect(parseFloat(stage.style.width)).toBeCloseTo(174.4, 0)
+    // 상자 안쪽 여백(p-3, 12px)까지 보이는 폭으로 끝 칸이 잘리게 배율을 정한다
+    expect(parseFloat(stage.style.width)).toBeCloseTo(183.8, 0)
   })
 
   it('너비를 모르면 compact: 상태 말이 없고 확대 버튼도 없다', () => {
@@ -90,12 +91,12 @@ describe('SeatMap 좌석 모양', () => {
     expect(content.style.bottom).toBe('25%')
   })
 
-  it('빗금 칸의 콘센트 아이콘은 종이색 칩 위에 놓인다', () => {
+  it('빗금 칸의 콘센트 아이콘은 흰 칩 위에 놓인다', () => {
     render(<SeatMap seats={[{ ...base, status: 'UNKNOWN', hasOutlet: true }]} />)
     const button = screen.getByRole('button', { name: /^A1 / })
     const icon = button.querySelector('svg')!
     expect(icon.parentElement).not.toBe(button)
-    expect(icon.parentElement).toHaveClass('bg-paper')
+    expect(icon.parentElement).toHaveClass('bg-surface')
   })
 
   it('알 수 없는 상태는 확인 불가와 같은 빗금이다', () => {

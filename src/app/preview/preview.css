@@ -1,7 +1,10 @@
 html.preview {
-  scroll-padding-top: calc(env(safe-area-inset-top) + var(--spacing-tap));
+  scroll-padding-top: calc(env(safe-area-inset-top) + var(--spacing-tap) * 2);
+  /* 고정 상단 줄은 미리보기 띠 바로 아래에 붙는다. 띠가 safe-area 를 덮으므로 상단 줄은 그 여백을 두지 않는다 */
+  --sticky-top: calc(env(safe-area-inset-top) + var(--spacing-tap));
+  --header-safe-top: 0px;
 }
 
 html.preview #root {
-  padding-top: calc(env(safe-area-inset-top) + var(--spacing-tap) + var(--spacing-4));
+  padding-top: calc(env(safe-area-inset-top) + var(--spacing-tap));
 }

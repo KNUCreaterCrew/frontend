@@ -2,57 +2,72 @@
  * 디자인 토큰. 기준 문서는 저장소 루트의 DESIGN.md 다.
  * Tailwind 기본 테마를 모두 지우고 여기 선언한 값만 유틸리티로 쓴다.
  * 새 값이 필요하면 DESIGN.md 를 먼저 고치고 여기에 더한다. 컴포넌트에 hex 나 임의 값을 쓰지 않는다.
- * 대비는 WCAG 2.2 기준. 본문 4.5:1, 큰 글자와 아이콘 3:1 이상.
+ * 대비는 WCAG 2.2 기준. 본문 4.5:1, 큰 글자와 아이콘, 의미 있는 경계 3:1 이상.
+ * 색의 출발점은 경북대 컴퓨터학부 홈페이지(네이비 #0e2036, 인디고, 블루, 틸)다.
  */
 @theme {
   --*: initial;
 
-  /* 색 */
-  --color-paper: #f2f0ea; /* 바탕. 게시판 종이 */
-  --color-surface: #ffffff; /* 바텀시트처럼 바탕 위에 올라오는 면 */
-  --color-ink: #121212; /* 본문, 선, 사용 중 좌석 면. paper 대비 16.4:1, surface 대비 18.7:1 */
-  --color-ink-soft: #3d3b37; /* 보조 글자. paper 대비 9.8:1, surface 대비 11.2:1 */
-  --color-empty: #007a45; /* 빈자리 면과 빈자리 숫자. paper 대비 4.8:1, surface 대비 5.4:1 */
-  --color-on-empty: #ffffff; /* empty 위 글자. 5.4:1 */
-  --color-live: #c4301a; /* 방금 바뀐 좌석과 장치 끊김 안내에만. paper 대비 4.9:1, surface 대비 5.6:1 */
-  --color-on-live: #ffffff; /* live 위 글자. 5.6:1 */
-  --color-scrim: rgb(18 18 18 / 0.28); /* 바텀시트 뒤를 덮는 막. 글자를 올리지 않는다 */
+  /* 색: 바탕과 글자 */
+  --color-paper: #f5f6f8; /* 바탕. 차가운 뉴트럴 */
+  --color-surface: #ffffff; /* 바닥판, 카드, 시트처럼 바탕 위에 놓이는 면 */
+  --color-ink: #0e2036; /* 본문, 네이비 패널. paper 15.2:1, surface 16.4:1 */
+  --color-ink-soft: #4b5768; /* 보조 글자. paper 6.8:1, surface 7.3:1 */
+  --color-on-ink: #ffffff; /* 네이비 패널 위 글자. 16.4:1 */
+  --color-on-ink-soft: #b9c4d6; /* 네이비 패널 위 보조 글자. 9.3:1 */
+  --color-accent: #0b5cad; /* 학부 블루를 어둡게. 링크, 포커스 링. paper 6.2:1, surface 6.7:1 */
 
-  /* 글꼴 */
-  --font-sans: 'Gothic A1', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-  --font-num: 'Archivo', 'Gothic A1', sans-serif; /* 숫자와 좌석 번호 */
+  /* 색: 선 */
+  --color-line: #dde2ea; /* 장식 구분선. 의미를 싣지 않는다 */
+  --color-line-strong: #7d8aa0; /* 의미 있는 경계(좌석 칸 테두리). surface 3.5:1, paper 3.2:1 */
+
+  /* 색: 좌석 상태와 신호 */
+  --color-empty: #0a6b5e; /* 빈자리 면. 학부 틸을 어둡게. paper 5.9:1, 흰 글자 6.4:1 */
+  --color-on-empty: #ffffff;
+  --color-empty-bright: #5eead4; /* 네이비 패널 위 빈자리 숫자. ink 대비 11.1:1 */
+  --color-occupied: #dde3ec; /* 사용 중 면. ink 글자 12.7:1, 빈자리 면과 밝기 대비 5.0:1 */
+  --color-live: #b42318; /* 방금 바뀐 좌석, 장치 끊김 표시에만. paper 6.1:1, 흰 글자 6.6:1 */
+  --color-on-live: #ffffff;
+  --color-live-tint: #fdf0ee; /* 장치 끊김 안내 면. ink 글자 14.8:1, live 글자 5.9:1 */
+  --color-scrim: rgb(14 32 54 / 0.32); /* 바텀시트 뒤를 덮는 막. 글자를 올리지 않는다 */
+
+  /* 글꼴. Pretendard 하나로 한글, 숫자, 서비스 이름을 쓴다 */
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Malgun Gothic', sans-serif;
+  --font-num: var(--font-sans); /* 숫자와 좌석 번호. 항상 tabular-nums 와 함께 */
   --default-font-family: var(--font-sans);
 
+  --font-weight-regular: 400;
   --font-weight-medium: 500;
+  --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  --font-weight-extrabold: 800;
-  --font-weight-black: 900;
 
   /* 글자 크기. 이름은 쓰임새 */
-  --text-caption: 0.75rem; /* 12px 벽, 통로 같은 좌석도 표시 */
+  --text-caption: 0.75rem; /* 12px 좌석도 보조 표시 */
   --text-caption--line-height: 1.4;
-  --text-label: 0.8125rem; /* 13px 좌석 칸 안 상태, 범례 */
+  --text-label: 0.8125rem; /* 13px 좌석 칸 안 상태, 범례, 상단 줄 */
   --text-label--line-height: 1.4;
   --text-body: 0.9375rem; /* 15px 본문 */
-  --text-body--line-height: 1.5;
-  --text-number: 1.25rem; /* 20px 요약 표의 숫자 */
-  --text-number--line-height: 1.2;
-  --text-fact: 1.375rem; /* 22px 요약 표의 첫 줄(빈자리) */
-  --text-fact--line-height: 1.2;
-  --text-alert: 1.5rem; /* 24px 장치 끊김 같은 안내 제목 */
-  --text-alert--line-height: 1.25;
-  --text-title: 1.875rem; /* 30px 방 이름 */
-  --text-title--line-height: 1.1;
-  --text-sheet: 2.125rem; /* 34px 바텀시트의 좌석 번호와 상태 */
-  --text-sheet--line-height: 1.1;
-  --text-poster-word: 4.5rem; /* 72px 숫자 대신 "모름"을 쓸 때 */
-  --text-poster-word--line-height: 0.95;
-  --text-row-number: 3.5rem; /* 56px 방 목록 행의 빈자리 숫자 */
-  --text-row-number--line-height: 0.9;
-  --text-poster: 9rem; /* 144px 빈자리 숫자 하나에만. 글자 제목에 쓰지 않는다 */
-  --text-poster--line-height: 0.82;
+  --text-body--line-height: 1.55;
+  --text-number: 1.0625rem; /* 17px 요약 표의 숫자 */
+  --text-number--line-height: 1.3;
+  --text-fact: 1.0625rem; /* 17px 방 목록 행 이름, 요약 표 첫 줄 */
+  --text-fact--line-height: 1.35;
+  --text-alert: 1.0625rem; /* 17px 장치 끊김 같은 안내 제목 */
+  --text-alert--line-height: 1.35;
+  --text-title: 1.625rem; /* 26px 방 이름, 페이지 제목 */
+  --text-title--line-height: 1.2;
+  --text-sheet: 1.625rem; /* 26px 바텀시트의 좌석 번호와 상태 */
+  --text-sheet--line-height: 1.2;
+  --text-poster-word: 3rem; /* 48px 숫자 대신 "모름"을 쓸 때 */
+  --text-poster-word--line-height: 1;
+  --text-row-number: 2.75rem; /* 44px 방 목록 행의 빈자리 숫자 */
+  --text-row-number--line-height: 1;
+  --text-poster: 6rem; /* 96px 빈자리 숫자 하나에만. 글자 제목에 쓰지 않는다 */
+  --text-poster--line-height: 0.9;
 
-  --tracking-tight: -0.03em;
+  --tracking-tight: -0.02em;
   --tracking-poster: -0.04em;
 
   /* 간격. 4px 단위 */
@@ -69,27 +84,67 @@
   --spacing-12: 3rem;
   --spacing-16: 4rem;
   --spacing-tap: 2.75rem; /* 44px 터치 목표 최소 크기 */
-  --spacing-band: 0.375rem; /* 6px 바텀시트 위 상태 띠 높이 */
+  --spacing-band: 0.375rem; /* 6px 바텀시트 위 상태 띠, 방 목록 "모름" 띠 */
+  --spacing-rail: 24rem; /* 384px 데스크톱 방 화면의 왼쪽 열 */
 
-  /* 선 굵기는 Tailwind 숫자 유틸리티(border-2 등)를 쓴다. 모서리는 각지게: 반경 토큰 없음, 그림자 토큰 없음 */
+  /* 모서리. 패널과 카드 16px, 버튼 12px, 좌석 칸 8px */
+  --radius-chip: 0.25rem; /* 좌석 칸 안 작은 글자 조각 */
+  --radius-seat: 0.5rem;
+  --radius-control: 0.75rem;
+  --radius-panel: 1rem;
+  --radius-sheet: 1.25rem;
+  --radius-full: 9999px;
+
+  /* 깊이. 한 요소에 테두리와 그림자를 함께 쓰지 않는다 */
+  --shadow-plate: 0 1px 2px rgb(14 32 54 / 0.05), 0 12px 32px -12px rgb(14 32 54 / 0.16);
+  --shadow-seat:
+    inset 0 1px 0 rgb(255 255 255 / 0.18), 0 2px 4px -1px rgb(10 107 94 / 0.35),
+    0 6px 14px -6px rgb(14 32 54 / 0.35);
+  --shadow-sheet: 0 -12px 40px -12px rgb(14 32 54 / 0.28);
+
+  /* 유리. 떠 있는 면(상단 줄, 시트 뒤 막)에만 */
+  --blur-glass: 14px;
+  --blur-scrim: 3px;
 
   /* 화면 폭 */
   --breakpoint-md: 48rem; /* 768px */
+  --breakpoint-lg: 64rem; /* 1024px 방 화면이 2열이 되는 폭 */
   --container-sheet: 30rem; /* 480px 데스크톱에서 바텀시트의 최대 폭 */
+  --container-page: 72rem; /* 1152px 모든 화면 내용의 최대 폭 */
 
   /* 움직임 */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --default-transition-duration: 160ms;
   --default-transition-timing-function: var(--ease-out);
-  --animate-live: live-tighten var(--duration-live) ease-out 1;
+  --animate-live: live-tighten var(--duration-live) var(--ease-out) 1;
+  --animate-flip: flip-in var(--duration-flip) var(--ease-out) 1;
+  --animate-pulse: pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* 불러오는 중 뼈대 */
+
+  @keyframes pulse {
+    50% {
+      opacity: 0.55;
+    }
+  }
 
   @keyframes live-tighten {
     from {
-      outline-offset: 4px;
-      opacity: 0.7;
+      outline-offset: 5px;
+      opacity: 0.6;
     }
     to {
       outline-offset: 2px;
+      opacity: 1;
+    }
+  }
+
+  /* 출발 안내판의 판처럼 위에서 아래로 한 번 넘어온다. 크기와 자리는 그대로 */
+  @keyframes flip-in {
+    from {
+      transform: perspective(28rem) rotateX(-72deg);
+      opacity: 0.35;
+    }
+    to {
+      transform: perspective(28rem) rotateX(0deg);
       opacity: 1;
     }
   }
@@ -97,8 +152,15 @@
 
 :root {
   /* 확인 불가 좌석의 빗금. 회색 면이 아니라 "모름"을 뜻하는 고유한 무늬 */
-  --pattern-unknown: repeating-linear-gradient(-45deg, var(--color-ink) 0 2px, transparent 2px 9px);
+  --pattern-unknown: repeating-linear-gradient(
+    -45deg,
+    var(--color-ink-soft) 0 1px,
+    transparent 1px 6px
+  );
+  /* 좌석도 바닥판의 점 격자. 평면도의 눈금이다 */
+  --pattern-floor: radial-gradient(rgb(14 32 54 / 0.09) 1px, transparent 1.2px);
   --sheet-max-height: 85dvh; /* 바텀시트 최대 높이. 넘치면 내용만 스크롤 */
   --duration-sheet: 240ms; /* 바텀시트 열고 닫기 */
   --duration-live: 1600ms; /* 방금 바뀐 좌석 강조 한 번 */
+  --duration-flip: 520ms; /* 좌석 칸과 빈자리 숫자가 바뀔 때 한 번 넘어오기 */
 }
