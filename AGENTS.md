@@ -52,7 +52,7 @@ src/
   shared/     api(client, endpoints, ApiError), ui(Button 등), lib(time 등), test(renderApp 등)
 mocks/        MSW 핸들러와 시나리오(scenarios.ts): 개발 서버, Vitest, E2E 공용
 e2e/          Playwright
-config/       개발 서버 프록시
+config/       개발 서버 프록시, 빌드 값 검증
 ```
 
 `features/`, `entities/`, `shared/api` 는 처음 쓰는 기능에서 만든다.
@@ -98,7 +98,7 @@ config/       개발 서버 프록시
 
 개발 서버는 `config/proxy.ts` 의 `createProxy(backendOrigin?)` 로 `/api` 를 백엔드 출처로, `/ws` 를 같은 곳의 `ws://`(백엔드가 https 면 `wss://`)로 넘긴다. 둘 다 `changeOrigin: true`. 기본 출처는 `http://127.0.0.1:8000` 이고, `BACKEND_ORIGIN` 으로 바꾼다(`.env.local` 또는 셸). `VITE_` 접두사가 아니라서 클라이언트 코드에 노출되지 않는다.
 
-WebSocket URL 은 `location` 에서 만든다: `ws(s)://${location.host}/ws/...`. 백엔드 주소를 코드에 적지 않는다.
+주소는 `shared/api/baseUrl` 의 `httpUrl`, `wsUrl` 로만 만든다. 개발 서버, Vitest, E2E 는 `VITE_API_ORIGIN` 이 없어 `location` 출처를 쓰고, 운영 빌드는 `.env.production` 의 `VITE_API_ORIGIN` 을 쓴다. 백엔드 주소는 `.env.production` 한 곳에만 적는다. 운영 빌드에 값이 없으면 `config/apiOrigin.ts` 가 빌드를 실패시킨다. `http` 는 CORS 단순 요청을 지키기 위해 `Accept` 외의 헤더를 붙이지 않는다(백엔드는 GET 만, 헤더 허용 없음).
 
 ## 스크립트 이름 (고정)
 
