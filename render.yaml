@@ -25,3 +25,31 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+
+  # 모의 데이터 미리보기 사이트. 실제 백엔드를 부르지 않는다(MSW 가 브라우저에서 응답한다).
+  # 대시보드 Environment 에 VITE_API_ORIGIN 을 넣으면 config/apiOrigin.ts 가 mock 빌드를 실패시킨다. 넣지 않는다.
+  # 미확인: 시연 전 운영 서비스 자동 배포를 끈 상태에서 Blueprint Sync 를 하면 자동 배포가 다시 켜질 수 있다. 시연 기간에는 Sync 하지 않는다.
+  - type: web
+    name: zeroframe-web-preview
+    runtime: static
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build:mock
+    staticPublishPath: dist
+    autoDeployTrigger: checksPass
+    previews:
+      generation: off
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      # 워커 파일은 이름에 해시가 없으므로 매번 새로 받아 오래된 워커가 남지 않게 한다.
+      - path: /mockServiceWorker.js
+        name: Cache-Control
+        value: no-cache
+      # 미리보기 주소가 검색에 잡히지 않게 한다.
+      - path: /*
+        name: X-Robots-Tag
+        value: noindex, nofollow
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
