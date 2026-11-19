@@ -117,12 +117,12 @@ config/       개발 서버 프록시, 빌드 값 검증
 
 ## 배포
 
-Render static site 로 올립니다. 설정은 [`render.yaml`](render.yaml)(Blueprint)에 있고, 서비스 이름은 `zeroframe-web`, 주소는 **https://zeroframe-web.onrender.com** 입니다. 접속 QR 은 [`docs/qr/zeroframe-web.svg`](docs/qr/zeroframe-web.svg)(발표 자료용 PNG 도 같은 폴더)이고 방 목록 `/` 을 엽니다. 2026-11-19 첫 배포에서 아래 1~2번 순서로 빌드가 성공했고, `/rooms/IT4-101` 처럼 바로 연 주소와 `/assets/*` 파일이 제대로 서빙되는 것을 확인했습니다.
+Render static site 로 올립니다. 설정은 [`render.yaml`](render.yaml)(Blueprint)에 있고, 서비스 이름은 `zeroframe-web`, 주소는 **https://zeroframe-web.onrender.com** 입니다. 접속 QR 은 [`docs/qr/zeroframe-web.svg`](docs/qr/zeroframe-web.svg)(발표 자료용 PNG 도 같은 폴더)이고 방 목록 `/` 을 엽니다. 2026-11-19 첫 배포에서 아래 1~2번 순서로 빌드가 성공했고, `curl` 로 `/rooms/IT4-101` 처럼 바로 연 주소가 앱(200)을, `/assets/*.js` 가 HTML 이 아닌 JavaScript 를 돌려주는 것을 확인했습니다.
 
 1. Render 대시보드에서 **New → Blueprint** 를 누르고 `KNUCreaterCrew/frontend` 저장소를 고릅니다.
 2. `render.yaml` 의 `zeroframe-web` 서비스를 확인하고 **Apply** 를 누릅니다.
 3. 빌드 로그에서 pnpm 이 맞춰지고 Node 가 24 인지 확인합니다. 안 맞으면 Environment 에 `NODE_VERSION=24` 를 넣습니다.
-4. 배포된 웹 출처를 백엔드의 `CORS_ALLOW_ORIGINS` 에 넣습니다. 지금 값(`https://zeroframe-web.onrender.com`)은 백엔드 `render.yaml` 에 적혀 있습니다([backend#36](https://github.com/KNUCreaterCrew/backend/pull/36)). 웹 주소가 바뀌면 백엔드 `render.yaml` 을 고칩니다. 첫 등록 때는 백엔드 Blueprint 가 자동으로 반영하지 않아, 백엔드 서비스의 Environment 에 같은 값을 직접 넣었습니다. 바꾼 뒤에는 5번으로 반영됐는지 꼭 확인합니다. 설정 방법은 백엔드 README 의 [다른 주소의 웹에서 부르기 (CORS)](https://github.com/KNUCreaterCrew/backend#다른-주소의-웹에서-부르기-cors) 를 봅니다.
+4. 배포된 웹 출처를 백엔드의 `CORS_ALLOW_ORIGINS` 에 넣습니다. 지금 값(`https://zeroframe-web.onrender.com`)은 백엔드 `render.yaml` 에 적혀 있습니다([backend#36](https://github.com/KNUCreaterCrew/backend/pull/36)). 웹 주소가 바뀌면 백엔드 `render.yaml` 을 고칩니다. 첫 등록 때는 `render.yaml` 을 병합해도 10분 넘게 반영되지 않아 백엔드 담당이 대시보드에서 다시 반영했습니다. 바꾼 뒤에는 5번으로 반영됐는지 꼭 확인하고, 반영되지 않으면 백엔드 서비스의 Environment 에 같은 값을 넣습니다. 설정 방법은 백엔드 README 의 [다른 주소의 웹에서 부르기 (CORS)](https://github.com/KNUCreaterCrew/backend#다른-주소의-웹에서-부르기-cors) 를 봅니다.
 5. 아래 두 명령 모두 응답 헤더에 `access-control-allow-origin` 이 붙는지 확인합니다. 두 번째는 404 응답이라도 붙어야 합니다.
 
 ```sh
