@@ -108,7 +108,10 @@ function SheetLayers({
           exit={{ opacity: 0 }}
           transition={reduceMotion ? { duration: 0 } : TRANSITION}
         >
-          <m.div className="absolute inset-0 bg-scrim" style={{ opacity: scrimOpacity }} />
+          <m.div
+            className="absolute inset-0 bg-scrim backdrop-blur-scrim"
+            style={{ opacity: scrimOpacity }}
+          />
         </m.div>
       </Dialog.Overlay>
       <Dialog.Content
@@ -118,7 +121,7 @@ function SheetLayers({
         onCloseAutoFocus={onCloseAutoFocus}
       >
         <m.div
-          className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-h-sheet w-full flex-col bg-surface md:max-w-sheet"
+          className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-h-sheet w-full flex-col overflow-hidden rounded-t-sheet bg-surface shadow-sheet md:bottom-4 md:max-w-sheet md:rounded-b-sheet"
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
@@ -149,10 +152,10 @@ function SheetLayers({
             />
             <div className="touch-none px-4" onPointerDown={startDrag}>
               <div className="py-3">
-                <div aria-hidden="true" className="mx-auto h-1 w-8 bg-ink" />
+                <div aria-hidden="true" className="mx-auto h-1 w-10 rounded-full bg-line-strong" />
               </div>
-              <Dialog.Title className="text-sheet font-black tracking-tight">
-                <span className="font-num text-ink tabular-nums">{content.seatLabel}</span>{' '}
+              <Dialog.Title className="text-sheet font-bold tracking-tight">
+                <span className="num text-ink">{content.seatLabel}</span>{' '}
                 <span className={content.statusTone === 'empty' ? 'text-empty' : 'text-ink'}>
                   {content.statusLabel}
                 </span>
@@ -162,14 +165,14 @@ function SheetLayers({
               {content.reason !== null && (
                 <p className="mt-2 text-body text-ink">{content.reason}</p>
               )}
-              <dl className="mt-4 border-t-2 border-ink">
+              <dl className="mt-4 border-t border-line">
                 {content.rows.map((row) => (
                   <div
                     key={row.key}
-                    className="flex items-baseline justify-between gap-4 border-b border-ink py-3"
+                    className="flex items-baseline justify-between gap-4 border-b border-line py-3"
                   >
                     <dt className="text-body text-ink-soft">{row.label}</dt>
-                    <dd className="text-right text-body font-bold text-ink">
+                    <dd className="text-right text-body font-semibold text-ink">
                       {row.key === 'outlet' && row.value === '있음' && (
                         <OutletIcon className="mr-1 inline-block size-4 align-middle" />
                       )}

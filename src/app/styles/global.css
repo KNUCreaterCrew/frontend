@@ -7,29 +7,100 @@ body,
   @apply min-h-dvh;
 }
 
+html {
+  color-scheme: light;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+/* 아주 넓은 화면(4K 를 배율 100% 로 쓰는 경우 등)에서는 기준 글자 크기를 단계적으로 키운다.
+   모든 크기가 rem 이라 글자, 패널, 좌석 칸 최대 크기(SeatMap)가 같은 비율로 커진다.
+   rem 미디어 쿼리는 브라우저 기본 글자 크기(16px)를 기준으로 한다: 120rem = 1920px */
+@media (min-width: 120rem) {
+  html {
+    font-size: 112.5%;
+  }
+}
+@media (min-width: 160rem) {
+  html {
+    font-size: 125%;
+  }
+}
+@media (min-width: 212.5rem) {
+  html {
+    font-size: 150%;
+  }
+}
+
 body {
-  @apply bg-paper font-sans text-body font-medium text-ink;
+  @apply bg-paper font-sans text-body font-regular text-ink;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss06';
   /* 한국어는 단어 단위로 줄을 바꾸고, 긴 ID 는 필요하면 어디서든 끊는다. */
   word-break: keep-all;
   overflow-wrap: anywhere;
+  caret-color: var(--color-accent);
 }
 
 ::selection {
-  @apply bg-ink text-paper;
+  @apply bg-ink text-on-ink;
 }
 
-/* 화면 가장자리 여백. 노치와 둥근 모서리에 글자가 가리지 않게 safe-area 를 함께 본다. */
+/* 상단 줄은 화면 폭 전체에 붙고, 내용은 page-x 가 가운데 최대 폭으로 모은다.
+   아래 여백은 safe-area 를 함께 본다. */
 #root {
-  padding-top: max(var(--spacing-4), env(safe-area-inset-top));
-  padding-right: max(var(--spacing-4), env(safe-area-inset-right));
-  padding-bottom: max(var(--spacing-4), env(safe-area-inset-bottom));
+  padding-bottom: max(var(--spacing-10), env(safe-area-inset-bottom));
+}
+
+/* 화면 가장자리 여백과 최대 폭. 노치와 둥근 모서리에 글자가 가리지 않게 safe-area 를 함께 본다. */
+@utility page-x {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
   padding-left: max(var(--spacing-4), env(safe-area-inset-left));
+  padding-right: max(var(--spacing-4), env(safe-area-inset-right));
+}
+
+#root main {
+  @apply page-x;
+}
+
+/* 데스크톱 방 화면: 왼쪽 열(패널, 범례)과 오른쪽 좌석도. 둘째 줄이 남는 높이를 받아 패널과 범례가 붙어 있다 */
+@utility grid-room {
+  grid-template-columns: var(--spacing-rail) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+}
+
+/* 고정 상단 줄의 위치. 미리보기 띠가 있으면 그 아래에 붙는다(preview.css). */
+@utility top-sticky {
+  top: var(--sticky-top, 0px);
+}
+
+@utility pt-safe-top {
+  padding-top: var(--header-safe-top, env(safe-area-inset-top));
+}
+
+/* 떠 있는 상단 줄의 유리. backdrop-filter 를 못 쓰면 불투명한 바탕으로 읽힌다.
+   88% 는 네이비 패널이 바로 밑을 지날 때도 ink-soft 글자가 5.3:1 을 넘는 값이다 */
+@utility glass {
+  background-color: var(--color-paper);
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    background-color: color-mix(in srgb, var(--color-paper) 88%, transparent);
+    -webkit-backdrop-filter: saturate(1.4) blur(var(--blur-glass));
+    backdrop-filter: saturate(1.4) blur(var(--blur-glass));
+  }
 }
 
 /* 확인 불가 좌석의 빗금. 무늬 정의는 tokens.css 의 --pattern-unknown */
 @utility pattern-unknown {
   background-image: var(--pattern-unknown);
+}
+
+/* 좌석도 바닥판의 점 격자(평면도 눈금) */
+@utility pattern-floor {
+  background-image: var(--pattern-floor);
+  background-size: 1rem 1rem;
+  background-position: center;
 }
 
 /* 바텀시트 높이 한계와 아래 여백(safe-area). 값은 tokens.css */
@@ -39,4 +110,10 @@ body {
 
 @utility pb-safe {
   padding-bottom: max(var(--spacing-4), env(safe-area-inset-bottom));
+}
+
+/* 숫자는 항상 고정폭. 바뀌어도 자리가 흔들리지 않는다 */
+@utility num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
 }

@@ -50,6 +50,18 @@ describe('cellStage', () => {
     expect(cellStage(40)).toBe('compact')
     expect(cellStage(39.9)).toBe('zoom')
   })
+
+  it('짧은 변이 56px 보다 작으면 두 줄이 들어가지 않으니 compact', () => {
+    expect(cellStage(64, 1, 56)).toBe('full')
+    expect(cellStage(64, 1, 55.9)).toBe('compact')
+  })
+
+  it('기준 글자를 키운 넓은 화면에서는 글자 크기로 나눈 값으로 full 을 정하고, zoom 은 실제 px 로 정한다', () => {
+    // 4K 배율 100%(기준 글자 150%)에서 40석 방의 칸 약 95x71px
+    expect(cellStage(95, 1.5, 71)).toBe('compact')
+    expect(cellStage(192, 1.5, 144)).toBe('full')
+    expect(cellStage(45, 1.5, 34)).toBe('compact')
+  })
 })
 
 describe('minCellPx와 zoomScale', () => {
@@ -84,8 +96,8 @@ describe('minCellPx와 zoomScale', () => {
 
 describe('zoomScaleWithCutEdge', () => {
   const vb = computeViewBox(many)!
-  // 좌석도 상자의 오른쪽 안쪽 여백(p-2)만큼 내용이 더 보인다.
-  const PAD = 8
+  // 좌석도 상자의 오른쪽 안쪽 여백(p-3)만큼 내용이 더 보인다.
+  const PAD = 12
 
   function visibleFractionAtEdge(scale: number, content: number, visible: number): number | null {
     const edge = (vb.width * (visible / content)) / scale
@@ -97,7 +109,7 @@ describe('zoomScaleWithCutEdge', () => {
   }
 
   it.each([312, 342, 280, 300, 330])(
-    '내용 폭 %ipx, 보이는 폭 +8px: 끝 칸이 25% 에서 75% 만 보이고 배율은 줄지 않는다',
+    '내용 폭 %ipx, 보이는 폭 +12px: 끝 칸이 25% 에서 75% 만 보이고 배율은 줄지 않는다',
     (w) => {
       const s0 = zoomScale(minCellSidePx(many, vb, w))
       const s = zoomScaleWithCutEdge(many, vb, s0, w, w + PAD)

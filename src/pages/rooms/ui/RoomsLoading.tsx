@@ -11,27 +11,27 @@ export function RoomsLoading({
   const showSkeleton = useDelayedVisibility(true)
 
   return (
-    <main className="mt-6">
-      <h1 className="text-title font-black tracking-tight">어느 방으로 갈까요</h1>
+    <main className="pt-6 lg:pt-10">
+      <h1 className="text-title font-bold tracking-tight">어느 방으로 갈까요</h1>
       <div className="mt-2">
         <LoadingStatus elapsedMs={elapsedMs} paused={paused} />
       </div>
       {showSkeleton && (
-        <div aria-busy="true" className="mt-4 border-t-6 border-ink">
+        <div aria-busy="true" className="mt-5 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="flex gap-1 border-b-2 border-ink py-4">
-              <span aria-hidden="true" className="w-band shrink-0" />
-              <div className="min-w-0 flex-1">
+            <div key={i} className="rounded-panel bg-surface p-4 shadow-plate">
+              <div className="min-w-0 flex-1 motion-safe:animate-pulse">
                 <div className="flex h-6 items-center">
-                  <div className="h-1 w-1/2 bg-ink" />
+                  <div className="h-3 w-1/2 rounded-chip bg-line" />
                 </div>
-                <div className="mt-2 flex items-start gap-4">
-                  <div className="w-1/3 shrink-0 pt-6">
-                    <div className="h-1 w-1/2 bg-ink" />
+                <div className="mt-3 flex items-start gap-4">
+                  <div className="w-1/3 shrink-0 pt-5">
+                    <div className="h-8 w-2/3 rounded-chip bg-line" />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-3 pt-2">
-                    <div className="h-1 bg-ink" />
-                    <div className="h-1 w-2/3 bg-ink" />
+                    <div className="h-3 rounded-chip bg-line" />
+                    <div className="h-3 rounded-chip bg-line" />
+                    <div className="h-3 w-2/3 rounded-chip bg-line" />
                   </div>
                 </div>
               </div>

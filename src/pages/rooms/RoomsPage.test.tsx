@@ -245,7 +245,7 @@ describe('방 목록 행 구성', () => {
     const row = within(await onlyRow())
     const label = row.getByText('빈자리')
     expect(label.parentElement).toContainElement(row.getByText('모름'))
-    expect(row.getByText('모름')).toHaveClass('text-title', 'font-black')
+    expect(row.getByText('모름')).toHaveClass('text-title', 'font-bold')
   })
 
   test('좌석 0인 방에는 빈자리 라벨이 없다', async () => {
@@ -277,22 +277,29 @@ describe('방 목록 행 구성', () => {
     expect(within(dl).getByText('보통')).toBeInTheDocument()
   })
 
-  test('여백 칸은 행 높이 전체를 채우고 위아래 여백은 내용 쪽에 있다', async () => {
+  test('모름 카드: 빈자리 라벨 옆에 좌석 칸과 같은 빗금 견본이 있고, 카드 옆면에는 띠가 없다', async () => {
     useList([item({ total_seats: 4, available_seats: 0, unknown_seats: 4 })])
     renderApp('/')
     const link = await onlyRow()
-    expect(link).toHaveClass('min-h-tap', 'gap-1')
-    expect(link).not.toHaveClass('py-4', 'gap-3')
-    const gutter = link.firstElementChild!
-    expect(gutter).toHaveClass('w-band', 'pattern-unknown')
-    expect(gutter.className).not.toMatch(/\b(p|m)[ytb]-/)
-    expect(link.lastElementChild).toHaveClass('py-4')
+    expect(link).toHaveClass('min-h-tap')
+    const label = within(link).getByText('빈자리')
+    expect(label.querySelector('[aria-hidden="true"].pattern-unknown')).not.toBeNull()
+    expect(link.querySelectorAll('.pattern-unknown')).toHaveLength(1)
+    expect(link.querySelector('.w-band')).toBeNull()
   })
 
-  test('방 이름은 링크처럼 밑줄이 있다', async () => {
+  test('확인된 방 카드에는 빗금 견본이 없다', async () => {
     useList([item()])
     renderApp('/')
-    expect(within(await onlyRow()).getByText(NAME)).toHaveClass('underline', 'underline-offset-4')
+    expect((await onlyRow()).querySelector('.pattern-unknown')).toBeNull()
+  })
+
+  test('카드 전체가 링크라 이름에는 밑줄 대신 화면 읽기 도구에 숨은 이동 아이콘이 붙는다', async () => {
+    useList([item()])
+    renderApp('/')
+    const link = await onlyRow()
+    expect(within(link).getByText(NAME)).not.toHaveClass('underline')
+    expect(link.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
   })
 })
 
@@ -350,10 +357,10 @@ describe('방 목록 로딩과 재조회', () => {
     await advance(250)
     const busy = document.querySelector('[aria-busy="true"]')
     expect(busy).not.toBeNull()
-    // 실제 행 모양: 행마다 아래 2px 선, 상자 테두리는 없다
+    // 실제 행 모양: 방 카드와 같은 면, 모서리, 그림자의 카드 세 장
     expect(busy!.children).toHaveLength(3)
-    for (const row of Array.from(busy!.children)) expect(row).toHaveClass('border-b-2')
-    expect(busy!.querySelector('.border-2')).toBeNull()
+    for (const row of Array.from(busy!.children))
+      expect(row).toHaveClass('rounded-panel', 'bg-surface', 'shadow-plate')
     await advance(5000)
     expect(screen.getByRole('status')).toHaveTextContent('서버를 깨우는 중이에요')
     await advance(55_000)

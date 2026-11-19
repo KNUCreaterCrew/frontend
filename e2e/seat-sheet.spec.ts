@@ -63,7 +63,7 @@ async function dragDown(
   await page.mouse.up()
 }
 
-const handleOf = (page: Page) => dialogOf(page).locator('div[aria-hidden="true"].w-8')
+const handleOf = (page: Page) => dialogOf(page).locator('div[aria-hidden="true"].w-10')
 
 test('mixed: A1 을 열면 시트가 화면 안에 있고 가로 넘침과 콘솔 오류가 없으며 닫기는 44px 이상이다', async ({
   page,

@@ -217,42 +217,55 @@ export function RoomPage() {
   return (
     <>
       <TopBar updatedAt={dataUpdatedAt} refreshFailed={state === 'refreshFailed'} />
-      <main>
+      <main className="pt-4 lg:pt-8">
         <div aria-live="polite" aria-atomic="true" className="sr-only">
           {live.edgeNotice}
         </div>
         <div aria-live="polite" aria-atomic="true" className="sr-only">
           {goneNotice ?? (loadFailed ? SHEET_FAILED : null)}
         </div>
-        {!data.edgeOnline && <EdgeOfflineBanner />}
-        <h1
-          ref={headingRef}
-          tabIndex={-1}
-          className="mt-6 text-title font-black tracking-tight focus:outline-hidden"
-        >
-          {data.roomName}
-        </h1>
-        <RoomSummary summary={summary} />
-        {summary.kind === 'allUnknown' && data.edgeOnline && (
-          <p className="mt-4 text-body">
-            지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.
-          </p>
+        {!data.edgeOnline && (
+          <div className="mb-4">
+            <EdgeOfflineBanner />
+          </div>
         )}
-        <div className="mt-6">
-          {summary.kind === 'noSeats' ? (
-            <p className="border-t-6 border-ink py-6">이 방에는 등록된 좌석이 없어요.</p>
-          ) : (
-            <SeatMap
-              seats={data.seats}
-              highlights={live.highlights}
-              onOutletsHiddenChange={setOutletsHidden}
-              onSelect={openSeat}
-              selectedSeatId={seat?.seatId ?? null}
-            />
-          )}
+        {/* 모바일은 패널, 좌석도, 범례 순서. lg 이상은 왼쪽 열에 패널과 범례, 오른쪽에 좌석도 */}
+        <div className="lg:grid lg:grid-room lg:items-start lg:gap-x-8">
+          <section className="rounded-panel bg-ink p-5 text-on-ink lg:col-start-1 lg:row-start-1">
+            <h1
+              ref={headingRef}
+              tabIndex={-1}
+              className="text-title font-bold tracking-tight focus:outline-hidden"
+            >
+              {data.roomName}
+            </h1>
+            <RoomSummary summary={summary} />
+            {summary.kind === 'allUnknown' && data.edgeOnline && (
+              <p className="mt-4 text-body text-on-ink-soft">
+                지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.
+              </p>
+            )}
+          </section>
+          <div className="mt-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0">
+            {summary.kind === 'noSeats' ? (
+              <p className="rounded-panel bg-surface p-6 shadow-plate">
+                이 방에는 등록된 좌석이 없어요.
+              </p>
+            ) : (
+              <SeatMap
+                seats={data.seats}
+                highlights={live.highlights}
+                onOutletsHiddenChange={setOutletsHidden}
+                onSelect={openSeat}
+                selectedSeatId={seat?.seatId ?? null}
+              />
+            )}
+            {loadFailed && <p className="mt-4 text-body text-ink">{SHEET_FAILED}</p>}
+          </div>
+          <div className="lg:col-start-1 lg:row-start-2 lg:pt-2">
+            <Legend outletsHidden={outletsHidden} />
+          </div>
         </div>
-        {loadFailed && <p className="mt-4 text-body text-ink">{SHEET_FAILED}</p>}
-        <Legend outletsHidden={outletsHidden} />
       </main>
       {sheetUsed && (
         <SheetSlot

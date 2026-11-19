@@ -4,6 +4,8 @@ import { useElementWidth } from '@/shared/lib'
 import {
   cellStage,
   computeViewBox,
+  fitStageWidth,
+  maxStageWidth,
   minCellPx,
   minCellSidePx,
   seatRect,
@@ -15,8 +17,8 @@ import type { CellStage } from '../lib/geometry'
 import { MapZoomToggle } from './MapZoomToggle'
 import { SeatButton } from './SeatButton'
 
-// 좌석도 상자의 오른쪽 안쪽 여백(className 의 p-2 = 8px). 확대하면 내용이 이 여백까지 보인다.
-const BOX_PAD_PX = 8
+// 좌석도 상자의 오른쪽 안쪽 여백(className 의 p-3 = 12px). 확대하면 내용이 이 여백까지 보인다.
+const BOX_PAD_PX = 12
 
 interface SeatMapProps {
   seats: Seat[]
@@ -28,6 +30,12 @@ interface SeatMapProps {
   onSelect?: (seatId: string) => void
   /** 상세 시트가 열려 있는 좌석 */
   selectedSeatId?: string | null
+}
+
+// 기준 글자 크기 / 16px. 아주 넓은 화면에서 global.css 가 기준 글자를 키우면 좌석 칸 상한도 따라 커진다
+function rootRemScale(): number {
+  const px = parseFloat(getComputedStyle(document.documentElement).fontSize)
+  return Number.isFinite(px) && px > 0 ? px / 16 : 1
 }
 
 // 강조한 상태가 좌석의 지금 상태와 같을 때만 강조한다(다시 조회해 다른 상태가 된 좌석 등)
@@ -59,8 +67,13 @@ export function SeatMap({
     [seats, vb],
   )
 
-  const px = vb && width !== null ? minCellPx(layouts, vb, width) : null
-  const fitStage: CellStage = px === null ? 'compact' : cellStage(px)
+  // 넓은 화면에서는 칸이 MAX_CELL_PX 를 넘지 않게 무대 폭을 줄여 가운데 둔다
+  const remScale = rootRemScale()
+  const stageWidth = vb && width !== null ? fitStageWidth(layouts, vb, width, remScale) : null
+  const px = vb && stageWidth !== null ? minCellPx(layouts, vb, stageWidth) : null
+  const shortPx = vb && stageWidth !== null ? minCellSidePx(layouts, vb, stageWidth) : null
+  const fitStage: CellStage =
+    px === null || shortPx === null ? 'compact' : cellStage(px, remScale, shortPx)
   const canZoom = fitStage === 'zoom' && width !== null
   const stage: CellStage = canZoom && zoomed ? 'compact' : fitStage
   const outletsHidden = stage === 'zoom'
@@ -87,23 +100,29 @@ export function SeatMap({
 
   return (
     <div>
-      <div ref={boxRef} className="overflow-x-auto border-t-6 border-ink p-2">
-        <div
-          className="relative"
-          style={{ aspectRatio: `${vb.width} / ${vb.height}`, width: `${scale * 100}%` }}
-        >
-          {placed.map(({ seat, rect }) => (
-            <SeatButton
-              key={seat.seatId}
-              seat={seat}
-              stage={stage}
-              rect={rect}
-              justChanged={justChanged(highlights, seat)}
-              cellPx={(px ?? 0) * scale}
-              onSelect={onSelect}
-              selected={seat.seatId === selectedSeatId}
-            />
-          ))}
+      <div className="rounded-panel bg-surface pattern-floor shadow-plate lg:px-8 lg:py-12">
+        <div ref={boxRef} className="overflow-x-auto p-3">
+          <div
+            className="relative mx-auto"
+            style={{
+              aspectRatio: `${vb.width} / ${vb.height}`,
+              width: `${scale * 100}%`,
+              maxWidth: scale === 1 ? `${maxStageWidth(layouts, vb, remScale)}px` : undefined,
+            }}
+          >
+            {placed.map(({ seat, rect }) => (
+              <SeatButton
+                key={seat.seatId}
+                seat={seat}
+                stage={stage}
+                rect={rect}
+                justChanged={justChanged(highlights, seat)}
+                cellPx={(px ?? 0) * scale}
+                onSelect={onSelect}
+                selected={seat.seatId === selectedSeatId}
+              />
+            ))}
+          </div>
         </div>
       </div>
       {canZoom && <MapZoomToggle zoomed={zoomed} onToggle={() => setZoomed((z) => !z)} />}

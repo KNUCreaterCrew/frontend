@@ -5,11 +5,11 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 const BASE =
-  'font-bold focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink'
+  'rounded-control font-semibold transition active:scale-98 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
 
 const VARIANTS = {
-  primary: 'h-12 w-full bg-ink text-paper',
-  plain: 'min-h-tap border-2 border-ink px-4 text-ink',
+  primary: 'h-12 w-full bg-ink text-on-ink hover:bg-ink/90',
+  plain: 'min-h-tap bg-surface px-4 text-ink shadow-plate hover:bg-paper',
 } as const
 
 export function Button({ variant = 'primary', type = 'button', className, ...rest }: ButtonProps) {
