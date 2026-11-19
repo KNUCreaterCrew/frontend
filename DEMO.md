@@ -13,7 +13,7 @@ QR 이 여는 주소는 `/`(방 목록)입니다. 배포 주소와 QR 은 배포
 
 ## 2. 시연 전 점검
 
-- [ ] 시연 전날까지 Render 의 자동 배포를 끄고, 끝나면 다시 켭니다(웹과 백엔드 모두).
+- [ ] 시연 전날까지 Render 의 자동 배포를 끄고, 끝나면 다시 켭니다(웹과 백엔드 모두). 그 뒤 Blueprint 를 다시 적용했다면 `render.yaml` 값(`checksPass`)으로 돌아갔을 수 있으니 다시 확인합니다.
 - [ ] 시연 30분 전과 직전에 `https://zeroframe-backend-p1wa.onrender.com/health` 를 열어 백엔드를 깨웁니다.
 - [ ] CORS 를 확인합니다. 둘 다 `access-control-allow-origin` 이 붙어야 합니다.
   - [ ] `curl -i -H "Origin: <웹 출처>" https://zeroframe-backend-p1wa.onrender.com/api/v1/rooms` → 200
