@@ -4,11 +4,11 @@
 
 ## 1. 시연 주소와 QR
 
-| 항목    | 값                                                                                                                            |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| 웹 주소 | https://zeroframe-web.onrender.com                                                                                            |
-| QR      | [`docs/qr/zeroframe-web.svg`](docs/qr/zeroframe-web.svg), 발표 자료용 [PNG](docs/qr/zeroframe-web.png) (카메라 스캔은 미확인) |
-| 백엔드  | https://zeroframe-backend-p1wa.onrender.com                                                                                   |
+| 항목    | 값                                                                                                                                                   |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 웹 주소 | https://zeroframe-web.onrender.com                                                                                                                   |
+| QR      | [`docs/qr/zeroframe-web.svg`](docs/qr/zeroframe-web.svg), 발표 자료용 [PNG](docs/qr/zeroframe-web.png) (iOS 기본 카메라로 열림 확인, Android 미확인) |
+| 백엔드  | https://zeroframe-backend-p1wa.onrender.com                                                                                                          |
 
 QR 이 여는 주소는 `/`(방 목록)입니다. 웹 주소가 바뀌면 QR 을 다시 만들고 백엔드 `render.yaml` 의 `CORS_ALLOW_ORIGINS` 도 고칩니다.
 
@@ -24,7 +24,7 @@ QR 이 여는 주소는 `/`(방 목록)입니다. 웹 주소가 바뀌면 QR 을
 - [x] 휴대폰에서 `/` 와 `/rooms/IT4-101` 이 실서버 데이터로 뜹니다. (2026-11-19, iOS 카카오톡 인앱 브라우저, 3절 스크린샷)
 - [x] 휴대폰에서 `/rooms/IT4-101` 을 연 채로 새로고침해도 앱이 뜹니다. (2026-11-19, 휴대폰에서 확인)
 - [x] 휴대폰에서 `/rooms/NOPE` 가 "방 없음" 화면입니다. (2026-11-19, 휴대폰에서 "이 방을 찾을 수 없어요" 확인)
-- [ ] iOS 와 Android 기본 카메라로 QR 이 열립니다.
+- [ ] iOS 와 Android 기본 카메라로 QR 이 열립니다. (2026-11-19 iOS 확인, Android 미확인)
 - [x] 장치(또는 demo 스크립트)의 보고가 들어옵니다. (2026-11-19 16:34 KST, demo 스크립트 7/7 단계 일치, 3절)
 
 ## 3. 실서버 처음부터 끝까지 확인
