@@ -158,7 +158,7 @@ describe('실시간 반영', () => {
     const banner = await screen.findByRole('heading', { level: 2, name: BANNER })
     expect(banner.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(screen.getByRole('button', { name: /^A1 확인 불가/ })).toBeInTheDocument()
-    expect(screen.getByText('모름', { selector: '[aria-hidden="true"]' })).toBeVisible()
+    expect(screen.getByText('확인 불가', { selector: '[aria-hidden="true"]' })).toBeVisible()
     expect(liveRegion(container)).toHaveTextContent(BANNER)
 
     sendAll(live, v3Events)

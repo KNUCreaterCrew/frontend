@@ -6,7 +6,7 @@ import { server } from '@mocks/node'
 import { ROOM_LIST_URL, roomListHandler } from '@mocks/handlers/rooms'
 import { manyRooms, mixedRoom, toListItemDto } from '@mocks/fixtures/rooms'
 
-const TITLE = '어느 방으로 갈까요'
+const TITLE = '방을 골라 주세요'
 const NAME = '제1실습실 (예시)'
 
 function item(over: Partial<RoomSummaryDto> = {}): RoomSummaryDto {
@@ -40,7 +40,7 @@ describe('방 목록 화면 행', () => {
     expect(row.getByText('보통')).toBeInTheDocument()
   })
 
-  test('서버 시작 직후(전부 확인 불가, 장치 끊김): 모름, 끊김 문장, 혼잡 없음', async () => {
+  test('서버 시작 직후(전부 확인 불가, 장치 끊김): 확인 불가, 끊김 문장, 혼잡 없음', async () => {
     useList([
       item({
         total_seats: 4,
@@ -53,10 +53,10 @@ describe('방 목록 화면 행', () => {
     renderApp('/')
     const link = await onlyRow()
     expect(link).toHaveAccessibleName(
-      `${NAME}, 빈자리 모름, 확인 불가 4석, 전체 4석, 장치 연결이 끊겼어요`,
+      `${NAME}, 빈자리 확인 불가, 확인 불가 4석, 전체 4석, 장치 연결이 끊겼어요`,
     )
     const row = within(link)
-    expect(row.getByText('모름')).toBeInTheDocument()
+    expect(row.getByText('확인 불가', { selector: 'span' })).toBeInTheDocument()
     expect(row.getByText('장치 연결이 끊겼어요')).toBeInTheDocument()
     expect(row.getAllByText('4석')).toHaveLength(2)
     expect(link).not.toHaveTextContent('혼잡')
@@ -72,7 +72,7 @@ describe('방 목록 화면 행', () => {
     expect(within(link).getByText('아직 자리를 확인하지 못했어요')).toBeInTheDocument()
     expect(link).not.toHaveTextContent('혼잡')
     expect(link).toHaveAccessibleName(
-      `${NAME}, 빈자리 모름, 확인 불가 4석, 전체 4석, 아직 자리를 확인하지 못했어요`,
+      `${NAME}, 빈자리 확인 불가, 확인 불가 4석, 전체 4석, 아직 자리를 확인하지 못했어요`,
     )
   })
 
@@ -90,7 +90,7 @@ describe('방 목록 화면 행', () => {
     const row = within(await onlyRow())
     expect(row.getByText('0')).toBeInTheDocument()
     expect(row.getByText('혼잡')).toBeInTheDocument()
-    expect(row.queryByText('모름')).not.toBeInTheDocument()
+    expect(row.queryByText('확인 불가', { selector: 'span' })).not.toBeInTheDocument()
     expect(row.queryByText(/확인하지 못한 자리가/)).not.toBeInTheDocument()
   })
 
@@ -239,13 +239,14 @@ describe('방 목록 행 구성', () => {
     expect(label.parentElement).toContainElement(within(label.parentElement!).getByText('1'))
   })
 
-  test('전부 확인 불가: 모름 위에도 빈자리 라벨이 보인다', async () => {
+  test('전부 확인 불가: 확인 불가 글자 위에도 빈자리 라벨이 보인다', async () => {
     useList([item({ total_seats: 4, available_seats: 0, unknown_seats: 4 })])
     renderApp('/')
     const row = within(await onlyRow())
     const label = row.getByText('빈자리')
-    expect(label.parentElement).toContainElement(row.getByText('모름'))
-    expect(row.getByText('모름')).toHaveClass('text-title', 'font-bold')
+    const word = row.getByText('확인 불가', { selector: 'span' })
+    expect(label.parentElement).toContainElement(word)
+    expect(word).toHaveClass('text-title', 'font-bold')
   })
 
   test('좌석 0인 방에는 빈자리 라벨이 없다', async () => {
@@ -277,7 +278,7 @@ describe('방 목록 행 구성', () => {
     expect(within(dl).getByText('보통')).toBeInTheDocument()
   })
 
-  test('모름 카드: 빈자리 라벨 옆에 좌석 칸과 같은 빗금 견본이 있고, 카드 옆면에는 띠가 없다', async () => {
+  test('전부 확인 불가 카드: 빈자리 라벨 옆에 좌석 칸과 같은 빗금 견본이 있고, 카드 옆면에는 띠가 없다', async () => {
     useList([item({ total_seats: 4, available_seats: 0, unknown_seats: 4 })])
     renderApp('/')
     const link = await onlyRow()

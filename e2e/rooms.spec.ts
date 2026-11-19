@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 const url = (scenario: string) => `/?scenario=${scenario}`
-const H1 = '어느 방으로 갈까요'
+const H1 = '방을 골라 주세요'
 
 function collectErrors(page: Page) {
   const errors: string[] = []
@@ -72,7 +72,7 @@ test('rooms-many: 6행이고 긴 이름 행도 화면 폭 안에 있다', async 
   }
 })
 
-test('rooms-many: 방 이름과 표가 모든 행에서 같은 x 에서 시작하고 모름이 줄바꿈되지 않는다', async ({
+test('rooms-many: 방 이름과 표가 모든 행에서 같은 x 에서 시작하고 확인 불가 글자가 줄바꿈되지 않는다', async ({
   page,
 }) => {
   await page.goto(url('rooms-many'))
@@ -89,7 +89,10 @@ test('rooms-many: 방 이름과 표가 모든 행에서 같은 x 에서 시작�
   const tables = xs.map((x) => x.table).filter((x) => x !== null)
   expect(tables).toHaveLength(5)
   expect(new Set(tables).size).toBe(1)
-  const word = page.getByText('모름', { exact: true }).first()
+  const word = page
+    .getByText('확인 불가', { exact: true })
+    .and(page.locator('span.text-title'))
+    .first()
   const box = await word.boundingBox()
   expect(box!.height).toBeLessThan(40)
 })

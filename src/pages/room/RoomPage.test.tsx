@@ -38,9 +38,7 @@ describe('방 화면', () => {
     ).toEqual(['빈자리', '확인 불가', '전체', '혼잡도'])
     expect(screen.getByText('빈자리', { selector: 'dt' })).toHaveClass('whitespace-nowrap')
     expect(screen.getByText('1', { selector: 'p[aria-hidden="true"]' })).toHaveClass('shrink-0')
-    expect(
-      screen.queryByText('지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.'),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText('지금은 모든 자리를 확인할 수 없어요.')).not.toBeInTheDocument()
     expect(
       seatButtons().map((b) => (b.getAttribute('aria-label') ?? b.textContent ?? '').slice(0, 2)),
     ).toEqual(['A1', 'A2', 'B1', 'B2'])
@@ -49,19 +47,14 @@ describe('방 화면', () => {
     expect(screen.getByRole('link', { name: '방 목록' })).toHaveAttribute('href', '/')
   })
 
-  test('all-unknown: 모름과 마지막 확인, 혼잡 없음', async () => {
+  test('all-unknown: 확인 불가와 마지막 확인, 혼잡 없음', async () => {
     renderApp(PATH, { scenario: 'all-unknown' })
-    expect(await screen.findByText('모름', { selector: '[aria-hidden="true"]' })).toBeVisible()
+    expect(await screen.findByText('확인 불가', { selector: '[aria-hidden="true"]' })).toBeVisible()
     expect(screen.queryByText(/혼잡/)).not.toBeInTheDocument()
-    // 만석은 "만석이라는 뜻은 아니에요" 라는 부정 안내에서만 나온다.
-    for (const el of screen.queryAllByText(/만석/)) {
-      expect(el).toHaveTextContent('만석이라는 뜻은 아니에요')
-    }
+    expect(screen.queryAllByText(/만석/)).toHaveLength(0)
     expect(rowValue('확인 불가')).toHaveTextContent('4석')
     expect(screen.getByText('마지막 확인', { selector: 'dt' })).toBeInTheDocument()
-    expect(
-      screen.getByText('지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.'),
-    ).toBeVisible()
+    expect(screen.getByText('지금은 모든 자리를 확인할 수 없어요.')).toBeVisible()
   })
 
   test('마지막 확인 시각은 상대 시각과 (시:분:초)만 끊을 수 있다', async () => {
@@ -80,11 +73,9 @@ describe('방 화면', () => {
     const h1 = await screen.findByRole('heading', { level: 1, name: ROOM_NAME })
     const h2 = screen.getByRole('heading', { level: 2, name: '장치 연결이 끊겼어요' })
     expect(h2.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(screen.getByText(/만석이라는 뜻은 아니에요/)).toBeInTheDocument()
+    expect(screen.getByText('지금은 이 방 자리를 확인할 수 없어요.')).toBeInTheDocument()
     expect(screen.queryByText(/^혼잡$/)).not.toBeInTheDocument()
-    expect(
-      screen.queryByText('지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.'),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText('지금은 모든 자리를 확인할 수 없어요.')).not.toBeInTheDocument()
   })
 
   test('배포 원문: 마지막 확인이 아직 확인하지 못함', async () => {

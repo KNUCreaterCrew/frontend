@@ -39,9 +39,9 @@ function Big({ summary }: { summary: Summary }) {
     return (
       <p
         aria-hidden="true"
-        className="shrink-0 text-poster-word font-bold tracking-tight text-on-ink"
+        className="w-min shrink-0 text-poster-word font-bold tracking-tight wrap-normal text-on-ink"
       >
-        모름
+        확인 불가
       </p>
     )
   }
@@ -68,7 +68,7 @@ export function RoomSummary({ summary }: { summary: Summary }) {
     summary.kind === 'known'
       ? `${summary.availableSeats}석`
       : summary.kind === 'allUnknown'
-        ? '모름'
+        ? '확인 불가'
         : '0석'
 
   return (

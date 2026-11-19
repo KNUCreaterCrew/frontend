@@ -117,7 +117,7 @@ test('방 목록에서 방으로 이동하고 새로고침해도 시나리오가
 test('모르는 시나리오는 기본으로 열고 목록 화면에서 알려 준다', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('/?scenario=nope')
-  await expect(page.getByRole('heading', { level: 1, name: '어느 방으로 갈까요' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: '방을 골라 주세요' })).toBeVisible()
   await expect(band(page).getByText('default', { exact: true })).toBeVisible()
 
   await page.goto('/__preview?scenario=nope')

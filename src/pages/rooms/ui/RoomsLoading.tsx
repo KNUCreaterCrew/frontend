@@ -12,7 +12,7 @@ export function RoomsLoading({
 
   return (
     <main className="pt-6 lg:pt-10">
-      <h1 className="text-title font-bold tracking-tight">어느 방으로 갈까요</h1>
+      <h1 className="text-title font-bold tracking-tight">방을 골라 주세요</h1>
       <div className="mt-2">
         <LoadingStatus elapsedMs={elapsedMs} paused={paused} />
       </div>
