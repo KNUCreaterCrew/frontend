@@ -2,214 +2,329 @@
 name: ZeroFrame
 description: 공강에 휴대폰으로 실습실 빈자리를 확인하는 좌석도
 colors:
-  paper: '#f2f0ea'
+  paper: '#f5f6f8'
   surface: '#ffffff'
-  ink: '#121212'
-  ink-soft: '#3d3b37'
-  empty: '#007a45'
+  ink: '#0e2036'
+  ink-soft: '#4b5768'
+  on-ink: '#ffffff'
+  on-ink-soft: '#b9c4d6'
+  accent: '#0b5cad'
+  line: '#dde2ea'
+  line-strong: '#7d8aa0'
+  empty: '#0a6b5e'
   on-empty: '#ffffff'
-  live: '#c4301a'
+  empty-bright: '#5eead4'
+  occupied: '#dde3ec'
+  live: '#b42318'
   on-live: '#ffffff'
-  scrim: 'rgb(18 18 18 / 0.28)'
+  live-tint: '#fdf0ee'
+  scrim: 'rgb(14 32 54 / 0.32)'
+  floor-dot: 'rgb(14 32 54 / 0.09)'
 typography:
   poster:
-    fontFamily: 'Archivo, Gothic A1, sans-serif'
-    fontSize: '9rem'
-    fontWeight: 800
-    lineHeight: 0.82
-    letterSpacing: '-0.04em'
-    fontFeature: 'tnum'
-  poster-word:
-    fontFamily: 'Gothic A1, sans-serif'
-    fontSize: '4.5rem'
-    fontWeight: 900
-    lineHeight: 0.95
-    letterSpacing: '-0.04em'
-  row-number:
-    fontFamily: 'Archivo, Gothic A1, sans-serif'
-    fontSize: '3.5rem'
-    fontWeight: 800
+    fontFamily: 'Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, sans-serif'
+    fontSize: '6rem'
+    fontWeight: 700
     lineHeight: 0.9
-    letterSpacing: '-0.03em'
+    letterSpacing: '-0.04em'
+  poster-word:
+    fontFamily: 'Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, sans-serif'
+    fontSize: '3rem'
+    fontWeight: 700
+    lineHeight: 1
+    letterSpacing: '-0.02em'
+  row-number:
+    fontFamily: 'Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, sans-serif'
+    fontSize: '2.75rem'
+    fontWeight: 700
+    lineHeight: 1
+    letterSpacing: '-0.02em'
     fontFeature: 'tnum'
-  sheet:
-    fontFamily: 'Gothic A1, sans-serif'
-    fontSize: '2.125rem'
-    fontWeight: 900
-    lineHeight: 1.1
-    letterSpacing: '-0.03em'
   title:
-    fontFamily: 'Gothic A1, sans-serif'
-    fontSize: '1.875rem'
-    fontWeight: 900
-    lineHeight: 1.1
-    letterSpacing: '-0.03em'
-  alert:
-    fontFamily: 'Gothic A1, sans-serif'
-    fontSize: '1.5rem'
-    fontWeight: 900
-    lineHeight: 1.25
-  fact:
-    fontFamily: 'Gothic A1, sans-serif'
-    fontSize: '1.375rem'
-    fontWeight: 900
-    lineHeight: 1.2
-  number:
-    fontFamily: 'Archivo, Gothic A1, sans-serif'
-    fontSize: '1.25rem'
+    fontFamily: 'Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, sans-serif'
+    fontSize: '1.625rem'
     fontWeight: 700
     lineHeight: 1.2
+    letterSpacing: '-0.02em'
+  sheet:
+    fontFamily: 'Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, sans-serif'
+    fontSize: '1.625rem'
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: '-0.02em'
+  fact:
+    fontFamily: 'Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, sans-serif'
+    fontSize: '1.0625rem'
+    fontWeight: 600
+    lineHeight: 1.35
+  alert:
+    fontFamily: 'Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, sans-serif'
+    fontSize: '1.0625rem'
+    fontWeight: 700
+    lineHeight: 1.35
+  number:
+    fontFamily: 'Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, sans-serif'
+    fontSize: '1.0625rem'
+    fontWeight: 600
+    lineHeight: 1.3
     fontFeature: 'tnum'
   body:
-    fontFamily: 'Gothic A1, sans-serif'
+    fontFamily: 'Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, sans-serif'
     fontSize: '0.9375rem'
-    fontWeight: 500
-    lineHeight: 1.5
+    fontWeight: 400
+    lineHeight: 1.55
   label:
-    fontFamily: 'Gothic A1, sans-serif'
+    fontFamily: 'Pretendard Variable, Pretendard, -apple-system, BlinkMacSystemFont, Apple SD Gothic Neo, Malgun Gothic, sans-serif'
     fontSize: '0.8125rem'
-    fontWeight: 700
-    lineHeight: 1.4
-  caption:
-    fontFamily: 'Gothic A1, sans-serif'
-    fontSize: '0.75rem'
-    fontWeight: 700
+    fontWeight: 400
     lineHeight: 1.4
 rounded:
-  none: '0px'
+  chip: '4px'
+  seat: '8px'
+  control: '12px'
+  panel: '16px'
+  sheet: '20px'
+  full: '9999px'
 spacing:
+  '0': '0px'
+  'px': '1px'
   '1': '4px'
   '2': '8px'
   '3': '12px'
   '4': '16px'
+  '5': '20px'
   '6': '24px'
   '8': '32px'
+  '10': '40px'
+  '12': '48px'
+  '16': '64px'
   tap: '44px'
   band: '6px'
+  rail: '384px'
 components:
+  summary-panel:
+    backgroundColor: '{colors.ink}'
+    textColor: '{colors.on-ink}'
+    rounded: '{rounded.panel}'
+    padding: '20px'
+  floor-plate:
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.panel}'
+    padding: '12px'
   seat-empty:
     backgroundColor: '{colors.empty}'
     textColor: '{colors.on-empty}'
-    rounded: '{rounded.none}'
+    rounded: '{rounded.seat}'
   seat-occupied:
-    backgroundColor: '{colors.ink}'
-    textColor: '{colors.paper}'
-    rounded: '{rounded.none}'
+    backgroundColor: '{colors.occupied}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.seat}'
   seat-away:
-    backgroundColor: '{colors.paper}'
+    backgroundColor: '{colors.surface}'
     textColor: '{colors.ink}'
-    rounded: '{rounded.none}'
+    rounded: '{rounded.seat}'
   seat-unknown:
-    backgroundColor: '{colors.paper}'
+    backgroundColor: '{colors.surface}'
     textColor: '{colors.ink}'
-    rounded: '{rounded.none}'
-  button-primary:
-    backgroundColor: '{colors.ink}'
-    textColor: '{colors.paper}'
-    rounded: '{rounded.none}'
-    height: '48px'
-  alert-offline:
+    rounded: '{rounded.seat}'
+  seat-just-changed-chip:
     backgroundColor: '{colors.live}'
     textColor: '{colors.on-live}'
-    rounded: '{rounded.none}'
+    rounded: '{rounded.chip}'
+    padding: '0 4px'
+  room-card:
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.panel}'
     padding: '16px'
+  button-primary:
+    backgroundColor: '{colors.ink}'
+    textColor: '{colors.on-ink}'
+    rounded: '{rounded.control}'
+    height: '48px'
+  button-plain:
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.control}'
+    height: '44px'
+    padding: '0 16px'
+  button-plain-hover:
+    backgroundColor: '{colors.paper}'
+  alert-offline:
+    backgroundColor: '{colors.live-tint}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.panel}'
+    padding: '16px'
+  seat-sheet:
+    backgroundColor: '{colors.surface}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.sheet}'
+    width: '480px'
+  top-bar:
+    backgroundColor: '{colors.paper}'
+    textColor: '{colors.ink}'
+    height: '44px'
+  preview-band:
+    backgroundColor: '{colors.ink}'
+    textColor: '{colors.on-ink}'
+    height: '44px'
 ---
 
 # Design System: ZeroFrame
 
 ## Overview
 
-**방향: "게시판 포스터"**
+**Creative North Star: "학부 네이비 안내판"**
 
-학과 게시판에 붙은 국제주의 타이포그래피 포스터처럼, 아주 큰 숫자 하나와 굵은 고딕, 평평한 면 색, 굵은 가로 선으로 정보를 정리합니다. 학생은 걸으면서 화면을 봅니다. 그래서 "빈자리 몇 석"이 가장 먼저, 가장 크게 읽혀야 하고, 그다음이 확인 불가 수와 좌석 위치입니다.
+경북대 컴퓨터학부 네이비 패널 하나가 "지금 가면 앉을 수 있나"에 답하고, 그 아래 조용한 흰 바닥판에서 빈자리만 색을 갖고 떠오릅니다. 출발 안내판처럼 차분하고 정밀하게 정리하고, 값이 바뀌는 순간에만 판이 한 번 넘어옵니다. 학생은 걸으면서 화면을 봅니다. 그래서 "빈자리 몇 석"이 가장 먼저, 가장 크게 읽혀야 하고, 그다음이 확인 불가 수와 좌석 위치입니다.
 
-장식은 없습니다. 색은 뜻이 있을 때만 씁니다. 초록은 빈자리, 검정은 사용 중과 글자, 빨강은 "방금 바뀜"과 "장치 끊김" 두 가지에만 씁니다. 회색 면은 쓰지 않습니다. 회색은 비활성처럼 읽혀서 "확인 불가"와 섞이기 때문입니다.
+색은 뜻이 있을 때만 씁니다. 네이비(`ink`)는 판단을 담는 패널과 글자, 틸(`empty`)은 빈자리, 빨강(`live`)은 "방금 바뀜"과 "장치 끊김" 두 가지에만 씁니다. 좌석도 위에서 채도 있는 면을 가진 것은 빈자리 칸뿐이고, 사용 중 칸은 연한 슬레이트 면, 짐 있음과 확인 불가는 흰 면에 띠와 빗금입니다. 확인 불가는 회색으로 칠하지 않습니다. "없음"이 아니라 "모름"이기 때문입니다.
 
-밝은 화면 하나만 둡니다. 실외 햇빛 아래 휴대폰으로 보는 장면이 기본이라 어두운 테마는 만들지 않습니다.
+밝은 화면 하나만 둡니다(`color-scheme: light`). 실외 햇빛 아래 휴대폰으로 보는 장면이 기본이라 어두운 테마는 만들지 않습니다. 네이비 패널은 어두운 테마가 아니라 밝은 화면 안의 판 하나입니다.
 
-**핵심 특징:**
+이 방향은 이전의 "게시판 포스터"를 대체합니다. 게시판 포스터는 종이색 바탕(#f2f0ea)에 검정(#121212) 글자, Gothic A1 900 과 Archivo 두 글꼴, 144px 포스터 숫자, 6px 검은 가로 선으로 정보를 나누고 반경, 그림자, 흐림을 모두 금지했습니다. 3초 판단이라는 목표와 좌석 4상태 규칙은 그대로 이어받았지만, 검은 굵은 선과 900 굵기가 행정 게시물처럼 딱딱하게 읽히고 사용 중 칸의 검은 면이 빈자리 초록과 함께 바둑판을 만들어 버렸습니다. 이번 방향은 판단을 네이비 패널 하나에 모으고, 나머지를 가볍게 해서 빈자리만 남기는 쪽으로 바꿨습니다.
 
-- 방 요약의 빈자리 숫자는 화면에서 가장 큰 글자(144px)입니다.
-- 좌석은 각진 면입니다. 4상태는 색과 함께 면, 띠, 빗금으로 구분되어 흑백으로도 읽힙니다.
-- 정보 묶음은 카드가 아니라 굵은 가로 선(2px, 6px)으로 나눕니다.
-- 모서리 반경과 그림자가 없습니다.
+**Key Characteristics:**
+
+- 방 화면의 빈자리 숫자는 네이비 패널 위 밝은 틸(`empty-bright`) 96px 로, 화면에서 가장 큰 글자입니다.
+- 좌석도 위에서 채운 색과 그림자를 함께 가진 것은 빈자리 칸뿐입니다. 4상태는 면, 테두리, 아래 띠, 빗금으로 흑백에서도 갈립니다.
+- 모서리는 둥글고(칸 8px, 패널 16px, 시트 20px), 그림자는 바닥판과 카드, 빈자리 칸, 시트에만 씁니다.
+- 유리(배경 흐림)는 고정 상단 줄과 시트 뒤 막에만 씁니다.
+- 글꼴은 Pretendard Variable 하나, 숫자는 고정폭입니다.
+- 시그니처 움직임은 출발 안내판처럼 위에서 한 번 넘어오는 판(flip)이고, 값이 바뀐 순간에만, 동작 줄이기 설정이 아닐 때만 움직입니다.
 
 ## Colors
 
-| 토큰       | 값                     | 쓰임                                            | 대비                       |
-| ---------- | ---------------------- | ----------------------------------------------- | -------------------------- |
-| `paper`    | `#f2f0ea`              | 바탕                                            |                            |
-| `surface`  | `#ffffff`              | 바텀시트처럼 바탕 위에 올라오는 면              |                            |
-| `ink`      | `#121212`              | 본문, 선, 사용 중 좌석 면, 주요 버튼            | paper 16.4:1               |
-| `ink-soft` | `#3d3b37`              | 보조 글자(표의 왼쪽 이름, 갱신 시각)            | paper 9.8:1                |
-| `empty`    | `#007a45`              | 빈자리 면, 빈자리 숫자                          | paper 4.8:1, 흰 글자 5.4:1 |
-| `on-empty` | `#ffffff`              | 빈자리 면 위 글자                               | 5.4:1                      |
-| `live`     | `#c4301a`              | 방금 바뀐 좌석 테두리와 표시, 장치 끊김 안내 띠 | paper 4.9:1, 흰 글자 5.6:1 |
-| `on-live`  | `#ffffff`              | live 면 위 글자                                 | 5.6:1                      |
-| `scrim`    | `rgb(18 18 18 / 0.28)` | 바텀시트 뒤 막. 글자를 올리지 않음              |                            |
+학부 네이비와 틸을 어둡게 다듬은 차가운 팔레트입니다. 값은 `src/app/styles/tokens.css` 가 기준이고 이 표는 그 값을 옮긴 것입니다. 대비는 WCAG 2.2 공식으로 직접 계산했습니다(본문 4.5:1, 큰 글자와 아이콘, 의미 있는 경계 3:1 이상).
 
-- `empty` 와 `live` 는 서로의 자리를 빌리지 않습니다. 빈자리를 빨강으로, 경고를 초록으로 쓰지 않습니다.
-- `live` 는 한 화면에 두 군데를 넘지 않게 씁니다. 많아지면 아무것도 눈에 띄지 않습니다.
-- 혼잡도(여유, 보통, 혼잡)는 색이 아니라 `ink` 면 위의 말로 보여줍니다.
+| 토큰           | 값                                                                                                                                                 | 쓰임                                                                                              | 측정한 대비                                                                          |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `paper`        | `#f5f6f8`                                                                                                                                          | 바탕, 상단 줄 유리의 바탕색, `theme-color`                                                        | ink 15.2:1                                                                           |
+| `surface`      | `#ffffff`                                                                                                                                          | 좌석도 바닥판, 방 카드, 바텀시트, 보조 버튼                                                       | ink 16.4:1                                                                           |
+| `ink`          | `#0e2036`                                                                                                                                          | 학부 네이비. 본문, 방 요약 패널 면, 주요 버튼 면, 짐 있음 아래 띠, 선택 테두리                    | paper 15.2:1, surface 16.4:1, occupied 12.7:1, live-tint 14.8:1                      |
+| `ink-soft`     | `#4b5768`                                                                                                                                          | 보조 글자(표의 왼쪽 이름, 갱신 시각, 범례), 확인 불가 빗금 선                                     | paper 6.8:1, surface 7.3:1                                                           |
+| `on-ink`       | `#ffffff`                                                                                                                                          | 네이비 패널과 주요 버튼 위 글자                                                                   | ink 16.4:1                                                                           |
+| `on-ink-soft`  | `#b9c4d6`                                                                                                                                          | 네이비 패널 위 보조 글자(표 이름, 안내 문장)                                                      | ink 9.3:1                                                                            |
+| `accent`       | `#0b5cad`                                                                                                                                          | 학부 블루를 어둡게. 포커스 링, 본문 링크                                                          | paper 6.2:1, surface 6.7:1. ink 위 2.5:1 이라 패널 위에 쓰지 않음                    |
+| `line`         | `#dde2ea`                                                                                                                                          | 장식 구분선(상단 줄 아래, 카드와 시트 표의 줄), 불러오는 중 뼈대 막대. 뜻을 싣지 않음             | surface 1.3:1, paper 1.2:1                                                           |
+| `line-strong`  | `#7d8aa0`                                                                                                                                          | 뜻이 있는 경계: 좌석 칸 테두리, 범례 견본 테두리, 시트 끌기 손잡이                                | surface 3.5:1, paper 3.2:1                                                           |
+| `empty`        | `#0a6b5e`                                                                                                                                          | 학부 틸을 어둡게. 빈자리 칸 면, 방 카드의 빈자리 숫자, 시트의 "빈자리"와 위 띠, 서비스 이름 앞 점 | paper 5.9:1, surface 6.4:1, occupied 면과 5.0:1                                      |
+| `on-empty`     | `#ffffff`                                                                                                                                          | 빈자리 면 위 글자와 콘센트 아이콘                                                                 | empty 6.4:1                                                                          |
+| `empty-bright` | `#5eead4`                                                                                                                                          | 네이비 패널 위 빈자리 큰 숫자 하나에만                                                            | ink 11.1:1. paper 위 1.4:1 이라 밝은 면에 쓰지 않음                                  |
+| `occupied`     | `#dde3ec`                                                                                                                                          | 사용 중 칸 면(연한 슬레이트)                                                                      | ink 글자 12.7:1. surface 와 1.3:1 이라 `line-strong` 테두리가 경계를 맡음            |
+| `live`         | `#b42318`                                                                                                                                          | 방금 바뀐 좌석 테두리와 "방금" 조각, 장치 끊김 아이콘과 제목                                      | paper 6.1:1, surface 6.6:1, live-tint 5.9:1. empty 면과 1.03:1 이라 칸에 붙이지 않음 |
+| `on-live`      | `#ffffff`                                                                                                                                          | live 면 위 글자("방금" 조각)                                                                      | live 6.6:1                                                                           |
+| `live-tint`    | `#fdf0ee`                                                                                                                                          | 장치 끊김 안내 패널 면                                                                            | ink 글자 14.8:1, live 글자 5.9:1                                                     |
+| `scrim`        | `rgb(14 32 54 / 0.32)`                                                                                                                             | 바텀시트 뒤를 덮는 막(3px 흐림과 함께). 글자를 올리지 않음                                        | paper 위 합성색 `#abb2ba`                                                            |
+| `floor-dot`    | `rgb(14 32 54 / 0.09)`                                                                                                                             | 좌석도 바닥판의 점 격자(16px 간격, `--pattern-floor`). 평면도 눈금이고 장식                       | surface 위 합성색 `#e9ebed`, 1.2:1                                                   |
+| `on-ink` 15%   | `rgb(255 255 255 / 0.15)`                                                                                                                          | 네이비 패널 안 구분선, 패널 뼈대 막대                                                             | ink 위 합성색 `#324154`, 1.6:1(장식)                                                 |
+| `on-ink` 10%   | `rgb(255 255 255 / 0.10)`                                                                                                                          | 네이비 패널 뼈대의 짧은 막대                                                                      | ink 위 합성색 `#26364a`, 1.3:1(장식)                                                 |
+| `ink` 90%      | `rgb(14 32 54 / 0.90)`                                                                                                                             | 주요 버튼 hover 면                                                                                | surface 위 `#26364a`, on-ink 12.3:1                                                  |
+| 유리           | `paper` 88% + 흐림 14px, 채도 1.4                                                                                                                  | 고정 상단 줄. 흐림을 못 쓰면 불투명 `paper`                                                       | 흰 바닥 위 ink 15.5:1, ink-soft 6.9:1                                                |
+| 그림자 색      | `rgb(14 32 54 / 0.05)`, `rgb(14 32 54 / 0.16)`, `rgb(14 32 54 / 0.28)`, `rgb(14 32 54 / 0.35)`, `rgb(10 107 94 / 0.35)`, `rgb(255 255 255 / 0.18)` | 그림자 토큰 안에서만 씁니다. 쓰임은 Elevation & Depth                                             |                                                                                      |
+
+상단 줄 유리를 88% 로 둔 이유: 네이비 패널이 바로 밑을 지나는 최악의 경우에도 유리 면이 `#d9dce1` 쯤에 머물러 `ink-soft` 갱신 시각이 5.3:1 을 넘습니다. 78% 에서는 4.3:1 로 본문 기준에 못 미쳤습니다.
+
+**The 빈자리만 칠한다 Rule.** 좌석도 위에서 채도 있는 면은 `empty` 하나입니다. 사용 중은 연한 `occupied`, 짐 있음과 확인 불가는 흰 면입니다. 진한 면이 둘이 되면 좌석도가 바둑판처럼 읽혀 빈자리가 묻힙니다.
+
+**The 두 신호 Rule.** `empty` 와 `live` 는 서로의 자리를 빌리지 않습니다. 빈자리를 빨강으로, 경고를 초록으로 쓰지 않습니다. `live` 는 한 화면에 두 군데를 넘지 않게 씁니다. 많아지면 아무것도 눈에 띄지 않습니다.
+
+**The 판 위와 판 밖 Rule.** `empty-bright` 와 `on-ink` 계열은 네이비 패널 위에만, `accent` 와 `empty` 는 밝은 면 위에만 씁니다. 서로 자리를 바꾸면 대비가 1.4:1 에서 2.5:1 까지 떨어집니다.
+
+- 혼잡도(여유, 보통, 혼잡)는 색이 아니라 말로 보여줍니다.
+- 회색처럼 보이는 연한 면(`occupied`, `line`)은 사용 중 칸과 장식에만 씁니다. 확인 불가에는 쓰지 않습니다.
 
 ## Typography
 
-글꼴은 두 가지입니다.
+**Body Font:** Pretendard Variable(jsDelivr 의 동적 서브셋, v1.3.9). 실패하면 `-apple-system`, Apple SD Gothic Neo, Malgun Gothic 같은 기기 한글 고딕으로 대신합니다.
 
-- **Gothic A1**: 한글 전부. 제목과 요약은 900(black), 본문은 500, 라벨은 700.
-- **Archivo**: 숫자와 좌석 번호(A1, B12). 항상 고정폭 숫자(`tabular-nums`)로 씁니다. 숫자가 바뀌어도 자리가 흔들리지 않게 하기 위해서입니다.
+**Character:** 한 가족으로 한글, 숫자, 서비스 이름을 모두 씁니다. 400(본문), 500(좌석 칸 상태), 600(표 값, 방 이름, 버튼), 700(제목, 큰 숫자, 경고 문장) 네 굵기만 씁니다. 900 은 쓰지 않습니다.
 
-| 역할        | 토큰               | 크기               | 쓰는 곳                       |
-| ----------- | ------------------ | ------------------ | ----------------------------- |
-| poster      | `text-poster`      | 144px, Archivo 800 | 방 요약의 빈자리 숫자 하나    |
-| poster-word | `text-poster-word` | 72px, 900          | 숫자를 낼 수 없을 때의 "모름" |
-| row-number  | `text-row-number`  | 56px, Archivo 800  | 방 목록 행의 빈자리 숫자      |
-| sheet       | `text-sheet`       | 34px, 900          | 바텀시트의 좌석 번호와 상태   |
-| title       | `text-title`       | 30px, 900          | 방 이름, 페이지 제목          |
-| alert       | `text-alert`       | 24px, 900          | 장치 끊김 같은 안내 제목      |
-| fact        | `text-fact`        | 22px, 900          | 요약 표 첫 줄(빈자리)         |
-| number      | `text-number`      | 20px, Archivo 700  | 요약 표의 숫자                |
-| body        | `text-body`        | 15px, 500          | 본문, 표                      |
-| label       | `text-label`       | 13px, 700          | 좌석 칸 안 상태, 범례         |
-| caption     | `text-caption`     | 12px, 700          | 좌석도의 벽, 통로, 창가 표시  |
+숫자와 좌석 번호(A1, B12), 시각은 `num` 유틸리티로 씁니다. `font-family: var(--font-num)` 과 `tabular-nums` 를 함께 걸어 숫자가 바뀌어도 자리가 흔들리지 않게 합니다. 본문에는 Pretendard 의 `ss06` 스타일 세트를 켭니다.
 
-- 큰 글자는 자간을 줄입니다(`tracking-tight` -0.03em, 포스터 숫자는 `tracking-poster` -0.04em).
-- 한국어는 단어 단위로 줄을 바꿉니다(keep-all). 긴 ID 는 필요하면 어디서든 끊습니다.
+| 역할        | 토큰               | 크기, 굵기, 줄 높이          | 쓰는 곳                                                         |
+| ----------- | ------------------ | ---------------------------- | --------------------------------------------------------------- |
+| poster      | `text-poster`      | 96px, 700, 0.9, 자간 -0.04em | 네이비 패널의 빈자리 숫자 하나                                  |
+| poster-word | `text-poster-word` | 48px, 700, 1, 자간 -0.02em   | 숫자를 낼 수 없을 때 패널의 "모름"                              |
+| row-number  | `text-row-number`  | 44px, 700, 1, 고정폭         | 방 카드의 빈자리 숫자                                           |
+| title       | `text-title`       | 26px, 700, 1.2, 자간 -0.02em | 방 이름, 페이지 제목, 방 카드의 "모름"                          |
+| sheet       | `text-sheet`       | 26px, 700, 1.2               | 바텀시트의 좌석 번호와 상태                                     |
+| fact        | `text-fact`        | 17px, 600, 1.35              | 방 카드 이름, 요약 표 첫 줄(빈자리), 미리보기 묶음 제목         |
+| alert       | `text-alert`       | 17px, 700, 1.35              | 장치 끊김 안내 제목                                             |
+| number      | `text-number`      | 17px, 600, 1.3, 고정폭       | 요약 표와 카드 표의 값, full 좌석 칸의 번호                     |
+| body        | `text-body`        | 15px, 400, 1.55              | 본문, 표 이름, 안내 문장                                        |
+| label       | `text-label`       | 13px, 400, 1.4               | 상단 줄, 범례, 좌석 칸 안 상태(500), compact 칸 번호(700)       |
+| caption     | `text-caption`     | 12px, 1.4                    | 좌석도 보조 표시용으로 남겨 둔 값. 지금 화면에서 쓰는 곳은 없음 |
+
+- 큰 글자는 자간을 줄입니다(`tracking-tight` -0.02em, 큰 숫자는 `tracking-poster` -0.04em).
+- 한국어는 단어 단위로 줄을 바꿉니다(`keep-all`). 긴 ID 는 필요하면 어디서든 끊습니다(`overflow-wrap: anywhere`).
 - 대문자 라벨, 자간을 넓힌 라벨, 제목 위의 작은 머리말을 쓰지 않습니다.
-- 글꼴은 웹폰트로 불러옵니다. 실패하면 기기의 한글 고딕으로 대신합니다.
+
+**The 한 가족 Rule.** 글꼴은 Pretendard 하나입니다. 숫자용 글꼴을 따로 들이지 않고 `num` 으로 고정폭만 켭니다.
+
+**The 큰 숫자는 하나 Rule.** 96px 는 빈자리 숫자 하나에만 씁니다. 글자 제목에 쓰지 않습니다.
 
 ## Layout
 
-- 360px 에서 설계하고 390px, 768px 에서 확인합니다. 화면 가장자리 여백은 16px(`spacing-4`)이고 safe-area 를 함께 봅니다.
-- 간격은 4px 단위 토큰(`spacing-1` ~ `spacing-16`)만 씁니다. 바텀시트 위 띠의 6px 높이만 전용 토큰 `spacing-band` 로 둡니다. 묶음 안은 촘촘하게, 묶음 사이는 넓게 둡니다.
-- 첫 화면(방 목록)의 순서는 고정입니다: 상단 줄(서비스 이름, 갱신 시각) → 제목 "어느 방으로 갈까요" → 방 목록.
-- 방 화면의 순서는 고정입니다: 상단 줄(방 목록, 갱신 시각) → 방 이름 → 요약(큰 숫자 + 표) → 좌석도 → 범례.
-- 요약은 2열입니다. 왼쪽은 큰 숫자, 오른쪽은 가는 선으로 나눈 표(빈자리, 확인 불가, 전체, 혼잡도 또는 마지막 확인). 큰 숫자 칸은 숫자 폭 그대로 두고 표가 나머지를 쓰며, 둘 사이에 간격을 둡니다.
-- 좌석도는 서버가 주는 `layout` 좌표로 그리고 너비에 맞게 줄입니다. 위쪽 굵은 선(6px)을 둡니다. 방의 방향(창가, 앞) 정보가 데이터에 없어 글자로 표시하지 않습니다. 좌석별 창가 여부는 바텀시트에서 보입니다.
-- 페이지에는 가로 스크롤이 없습니다.
+- 360px 에서 설계하고 390px, 768px(`md`), 1024px(`lg`)에서 확인합니다. 화면 가장자리 여백은 16px(`spacing-4`)이고 safe-area 를 함께 봅니다(`page-x`).
+- 모든 화면의 내용은 최대 72rem(1152px, `--container-page`)으로 가운데 모읍니다. 상단 줄의 바탕은 화면 폭 전체에 붙고 안쪽 내용만 같은 폭으로 모입니다.
+- 간격은 4px 단위 토큰(`spacing-1` ~ `spacing-16`)만 씁니다. 전용 토큰은 셋입니다: 터치 목표 44px(`spacing-tap`), 바텀시트 위 상태 띠 6px(`spacing-band`), 데스크톱 방 화면 왼쪽 열 24rem(`spacing-rail`). 묶음 안은 촘촘하게, 묶음 사이는 16px 로 둡니다. 패널 안쪽은 20px, 카드 안쪽은 16px, 바닥판 안쪽은 12px 입니다.
+- 첫 화면(방 목록)의 순서는 고정입니다: 상단 줄(서비스 이름, 갱신 시각) → 제목 "어느 방으로 갈까요" → 방 카드 격자. 격자는 모바일 1열, 768px 이상 2열, 1024px 이상 3열이고 카드 사이 12px 입니다.
+- 방 화면의 순서는 고정입니다: 상단 줄(방 목록, 갱신 시각) → (장치 끊김 안내) → 네이비 패널(방 이름 + 요약) → 좌석도 바닥판 → (확대 버튼) → 범례.
+- 1024px 이상 방 화면은 2열입니다(`grid-room`). 왼쪽 24rem 열에 네이비 패널과 그 아래 범례, 오른쪽 열에 좌석도 바닥판이 두 줄을 차지합니다. 열 사이는 32px 이고 바닥판은 안쪽 여백을 좌우 32px, 위아래 48px 로 늘립니다.
+- 요약은 패널 안에서 2열입니다. 왼쪽은 큰 숫자, 오른쪽은 가는 선으로 나눈 표(빈자리, 확인 불가, 전체, 혼잡도 또는 마지막 확인). 큰 숫자 칸은 숫자 폭 그대로 두고 표가 나머지를 쓰며, 둘 사이는 20px 입니다.
+- 좌석도는 서버가 주는 `layout` 좌표로 그리고 너비에 맞게 줄입니다. 방의 방향(창가, 앞) 정보가 데이터에 없어 글자로 표시하지 않습니다. 좌석별 창가 여부는 바텀시트에서 보입니다.
+- 페이지에는 가로 스크롤이 없습니다. 아래 여백은 40px 와 safe-area 중 큰 값입니다.
+
+### 아주 넓은 화면
+
+모든 크기가 rem 이라 기준 글자 크기를 키우면 글자, 패널, 좌석 칸 상한이 같은 비율로 커집니다. 기준 글자는 화면 폭에 따라 단계적으로 커집니다(rem 미디어 쿼리는 브라우저 기본 16px 기준).
+
+| 화면 폭               | 기준 글자 크기 | remScale |
+| --------------------- | -------------- | -------- |
+| 1920px(120rem) 미만   | 16px           | 1        |
+| 1920px 이상           | 18px(112.5%)   | 1.125    |
+| 2560px(160rem) 이상   | 20px(125%)     | 1.25     |
+| 3400px(212.5rem) 이상 | 24px(150%)     | 1.5      |
+
+넓은 화면에서는 가장 작은 좌석 칸의 폭이 128px x remScale(`MAX_CELL_PX`)을 넘지 않도록 좌석도 무대 폭을 줄여 바닥판 가운데 둡니다. 3840px 화면을 배율 100% 로 볼 때 칸 한 변은 최대 192px 입니다.
 
 ### 좌석이 많은 방
 
-| 좌석 칸 너비        | 칸 안에 넣는 것                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 64px 이상           | 좌석 번호, 상태 이름, 콘센트 표시                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| 40px 이상 64px 미만 | 좌석 번호와 콘센트 표시. 상태는 면과 무늬로만 구분하고 이름은 바텀시트에서 읽음                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| 40px 미만           | 좌석도 안에서만 확대와 이동(버튼 하나가 "확대"와 "전체 보기"를 오가고, 확대하면 좌석도 바로 아래에 "옆으로 밀면 나머지 좌석이 보여요" 한 줄, 상자 안 스크롤). 확대하면 가장 작은 칸의 짧은 변이 44px 이상이 되고, 오른쪽 끝에서 한 칸이 항상 일부(25%에서 75%) 잘려 보여 더 있다는 것이 드러나게 배율을 조금 키움. 칸이 작아 콘센트 아이콘이 숨은 동안 범례의 콘센트 줄에 "확대하면 보여요"를 붙임. 처음에는 방 전체가 보이게 맞춤. 두 손가락으로 좌석도만 확대하는 기능은 아직 없고, 브라우저의 페이지 확대는 막지 않음 |
+| 좌석 칸 너비                                                      | 칸 안에 넣는 것                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| full: 칸 폭 / remScale 64px 이상이고 짧은 변 / remScale 56px 이상 | 좌석 번호(`text-number`), 상태 이름(`text-label` 500), 콘센트 표시(16px)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| compact: 40px 이상이고 full 이 아님                               | 좌석 번호(`text-label` 700)와 콘센트 표시(12px). 상태는 면, 테두리, 띠, 빗금으로만 구분하고 이름은 바텀시트에서 읽음                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| zoom: 40px 미만(실제 화면 px)                                     | 칸 안 글자와 아이콘 없이 면과 무늬만 보이고, 좌석도 안에서만 확대와 이동. 바닥판 아래 너비 가득한 보조 버튼 하나가 "확대"와 "전체 보기"를 오가고, 확대하면 버튼 바로 위에 "옆으로 밀면 나머지 좌석이 보여요" 한 줄(`text-label`), 바닥판 안쪽 상자만 가로로 스크롤. 확대하면 가장 작은 칸의 짧은 변이 44px 이상이 되고(이때 칸은 compact 로 그림), 오른쪽 끝에서 한 칸이 항상 일부(25%에서 75%) 잘려 보여 더 있다는 것이 드러나게 배율을 조금 키움. 칸이 작아 콘센트 아이콘이 숨은 동안 범례의 콘센트 줄에 "확대하면 보여요"를 붙임. 처음에는 방 전체가 보이게 맞춤. 두 손가락으로 좌석도만 확대하는 기능은 아직 없고, 브라우저의 페이지 확대는 막지 않음 |
 
-칸 사이 간격은 서버 `layout` 좌표를 그대로 따릅니다. 간격이 실제 통로나 책상 배치일 수 있어 메우지 않습니다. 배포 데이터처럼 좌석 폭 64에 간격 16이면 360px 에서 한 줄 6석까지 확대 없이 누를 수 있습니다. 계산: 좌석도 상자 안쪽 여백 8px 를 빼면 내용 폭 312px, 한 줄 n석의 viewBox 폭 80n - 16, 칸 = 64 / (80n - 16) x 312. 6석 43.0px(40px 이상, 확대 없음), 7석 36.7px(확대).
+누르기 쉬운지(zoom)는 실제 화면 px 로, 글자가 들어가는지(full)는 remScale 로 나눈 값으로 판단합니다. 아주 넓은 화면에서는 글자도 커지므로 같은 px 칸이라도 full 이 아닐 수 있습니다.
+
+칸 사이 간격은 서버 `layout` 좌표를 그대로 따릅니다. 간격이 실제 통로나 책상 배치일 수 있어 메우지 않습니다. 배포 데이터처럼 좌석 폭 64에 간격 16이면 360px 에서 한 줄 6석까지 확대 없이 누를 수 있습니다. 계산: 360px 에서 화면 가장자리 여백 16px 두 번(32px)과 좌석도 상자 안쪽 여백 12px 두 번(`p-3`, 24px)을 빼면 내용 폭 304px, 한 줄 n석의 viewBox 폭 80n - 16, 칸 = 64 / (80n - 16) x 304. 6석 41.9px(40px 이상, compact, 확대 없음), 7석 35.8px(확대). 390px 에서는 내용 폭 334px 라 6석 46.1px, 7석 39.3px(확대)입니다.
 
 ## Elevation & Depth
 
-평평합니다. 그림자 토큰이 없습니다. 위에 올라오는 것은 면과 선으로 구분합니다.
+평평한 바탕 위에 흰 판을 올리는 2층 구조입니다. 그림자는 "바탕 위에 놓인 판"과 "좌석도 위로 떠오른 빈자리", "화면 위로 올라온 시트" 세 경우에만 씁니다. 한 요소에 테두리와 그림자를 함께 쓰지 않습니다.
 
-- 바텀시트: `surface` 면, 위쪽 6px 띠(그 좌석 상태의 색, 빈자리면 `empty`), 뒤에 `scrim`.
-- 장치 끊김 안내: 화면 폭 전체의 `live` 띠.
+- **바닥판 그림자** (`--shadow-plate`: `0 1px 2px rgb(14 32 54 / 0.05), 0 12px 32px -12px rgb(14 32 54 / 0.16)`): 좌석도 바닥판, 방 카드, 보조 버튼, 미리보기 시나리오 묶음, 좌석이 없는 방의 안내 판.
+- **빈자리 그림자** (`--shadow-seat`: `inset 0 1px 0 rgb(255 255 255 / 0.18), 0 2px 4px -1px rgb(10 107 94 / 0.35), 0 6px 14px -6px rgb(14 32 54 / 0.35)`): 빈자리 칸과 범례의 빈자리 견본에만. 위쪽 안쪽 하이라이트와 틸 기운의 짧은 그림자로 칸이 바닥판에서 살짝 떠 보입니다.
+- **시트 그림자** (`--shadow-sheet`: `0 -12px 40px -12px rgb(14 32 54 / 0.28)`): 바텀시트 위쪽으로 퍼지는 그림자.
+
+네이비 패널에는 그림자가 없습니다. 바탕과의 명도 차이(15.2:1)만으로 충분히 떠 보이고, 그림자를 더하면 판단 패널이 무거워집니다. 장치 끊김 안내 패널과 상단 줄에도 그림자가 없습니다.
+
+유리는 떠 있는 면 둘에만 씁니다. 고정 상단 줄은 `paper` 88% 에 흐림 14px(`--blur-glass`), 채도 1.4 를 걸고 아래에 1px `line` 선을 둡니다. `backdrop-filter` 를 지원하지 않으면 불투명한 `paper` 로 읽힙니다. 바텀시트 뒤 막은 `scrim` 에 흐림 3px(`--blur-scrim`)이고, 시트를 아래로 끄는 동안 막의 불투명도가 1에서 0.2 쪽으로 따라 내려갑니다.
+
+**The 빈자리만 뜬다 Rule.** 좌석도 위에서 그림자를 가진 것은 빈자리 칸뿐입니다. 사용 중, 짐 있음, 확인 불가 칸은 바닥판에 붙은 면과 테두리로 그립니다.
+
+**The 테두리냐 그림자냐 Rule.** 한 요소에는 테두리와 그림자 중 하나만 둡니다.
 
 ## Shapes
 
-- 모서리는 모두 각집니다. 반경 토큰이 없습니다.
-- 선 굵기: 1px(표 안 구분), 2px(구역 구분, 확인 불가 테두리), 3px(짐 있음 테두리), 4px(선택, 방금 바뀜), 6px(벽, 바텀시트 위 띠).
-- 아이콘은 한 가지 굵기의 직접 그린 선 아이콘만 씁니다(콘센트 등). 이모지와 글자 기호를 아이콘 대신 쓰지 않습니다.
+- **모서리:** 좌석 칸 안 작은 글자 조각, 범례 견본, 뼈대 막대는 4px(`radius-chip`). 좌석 칸과 방금 바뀜 테두리는 8px(`radius-seat`). 버튼과 상단 줄 링크의 누름 영역은 12px(`radius-control`). 네이비 패널, 바닥판, 방 카드, 장치 끊김 안내, 미리보기 묶음은 16px(`radius-panel`). 바텀시트는 20px(`radius-sheet`)이고 모바일에서는 위 두 모서리, 768px 이상에서는 네 모서리입니다. 끌기 손잡이, 서비스 이름 앞 점, 지금 보는 시나리오 표시는 완전한 원(`radius-full`).
+- **선:** 1px `line` 은 장식 구분선(상단 줄 아래, 카드 표와 시트 표의 줄)이고 뜻을 싣지 않습니다. 1px `line-strong` 은 뜻이 있는 경계(좌석 칸 테두리, 범례 견본 테두리)로 바탕과 3:1 이상입니다. 네이비 패널 안의 구분선은 1px `on-ink` 15% 입니다.
+- **굵은 표시:** 4px `ink` 선택 테두리(3px 띄움), 4px `live` 방금 바뀜 테두리(2px 띄움), 3px `accent` 좌석 포커스 링, 2px `accent` 그 밖의 포커스 링, 6px 바텀시트 위 상태 띠, 짐 있음 칸 아래 25% `ink` 띠.
+- **무늬:** 확인 불가 빗금(`--pattern-unknown`)은 -45도, `ink-soft` 1px 선과 6px 간격입니다. 바닥판 점 격자(`--pattern-floor`)는 16px 간격의 `floor-dot` 점입니다.
+- **아이콘:** 한 가지 굵기(1.8)로 직접 그린 선 아이콘만 씁니다(콘센트, 왼쪽/오른쪽 갈매기, 끊어진 고리). 장식이라 화면 읽기 도구에는 숨깁니다. 이모지와 글자 기호를 아이콘 대신 쓰지 않습니다.
 
 ## Components
 
@@ -217,92 +332,146 @@ components:
 
 말은 공통 문서 `SEAT-STATES.md` 의 "학생에게 보이는 말"을 그대로 씁니다.
 
-| 상태      | 면                                     | 형태                                           | 흑백에서 구분되는 점 |
-| --------- | -------------------------------------- | ---------------------------------------------- | -------------------- |
-| 빈자리    | `empty` 면, `on-empty` 글자            | 꽉 찬 면                                       | 진한 단색 면         |
-| 사용 중   | `ink` 면, `paper` 글자                 | 꽉 찬 면                                       | 가장 어두운 단색 면  |
-| 짐 있음   | `paper` 면, `ink` 글자                 | 3px `ink` 테두리 + 아래쪽 띠(칸 높이의 약 25%) | 밝은 면 아래 검은 띠 |
-| 확인 불가 | `paper` 면 위 `--pattern-unknown` 빗금 | 2px `ink` 테두리, 글자는 `paper` 바탕 조각 위  | 빗금                 |
+| 상태      | 면                                         | 형태                                                                                  | 흑백에서 구분되는 점      |
+| --------- | ------------------------------------------ | ------------------------------------------------------------------------------------- | ------------------------- |
+| 빈자리    | `empty` 면, `on-empty` 글자, `shadow-seat` | 테두리 없이 꽉 찬 면이 바닥판에서 떠 있음                                             | 가장 진한 단색 면, 그림자 |
+| 사용 중   | `occupied` 면, `ink` 글자                  | 1px `line-strong` 테두리                                                              | 연한 단색 면              |
+| 짐 있음   | `surface` 면, `ink` 글자                   | 1px `line-strong` 테두리 + 아래쪽 `ink` 띠(칸 높이의 25%)                             | 흰 면 아래 진한 띠        |
+| 확인 불가 | `surface` 면 위 `--pattern-unknown` 빗금   | 1px `line-strong` 테두리, 번호와 상태 글자, 콘센트 아이콘은 흰 조각(`radius-chip`) 위 | 빗금                      |
 
-- 확인 불가는 회색으로 칠하지 않습니다. "없음"이 아니라 "모름"입니다.
-- 선택한 좌석: 4px `ink` 테두리를 3px 띄워 둘러 줍니다.
-- 방금 바뀐 좌석: 칸 바깥에 2px 틈(바탕색)을 두고 두른 4px `live` 테두리와 바뀐 상태를 쓴 작은 `live` 표시. 테두리를 칸 면에 붙이지 않는 것은 빈자리 초록 면과 `live` 빨강의 밝기가 거의 같아 색을 구별하기 어려운 사람에게도 테두리가 보이게 하려는 것입니다. 키보드 포커스를 받은 좌석은 포커스 링이 이 테두리 위에 옵니다. 5초 동안 보이고 바로 사라집니다. 같은 좌석이 다시 바뀌면 다시 5초이고, 동시에 최대 2석까지만 강조해서 새 변경이 가장 오래된 강조를 밀어냅니다. 장치 연결이 바뀌면서 생긴 변경, 사유만 바뀐 변경, 다시 조회해서 알게 된 차이는 강조하지 않습니다. 칸이 96px 이상이면 "방금 사용 중", 64px 이상 96px 미만이면 "방금", 그보다 작으면 테두리만 둡니다. 처음 1.6초 동안 테두리가 칸 쪽으로 한 번 조여 들며(틈 4px에서 2px로, 크기는 그대로, `--duration-live`) 좌석도 안쪽 여백 밖으로 나가지 않고, 동작 줄이기 설정이면 움직이지 않고 테두리만 보입니다. 화면 읽기 도구에는 좌석 변화를 읽어 주지 않고 장치 끊김과 복구만 알립니다.
+- 확인 불가는 회색으로 칠하지 않습니다. "없음"이 아니라 "모름"입니다. 알 수 없는 상태 값도 확인 불가와 같은 빗금으로 그립니다.
+- 칸은 모서리 8px 이고, 마우스를 올리면 1px 위로 뜹니다.
+- 선택한 좌석: 시트가 열린 동안 4px `ink` 테두리를 3px 띄워 둘러 줍니다.
+- 방금 바뀐 좌석: 칸 바깥에 2px 틈(바닥판 색)을 두고 두른 4px `live` 테두리와, full 칸이면 상태 줄 자리에 바뀐 상태를 쓴 작은 `live` 조각(`on-live` 글자, `radius-chip`). 테두리를 칸 면에 붙이지 않는 것은 빈자리 틸 면과 `live` 빨강의 밝기가 거의 같아(1.03:1) 색을 구별하기 어려운 사람에게도 테두리가 보이게 하려는 것입니다. 키보드 포커스를 받은 좌석은 포커스 링이 이 테두리 위에 옵니다. 5초 동안 보이고 바로 사라집니다. 같은 좌석이 다시 바뀌면 다시 5초이고, 동시에 최대 2석까지만 강조해서 새 변경이 가장 오래된 강조를 밀어냅니다. 장치 연결이 바뀌면서 생긴 변경, 사유만 바뀐 변경, 다시 조회해서 알게 된 차이는 강조하지 않습니다. 칸이 96px 이상이면 "방금 사용 중", 64px 이상 96px 미만이면 "방금", 그보다 작으면 테두리만 둡니다. 처음 1.6초 동안 테두리가 칸 쪽으로 한 번 조여 들며(틈 5px 에서 2px 로, 흐린 상태에서 또렷하게, 크기는 그대로, `--duration-live`) 좌석도 안쪽 여백 밖으로 나가지 않습니다. 같은 순간 칸 자체는 위에서 한 번 넘어옵니다(`flip-in`). 동작 줄이기 설정이면 움직이지 않고 테두리만 보입니다. 화면 읽기 도구에는 좌석 변화를 읽어 주지 않고 장치 끊김과 복구만 알립니다.
 - 좌석은 버튼입니다. 화면 읽기 도구 이름은 "A1 빈자리, 콘센트 있음"처럼 번호, 상태, 콘센트 순서입니다.
-- 범례는 좌석도 바로 아래에 2열로 둡니다.
+
+### 범례
+
+- 모바일에서는 좌석도 바로 아래에 한 줄로 흘려 놓고 넘치면 다음 줄로 넘깁니다(가로 간격 20px, 세로 12px). 1024px 이상에서는 왼쪽 열 네이비 패널 아래에 둡니다.
+- 글자는 `text-label`, `ink-soft` 입니다. 견본은 20x12px, `radius-chip` 으로 좌석 칸을 작게 되풀이합니다: 빈자리는 `empty` 면과 `shadow-seat`, 사용 중은 `occupied` 면과 1px `line-strong` 테두리, 짐 있음은 흰 면 아래 `ink` 띠와 테두리, 확인 불가는 흰 면 위 빗금과 테두리. 마지막 줄은 콘센트 아이콘(16px, `ink`)입니다.
 
 ### 방 요약
 
-- 큰 숫자는 빈자리 수, `empty` 색입니다.
-- 표에는 항상 빈자리, 확인 불가, 전체를 이 순서로 둡니다. 확인 불가가 0이어도 지우지 않습니다.
-- 모든 좌석이 확인 불가면 큰 숫자 자리에 0 대신 `ink` 색 "모름"(`text-poster-word`)을 두고, 혼잡도 대신 마지막으로 확인한 시각을 둡니다. 서버가 혼잡도를 `HIGH` 로 주어도 "혼잡"이라고 쓰지 않습니다.
-- 갱신 시각은 상단 줄 오른쪽에 "12초 전 갱신"처럼 씁니다. 1분 넘게 갱신되지 않으면 "1분 넘게 갱신되지 않았어요"를, 재조회가 실패하면 "갱신하지 못했어요, 40초 전 정보"처럼 마지막으로 성공한 시각을 붙여 같은 자리에 굵게(`font-bold`) 씁니다. 방 목록 상단 줄에도 같습니다.
+- 네이비 패널(`ink` 면, 16px 모서리, 안쪽 20px, 그림자 없음) 안에 방 이름(`text-title`, 700, `on-ink`)을 두고, 1px `on-ink` 15% 선 아래에 큰 숫자와 표를 둡니다.
+- 큰 숫자는 빈자리 수, `empty-bright` 색, `text-poster` 입니다.
+- 표에는 항상 빈자리, 확인 불가, 전체를 이 순서로 둡니다. 확인 불가가 0이어도 지우지 않습니다. 첫 줄 이름 "빈자리"만 `text-fact` 600 `on-ink` 이고 나머지 이름은 `on-ink-soft` 입니다. 값은 모두 `num` `text-number` 600 `on-ink` 입니다. 줄 사이는 1px `on-ink` 15% 선입니다.
+- 모든 좌석이 확인 불가면 큰 숫자 자리에 0 대신 `on-ink` 색 "모름"(`text-poster-word`)을 두고, 표 첫 줄 값도 "모름"이며, 혼잡도 대신 마지막으로 확인한 시각을 둡니다. 서버가 혼잡도를 `HIGH` 로 주어도 "혼잡"이라고 쓰지 않습니다. 장치가 연결되어 있으면 패널 안 맨 아래에 "지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요."를 `on-ink-soft` 로 덧붙입니다.
+- 갱신 시각은 상단 줄 오른쪽에 "12초 전 갱신"처럼 `ink-soft` 로 씁니다. 1분 넘게 갱신되지 않으면 "1분 넘게 갱신되지 않았어요"를, 재조회가 실패하면 "갱신하지 못했어요, 40초 전 정보"처럼 마지막으로 성공한 시각을 붙여 같은 자리에 굵게(`font-bold`, `ink`) 씁니다. 방 목록 상단 줄에도 같습니다.
+- 좌석이 없는 방(전체 0석)은 좌석도 대신 흰 판(`shadow-plate`, 안쪽 24px)에 "이 방에는 등록된 좌석이 없어요." 한 줄입니다.
+
+### 좌석도 바닥판
+
+- 흰 `surface` 판, 16px 모서리, `shadow-plate`, 점 격자(`pattern-floor`). 안쪽 여백 12px(1024px 이상은 바깥에 좌우 32px, 위아래 48px 를 더함).
+- 좌석 칸은 바닥판 위 절대 위치로 놓이고, 넓은 화면에서는 칸 상한에 맞춰 줄어든 무대가 가운데 섭니다.
 
 ### 방 목록
 
-- 첫 화면입니다. 위에 6px `ink` 선을 긋고 방을 위에서 아래로 한 줄씩 둡니다. 행 사이는 2px `ink` 선이고 카드, 테두리 상자, 화살표 글자 기호는 없습니다. 행 전체가 그 방의 좌석도로 가는 링크이고 누르는 높이는 `spacing-tap` 이상, 포커스는 3px `ink` 윤곽선입니다.
-- 행의 첫 줄은 방 이름(`text-fact`)이고 링크 처리(`ink` 글자, 밑줄, `underline-offset-4`, 방 화면 상단 줄의 "방 목록"과 같음)를 합니다. 행 전체가 링크이고 화살표 글자는 없습니다. 단어 단위로 줄을 바꾸고 아주 긴 이름도 말줄임 없이 어디서든 끊어 가로 스크롤을 만들지 않습니다.
-- 둘째 줄은 2열입니다. 왼쪽은 숫자 칸입니다. 칸 폭은 모든 행에서 같고(행 폭의 3분의 1) 위쪽이 첫 표 줄과 맞습니다. 칸 안은 `ink` 색 "빈자리"(`text-label`) 아래에 빈자리 수(`text-row-number`, `empty` 색)와 "석"입니다. 오른쪽은 1px 선으로 나눈 작은 표로 확인 불가, 전체, 혼잡도를 이 순서로 둡니다(이름은 `text-body`, 값은 `text-number` `font-bold` 로 확인 불가, 전체, 혼잡도 값이 모두 같은 크기와 굵기이고 혼잡도만 도드라지지 않습니다). 확인 불가가 0이어도 지우지 않습니다. 혼잡도는 방 요약과 같이 말로만 쓰고, 모르는 값은 "알 수 없음"입니다.
-- 모든 좌석이 확인 불가인 방: 숫자 자리에 `ink` 색 "모름"을 두고("빈자리" 라벨 아래, `text-title` 크기, 900, 고정된 숫자 칸 안) 표에는 확인 불가와 전체만 둡니다. 혼잡도 줄 대신 숫자와 표 묶음 아래, 행 전체 폭에 굵은(`font-bold`, `ink`) 한 줄 문장을 둡니다. 장치가 연결되어 있으면 "아직 자리를 확인하지 못했어요", 끊겼으면 "장치 연결이 끊겼어요". "혼잡"과 빈자리 "0석"은 쓰지 않습니다. 모든 행의 왼쪽에 6px 여백 칸(`spacing-band`)을 두고, 그 칸과 내용 사이는 4px(`spacing-1`)만 띄워 행 글자가 제목(h1)과 구분선 x 에 거의 붙어 시작합니다(표는 오른쪽 끝에 붙습니다). 위아래 여백(`spacing-4`)은 내용 쪽에 두어 여백 칸이 행 위 선부터 아래 선까지 끊기지 않고 이어지고, 누르는 높이는 `spacing-tap` 이상으로 유지합니다. "모름" 행에서만 그 칸에 좌석 칸과 같은 `--pattern-unknown` 빗금 세로 띠를 채워 흑백에서도 갈립니다.
+- 첫 화면입니다. 제목 아래 방마다 흰 카드 하나를 둡니다(`surface` 면, `radius-panel` 16px, `shadow-plate`, 안쪽 16px, 테두리 없음). 격자는 모바일 1열, 768px 이상 2열, 1024px 이상 3열이고 같은 줄 카드는 높이를 맞춥니다.
+- 카드 전체가 그 방의 좌석도로 가는 링크입니다. 누르는 높이는 `spacing-tap` 이상, 포커스는 2px `accent` 윤곽선(2px 띄움)이고, 마우스를 올리면 카드가 1px 뜨고 갈매기가 1px 오른쪽으로 갑니다(동작 줄이기 설정이면 움직이지 않음).
+- 카드 첫 줄은 방 이름(`text-fact`, 600, `ink`)과 오른쪽 끝의 오른쪽 갈매기 아이콘(16px, `ink-soft`)입니다. 밑줄은 없습니다. 단어 단위로 줄을 바꾸고 아주 긴 이름도 말줄임 없이 어디서든 끊어 가로 스크롤을 만들지 않습니다.
+- 둘째 줄은 2열입니다. 왼쪽은 숫자 칸입니다. 칸 폭은 모든 카드에서 같고(카드 내용 폭의 3분의 1) 위쪽이 첫 표 줄과 맞습니다. 칸 안은 `ink-soft` 색 "빈자리"(`text-label`) 아래에 빈자리 수(`text-row-number`, 700, `empty` 색)와 "석"(`text-body`, 600, `ink-soft`)입니다. 오른쪽은 1px `line` 선으로 나눈 작은 표로 확인 불가, 전체, 혼잡도를 이 순서로 둡니다(이름은 `text-body` `ink-soft`, 값은 `num` `text-number` 600 `ink` 로 확인 불가, 전체, 혼잡도 값이 모두 같은 크기와 굵기이고 혼잡도만 도드라지지 않습니다). 확인 불가가 0이어도 지우지 않습니다. 혼잡도는 방 요약과 같이 말로만 쓰고, 모르는 값은 "알 수 없음"입니다.
+- 모든 좌석이 확인 불가인 방: 숫자 자리에 `ink` 색 "모름"을 두고("빈자리" 라벨 아래, `text-title` 크기, 700, 고정된 숫자 칸 안) 표에는 확인 불가와 전체만 둡니다. "빈자리" 라벨 바로 옆에는 좌석 칸, 범례와 같은 빗금 견본(20x12px, `radius-chip`, 1px `line-strong` 테두리)을 두어 흑백에서도 "모름"으로 갈립니다. 혼잡도 줄 대신 숫자와 표 묶음 아래, 카드 내용 폭 전체에 굵은(`font-bold`, `ink`) 한 줄 문장을 둡니다. 장치가 연결되어 있으면 "아직 자리를 확인하지 못했어요", 끊겼으면 "장치 연결이 끊겼어요". "혼잡"과 빈자리 "0석"은 쓰지 않습니다.
 - 확인된 좌석이 있는데 빈자리가 0석이고 확인 불가가 1석 이상이면 표 아래에 같은 굵은 한 줄 "확인하지 못한 자리가 N석 있어요"(N 은 확인 불가 수)를 둡니다. 0석이 만석이라는 뜻으로 읽히지 않게 하려는 것이고, 링크 이름 끝(혼잡도 뒤)에도 같은 문장이 붙습니다. 빈자리가 1석 이상이거나 확인 불가가 0이면 두지 않습니다. 장치도 끊겼으면 이 문장이 먼저, "장치 연결이 끊겼어요"가 그 아래입니다.
 - 확인된 좌석이 있는데 장치 연결이 끊긴 응답이 오면 혼잡도 줄을 표에 그대로 두고 숫자와 표 묶음 아래에 같은 굵은 한 줄로 "장치 연결이 끊겼어요"를 덧붙입니다.
-- 좌석이 없는 방(전체 0석)은 숫자와 표 없이 "등록된 좌석이 없어요" 한 줄이고 링크는 그대로입니다.
+- 좌석이 없는 방(전체 0석)은 숫자와 표 없이 "등록된 좌석이 없어요" 한 줄(`ink-soft`)이고 링크는 그대로입니다.
 - `live` 색은 이 화면에 쓰지 않습니다. 장치가 끊긴 방이 여럿이어도 `live` 한도(한 화면 두 군데)를 넘지 않게 하려는 것입니다.
-- 불러오는 중에는 제목과 상태 안내 아래에 실제 행 모양의 뼈대 세 줄을 둡니다(위 6px 선, 행 사이 2px `ink` 선, 방 이름과 숫자와 표 자리에 짧은 `ink` 선 조각). 상자와 행 사이 간격은 없고 200ms 뒤에 나타나며 한 번 보이면 400ms 는 유지합니다.
+- 불러오는 중에는 제목과 상태 안내 아래에 실제 카드 모양의 뼈대 세 개를 같은 격자로 둡니다(흰 카드, `shadow-plate`, 방 이름과 숫자와 표 자리에 `line` 색 막대, 천천히 깜빡임). 200ms 뒤에 나타나며 한 번 보이면 400ms 는 유지합니다.
 - 오류 상태는 방 화면과 같이 제목(h1)을 오류 문장으로 바꿉니다("방 목록을 불러오지 못했어요.").
-- 정렬하지 않고 서버가 준 순서를 그대로 씁니다(다시 조회해도 행이 움직이지 않게). 방이 하나뿐이어도 바로 들어가지 않고 목록을 보입니다. 비어 있으면 "아직 등록된 방이 없어요." 한 줄입니다.
-- 링크 이름은 "제1실습실 (예시), 빈자리 1석, 확인 불가 1석, 전체 4석, 보통"처럼 이름, 빈자리, 확인 불가, 전체, 혼잡도 순서입니다.
+- 정렬하지 않고 서버가 준 순서를 그대로 씁니다(다시 조회해도 카드가 움직이지 않게). 방이 하나뿐이어도 바로 들어가지 않고 목록을 보입니다. 비어 있으면 "아직 등록된 방이 없어요." 한 줄입니다.
+- 링크 이름은 "제1실습실 (예시), 빈자리 1석, 확인 불가 1석, 전체 4석, 보통"처럼 이름, 빈자리, 확인 불가, 전체, 혼잡도 순서입니다. 모든 좌석이 확인 불가면 "이름, 빈자리 모름, 확인 불가 N석, 전체 N석, 문장", 좌석이 없으면 "이름, 등록된 좌석이 없어요"입니다.
+
+### 상단 줄
+
+- 화면 위에 붙는 유리 줄(`glass`, 아래 1px `line`)입니다. 높이 44px 이상, 글자는 `text-label`.
+- 방 목록: 왼쪽에 서비스 이름 "ZeroFrame"(`text-body`, 700, `ink`)과 그 앞 8px `empty` 점, 오른쪽에 갱신 시각.
+- 방 화면: 왼쪽에 "방 목록" 링크(왼쪽 갈매기 16px + 600 `ink`, 밑줄 없음, 마우스를 올리면 `surface` 면이 12px 모서리로 깔림), 오른쪽에 갱신 시각.
 
 ### 장치 끊김
 
-- 상단 줄 바로 아래, 방 이름보다 먼저 화면 폭 전체의 `live` 띠를 둡니다. 제목 "장치 연결이 끊겼어요"(`text-alert`)와 한두 줄 설명("지금은 이 방 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.").
+- 상단 줄 아래, 네이비 패널보다 먼저 `live-tint` 안내 패널(16px 모서리, 안쪽 16px)을 둡니다. 왼쪽에 끊어진 고리 아이콘(20px, `live`), 제목 "장치 연결이 끊겼어요"(`text-alert`, 700, `live`)와 한두 줄 설명("지금은 이 방 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.", `ink`).
 - 좌석도는 모두 확인 불가 무늬로 바뀌고, 요약은 위 "모름" 규칙을 따릅니다.
 
 ### 미리보기 띠
 
-- `ink` 면에 `paper` 글자, 높이는 `spacing-tap`. 지금 시나리오 이름과 목록 링크를 보입니다. 미리보기 빌드에만 있고 운영 화면에는 없습니다.
-- 오른쪽 링크 둘: "바꾸기"(시나리오 목록, 목록 페이지에서는 없음)와 "의견"(새 탭). 누르는 영역 44x44, 밑줄, 포커스는 글자 칸에 3px `paper` 윤곽선(2px 띄움).
-- 바텀시트가 열린 동안 두 링크는 흐리게(밑줄 없음, 반투명) 보입니다. 시트를 닫아야 누를 수 있다는 표시이고, "회색 금지" 규칙의 예외는 이 미리보기 띠에만 둡니다.
+- `ink` 면에 `on-ink` 글자, 높이는 `spacing-tap`. "모의 데이터"(굵게)와 지금 시나리오 이름(`num`)을 보입니다. 미리보기 빌드에만 있고 운영 화면에는 없습니다.
+- 오른쪽 링크 둘: "바꾸기"(시나리오 목록, 목록 페이지에서는 없음)와 "의견"(새 탭). 누르는 영역 44x44, 밑줄, 포커스는 글자 칸에 2px `paper` 윤곽선(2px 띄움).
+- 바텀시트가 열린 동안 두 링크는 흐리게(밑줄 없음, 불투명도 50%, 측정 5.1:1) 보입니다. 시트를 닫아야 누를 수 있다는 표시이고, 흐리게 보이는 조작 요소는 이 미리보기 띠에만 둡니다.
+- 시나리오 목록 화면은 묶음마다 흰 판(`shadow-plate`, 16px 모서리) 안에 1px `line` 으로 나눈 줄을 두고, 지금 보는 시나리오 줄 왼쪽에 6px 폭의 `empty` 둥근 막대와 "지금 보는 중"을 둡니다. 링크는 `accent` 글자와 밑줄입니다.
 
 ### 바텀시트
 
-- 좌석을 누르면 아래에서 올라옵니다(`--duration-sheet` 240ms, `ease-out`). 동작 줄이기 설정이면 바로 나타납니다.
-- 내용 순서: 좌석 번호와 상태(`text-sheet`, 상태는 그 상태 색) → 표(자리, 콘센트, 마지막 확인, 상태가 바뀐 때) → 닫기 버튼.
-- 표는 위 2px, 줄마다 1px `ink` 선입니다. 마지막 확인은 "12초 전 (14:02:48)"처럼 상대 시각과 한국 시각을 함께 씁니다.
+- 좌석을 누르면 아래에서 올라옵니다(`--duration-sheet` 240ms, `--ease-out`). 동작 줄이기 설정이면 바로 나타납니다.
+- 면은 `surface`, 위 모서리 20px, `shadow-sheet`. 맨 위에 6px 상태 띠(`spacing-band`)를 두고 모서리를 따라 잘립니다.
+- 내용 순서: 좌석 번호와 상태(`text-sheet`, 700, 번호는 `num` `ink`, 상태는 빈자리면 `empty` 색, 나머지는 `ink`) → 표(자리, 콘센트, 마지막 확인, 상태가 바뀐 때) → 닫기 버튼(주요 버튼).
+- 표는 위와 줄마다 1px `line` 선, 줄 위아래 12px 입니다. 이름은 `text-body` `ink-soft`, 값은 `text-body` 600 `ink` 입니다. 마지막 확인은 "12초 전 (14:02:48)"처럼 상대 시각과 한국 시각을 함께 씁니다.
 - 콘센트 줄에 콘센트가 있으면 값 `있음` 옆에 좌석도와 같은 콘센트 선 아이콘(16px)을 반복합니다. 좌석도 안의 아이콘은 칸 크기에 맞춰 더 작습니다. 장식이라 화면 읽기 도구에는 숨기고, 줄의 글자는 그대로 `있음`/`없음` 입니다.
 - 아래로 끌거나 닫기를 누르면 닫히고, 포커스는 누른 좌석으로 돌아갑니다.
 - 위 띠: 빈자리 `empty`, 사용 중과 짐 있음 `ink`, 확인 불가와 알 수 없는 상태는 `--pattern-unknown` 빗금(좌석 칸과 같은 무늬).
 - 확인 불가 이유: 제목 바로 아래 한 문장(`text-body`, `ink`)이고 표 줄이 아닙니다. 상태가 확인 불가일 때만 보이며, 알 수 없는 상태에는 두지 않습니다. 기술 용어(장치 이름, 모델, 타임아웃)를 쓰지 않습니다.
-- 끌기 손잡이: 띠 아래 가운데 32x4px `ink` 막대(각진 모서리). 장식이라 화면 읽기 도구에는 숨깁니다. 끌기는 손잡이와 제목 줄에서만 시작해 내용 스크롤과 다투지 않고, 아래로만 움직입니다. 이동이 시트 높이의 4분의 1 이상이거나 아래 속도가 500px/s 이상이면 닫히고, 아니면 240ms 로 제자리로 돌아갑니다. 닫기 버튼이 같은 일을 합니다.
-- 데스크톱(768px 이상): 아래에 붙인 채 가운데, 최대 폭 `--container-sheet`(30rem, 480px).
+- 끌기 손잡이: 띠 아래 가운데 40x4px `line-strong` 막대(완전한 원 모서리). 장식이라 화면 읽기 도구에는 숨깁니다. 끌기는 손잡이와 제목 줄에서만 시작해 내용 스크롤과 다투지 않고, 아래로만 움직입니다. 이동이 시트 높이의 4분의 1 이상이거나 아래 속도가 500px/s 이상이면 닫히고, 아니면 240ms 로 제자리로 돌아갑니다. 닫기 버튼이 같은 일을 합니다.
+- 데스크톱(768px 이상): 화면 아래에서 16px 띄워 가운데 두고 네 모서리를 둥글게, 최대 폭 `--container-sheet`(30rem, 480px).
 - 높이: 내용만큼, 최대 화면 높이의 85%(`--sheet-max-height`). 넘치면 내용 영역만 세로로 스크롤하고, 아래 여백에 safe-area 를 포함합니다.
 - 갱신이 멈췄을 때(재조회 실패, 1분 넘게 갱신 없음): 표 아래 한 줄을 굵게(`font-bold`) 둡니다. "1분 넘게 갱신되지 않았어요" 또는 "갱신하지 못했어요, 40초 전 정보"입니다. 막이 상단 줄을 덮으므로 시트 안에도 둡니다. 시트 안에 `live` 색 표시는 두지 않습니다.
 - 선택 표시: 시트가 열린 동안 누른 좌석에 4px `ink` 테두리를 3px 띄워 두릅니다. 그 좌석이 방금 바뀌어 `live` 테두리가 있으면 `live` 테두리가 위에 보이고, 5초 뒤 선택 표시만 남습니다.
-- 쌓임: 막 `z-30`, 시트 `z-40`(강조 테두리 `z-10`, 포커스 좌석 `z-20` 보다 위). 미리보기 띠는 `z-25` 로 포커스 좌석 위, 막 아래다.
+- 쌓임: 막 `z-30`, 시트 `z-40`(강조 테두리 `z-10`, 포커스 좌석과 고정 상단 줄 `z-20` 보다 위). 미리보기 띠는 `z-25` 로 포커스 좌석 위, 막 아래입니다.
 
 ### 버튼과 링크
 
-- 주요 버튼: `ink` 면, `paper` 글자, 높이 48px, 각진 모서리, 너비 가득.
-- 보조 버튼: 배경 없이 `paper` 바탕 위에 놓고, 2px `ink` 테두리, `ink` 글자, 너비 가득, 높이 `spacing-tap`(44px) 이상. 좌석도 조작("확대", "전체 보기")에 씁니다. 비활성 상태를 만들지 않고 회색을 쓰지 않습니다.
-- 링크: `ink` 글자, 밑줄(간격 4px). 누를 수 있는 높이는 `spacing-tap`(44px) 이상.
-- 키보드 포커스: 3px `ink` 윤곽선을 2px 띄워서, 바로 나타나게.
+- 주요 버튼: `ink` 면, `on-ink` 글자, 600, 높이 48px, 12px 모서리(`radius-control`), 너비 가득. 마우스를 올리면 `ink` 90% 면, 누르는 동안 98% 로 살짝 작아집니다. 인디고나 밝은 파랑으로 칠하지 않습니다.
+- 보조 버튼: `surface` 면, `shadow-plate`, 테두리 없음, `ink` 글자, 600, 높이 `spacing-tap`(44px) 이상, 좌우 16px. 마우스를 올리면 `paper` 면. 좌석도 조작("확대", "전체 보기")에 너비 가득으로 씁니다. 비활성 상태를 만들지 않고 회색을 쓰지 않습니다.
+- 본문 링크: 굵게, `accent` 글자, 밑줄(간격 4px). 누를 수 있는 높이는 `spacing-tap`(44px) 이상.
+- 키보드 포커스: 버튼, 링크, 방 카드는 2px `accent` 윤곽선을 2px 띄워서, 좌석 칸은 3px `accent` 윤곽선을 2px 띄워서 둡니다.
+
+### 움직임
+
+| 토큰                               | 값                                                                               | 쓰는 곳                                                  |
+| ---------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `--ease-out`                       | `cubic-bezier(0.16, 1, 0.3, 1)`                                                  | 모든 전환과 애니메이션의 기본 곡선                       |
+| 기본 전환                          | 160ms                                                                            | hover 의 1px 뜸(동작 줄이기면 없음), 면 색 바뀜          |
+| `--duration-flip` / `flip-in`      | 520ms, `perspective(28rem) rotateX(-72deg)` → `rotateX(0deg)`, 불투명도 0.35 → 1 | 상태가 방금 바뀐 좌석 칸, 값이 바뀐 뒤의 빈자리 큰 숫자  |
+| `--duration-live` / `live-tighten` | 1600ms, 윤곽선 틈 5px → 2px, 불투명도 0.6 → 1                                    | 방금 바뀐 좌석 테두리                                    |
+| `--duration-sheet`                 | 240ms                                                                            | 바텀시트 열고 닫기, 막 나타나기, 끌다 놓은 시트 제자리로 |
+| `pulse`                            | 1.8s 반복, 중간에 불투명도 0.55                                                  | 불러오는 중 뼈대                                         |
+
+**The 바뀐 순간만 Rule.** 판 넘김은 값이 바뀐 순간에만 한 번 일어납니다. 화면을 처음 그릴 때 큰 숫자는 넘어오지 않고, 강조하지 않는 변경(연결 복구, 사유만 바뀜, 다시 조회)에서는 칸도 넘어오지 않습니다. 크기와 자리는 그대로이고 기울기만 바뀝니다.
+
+**The 동작 줄이기 Rule.** 판 넘김, 테두리 조임, 뼈대 깜빡임은 모두 `motion-safe` 안에 둡니다. 시트는 동작 줄이기 설정이면 바로 나타나고 바로 사라집니다.
 
 ## Do's and Don'ts
 
-**Do**
+### Do:
 
-- 빈자리 수를 화면에서 가장 크게 보여줍니다.
-- 확인 불가 수를 빈자리 수 바로 옆에 둡니다.
-- 색을 쓰면 무늬나 형태, 말을 함께 둡니다.
-- 숫자는 고정폭 숫자로 씁니다.
-- 새 값이 필요하면 이 문서와 `src/app/styles/tokens.css` 를 먼저 고칩니다.
+- **Do** 빈자리 수를 화면에서 가장 크게 보여줍니다(네이비 패널 위 `empty-bright` 96px).
+- **Do** 확인 불가 수를 빈자리 수 바로 옆 표에 둡니다.
+- **Do** 색을 쓰면 무늬나 형태, 말을 함께 둡니다.
+- **Do** 표, 좌석 번호, 시각의 숫자는 `num`(고정폭)으로 씁니다.
+- **Do** 한 요소에는 테두리와 그림자 중 하나만 둡니다.
+- **Do** 움직임은 `motion-safe` 로 감싸고 값이 바뀐 순간에만 씁니다.
+- **Do** 새 값이 필요하면 이 문서와 `src/app/styles/tokens.css` 를 먼저 고칩니다.
 
-**Don't**
+### Don't:
 
-- 회색 면이나 흐린 글자로 "확인 불가"를 나타내지 않습니다.
-- 둥근 카드, 그림자, 카드 안의 카드, 그라데이션, 흐림 효과를 쓰지 않습니다.
-- 이모지, 느낌표, "실시간!" 같은 문구를 쓰지 않습니다.
-- 모든 것을 가운데 정렬하지 않습니다. 왼쪽 정렬이 기본입니다.
-- 포스터 크기(144px)를 글자 제목에 쓰지 않습니다. 숫자 하나에만 씁니다.
-- 컴포넌트에 hex 나 임의 값(`text-[#…]`, `p-[13px]`)을 쓰지 않습니다.
-- 화면에 기술 용어(엣지, WebSocket, UNKNOWN)를 드러내지 않습니다.
+- **Don't** 회색 면이나 흐린 글자로 "확인 불가"를 나타내지 않습니다. 확인 불가는 빗금입니다.
+- **Don't** 사용 중 좌석을 진한 면으로 칠하지 않습니다. 좌석도 위 채도 있는 면은 빈자리 하나입니다.
+- **Don't** `empty-bright` 를 밝은 면 위에, `accent` 를 네이비 패널 위에 쓰지 않습니다.
+- **Don't** 카드 안에 카드를 넣거나 장식용 그라데이션을 쓰지 않습니다. 빗금과 범례 견본의 띠처럼 경계가 딱 끊기는 무늬만 씁니다.
+- **Don't** 흐림을 고정 상단 줄과 시트 뒤 막 밖에서 쓰지 않습니다.
+- **Don't** 네이비 패널에 그림자를 두지 않습니다.
+- **Don't** 버튼을 인디고나 밝은 파랑으로 칠하지 않습니다. 주요 버튼은 `ink` 네이비입니다.
+- **Don't** 이모지, 느낌표, "실시간!" 같은 문구를 쓰지 않습니다.
+- **Don't** 모든 것을 가운데 정렬하지 않습니다. 왼쪽 정렬이 기본입니다.
+- **Don't** 큰 숫자 크기(96px)를 글자 제목에 쓰지 않습니다. 숫자 하나에만 씁니다.
+- **Don't** 컴포넌트에 hex 나 임의 값(`text-[#…]`, `p-[13px]`)을 쓰지 않습니다. 토큰은 `tokens.css` 에만 있습니다.
+- **Don't** 화면에 기술 용어(엣지, WebSocket, UNKNOWN)를 드러내지 않습니다.
   - 미리보기 사이트의 띠와 시나리오 목록에서만 영문 시나리오 이름을 보입니다(피드백 재현용). 학생 화면에는 쓰지 않습니다.
+
+## 결정 이유와 버린 안
+
+- **학부 네이비와 틸.** 학생이 이미 아는 경북대 컴퓨터학부 홈페이지(https://cse.knu.ac.kr/)와 한 식구로 보이게 했습니다. 그 사이트의 CSS 에서 네이비 `#0e2036`, 인디고 `#1c2c73`, 블루 `#0577e6`, 틸 `#00b29c` 를 뽑았습니다. 네이비는 그대로 `ink` 로, 블루는 밝은 면 위 대비를 맞추려고 어둡게 해서 `accent`(`#0b5cad`)로, 틸은 흰 글자를 올릴 수 있게 어둡게 해서 `empty`(`#0a6b5e`)로 썼습니다. 네이비 패널 위 숫자에는 같은 틸 계열을 밝게 올린 `empty-bright` 를 씁니다.
+- **빈자리는 파랑이 아니라 틸.** 학부 색만 보면 블루가 더 대표색이지만, "빈자리 = 초록 계열"이라는 관습을 따라야 3초 판단이 지켜집니다. 그래서 블루 빈자리안은 검토 후 버렸습니다.
+- **사용 중은 네이비가 아니라 연한 슬레이트.** 사용 중을 네이비로 칠하면 진한 면이 둘(틸과 네이비)이 되어 좌석도가 바둑판처럼 읽혔습니다. 사용 중을 `occupied`(연한 슬레이트)로 낮춰 채도 있는 색은 빈자리만 갖게 했습니다. 빈자리 면과 밝기 대비 5.0:1 이 남아 흑백에서도 갈립니다.
+- **Pretendard 하나.** 이전의 Gothic A1 과 Archivo 두 글꼴 대신, 600 굵기와 고정폭 숫자를 모두 가진 Pretendard Variable 하나로 줄였습니다. 불러오는 글꼴이 하나라 첫 화면도 가볍습니다.
+- **좌석 칸 상한과 기준 글자 단계.** 4K 모니터를 배율 100% 로 보면 좌석 한 칸이 1685x1264px 까지 커지고 범례가 화면 밖으로 밀려났습니다. 칸 한 변을 128px x remScale 로 묶고, 1920/2560/3400px 에서 기준 글자를 키워 글자와 패널이 함께 자라게 했습니다.
+- **인디고 버튼을 버림.** 학부 인디고 `#1c2c73` 로 주요 버튼을 칠해 봤지만 흔한 파란 SaaS 버튼으로 읽혔습니다. 주요 버튼은 패널과 같은 `ink` 네이비로 두었습니다.
+- **출발 안내판 판 넘김.** 실시간으로 바뀌는 숫자를 "바뀌었다"고 알리되 소란스럽지 않게 하려고, 출발 안내판의 판이 넘어오는 동작을 골랐습니다. 값이 바뀐 순간에만, 동작 줄이기 설정이 아닐 때만 한 번 움직입니다.
+- **게시판 포스터를 대체함.** 이전 방향은 종이색 바탕, 검은 굵은 선, 900 굵기, 144px 숫자, 반경과 그림자와 흐림 금지로 강한 인상을 냈지만 행정 게시물처럼 딱딱했고, 사용 중 검은 면 때문에 빈자리가 묻혔습니다. 4상태 규칙, 확인 불가 빗금, 3초 판단의 화면 순서는 이어받고 시각 언어만 바꿨습니다.
