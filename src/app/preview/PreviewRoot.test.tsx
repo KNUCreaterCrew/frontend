@@ -1,0 +1,41 @@
+import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
+import { AppProviders } from '@/app/providers'
+import { createQueryClient } from '@/app/queryClient'
+import { PreviewRoot } from './PreviewRoot'
+
+function renderRoot(path: string) {
+  const queryClient = createQueryClient()
+  queryClient.setDefaultOptions({ queries: { retry: false } })
+  return render(
+    <AppProviders queryClient={queryClient}>
+      <MemoryRouter initialEntries={[path]}>
+        <PreviewRoot scenario="mixed" unknownScenario={null} />
+      </MemoryRouter>
+    </AppProviders>,
+  )
+}
+
+test('시나리오 목록 경로는 띠와 목록을 보이고 바꾸기 링크가 없다', async () => {
+  renderRoot('/__preview')
+  expect(await screen.findByRole('heading', { level: 1, name: '어떤 화면을 볼까요' })).toBeVisible()
+  expect(screen.getByRole('complementary', { name: '미리보기 안내' })).toBeInTheDocument()
+  expect(screen.queryByRole('link', { name: '시나리오 바꾸기' })).toBeNull()
+})
+
+test('앱 경로는 띠와 앱 화면이 함께 나온다', async () => {
+  renderRoot('/')
+  expect(screen.getByRole('complementary', { name: '미리보기 안내' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: '시나리오 바꾸기' })).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { level: 1, name: '어느 방으로 갈까요' })).toBeVisible()
+})
+
+test('마운트하면 html 에 preview 클래스가 붙고 제목 앞에 미리보기가 붙는다', () => {
+  document.title = 'ZeroFrame'
+  const first = renderRoot('/__preview')
+  expect(document.documentElement.classList.contains('preview')).toBe(true)
+  expect(document.title).toBe('미리보기 ZeroFrame')
+  first.unmount()
+  renderRoot('/__preview')
+  expect(document.title).toBe('미리보기 ZeroFrame')
+})
