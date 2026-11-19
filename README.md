@@ -122,7 +122,7 @@ Render static site 로 올립니다. 설정은 [`render.yaml`](render.yaml)(Blue
 1. Render 대시보드에서 **New → Blueprint** 를 누르고 `KNUCreaterCrew/frontend` 저장소를 고릅니다.
 2. `render.yaml` 의 `zeroframe-web` 서비스를 확인하고 **Apply** 를 누릅니다.
 3. 빌드 로그에서 pnpm 이 맞춰지고 Node 가 24 인지 확인합니다. 안 맞으면 Environment 에 `NODE_VERSION=24` 를 넣습니다.
-4. 배포된 웹 출처(예: `https://zeroframe-web.onrender.com`)를 백엔드의 `CORS_ALLOW_ORIGINS` 에 넣습니다. 방법은 백엔드 README 의 [다른 주소의 웹에서 부르기 (CORS)](https://github.com/KNUCreaterCrew/backend#다른-주소의-웹에서-부르기-cors) 를 봅니다.
+4. 배포된 웹 출처(예: `https://zeroframe-web.onrender.com`, Render 가 뒤에 접미사를 붙일 수 있으니 실제 주소는 대시보드에서 확인합니다)를 백엔드의 `CORS_ALLOW_ORIGINS` 에 넣습니다. 방법은 백엔드 README 의 [다른 주소의 웹에서 부르기 (CORS)](https://github.com/KNUCreaterCrew/backend#다른-주소의-웹에서-부르기-cors) 를 봅니다.
 5. 아래 두 명령 모두 응답 헤더에 `access-control-allow-origin` 이 붙는지 확인합니다. 두 번째는 404 응답이라도 붙어야 합니다.
 
 ```sh
