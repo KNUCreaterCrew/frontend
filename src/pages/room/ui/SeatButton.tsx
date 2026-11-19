@@ -5,9 +5,10 @@ import { OutletIcon } from '@/shared/ui'
 import type { CellStage } from '../lib/geometry'
 
 const FACE: Record<SeatStatus, string> = {
-  // 빈자리만 칠한 면이고 그림자로 떠 있다. 나머지는 바닥판에 붙은 면과 테두리로 구분한다
-  EMPTY: 'bg-empty text-on-empty shadow-seat',
-  OCCUPIED: 'border border-line-strong bg-occupied text-ink',
+  // 빈자리는 밝은 민트 면에 틸 테두리를 두르고 그림자로 떠 있다(비어 있는 칸).
+  // 사용 중은 진한 면으로 채운다(누가 있는 칸). 나머지는 바닥판에 붙은 흰 면과 테두리로 구분한다
+  EMPTY: 'bg-empty-tint text-empty shadow-seat',
+  OCCUPIED: 'bg-occupied text-on-occupied',
   AWAY: 'border border-line-strong bg-surface text-ink',
   UNKNOWN: 'pattern-unknown border border-line-strong bg-surface text-ink',
   UNRECOGNIZED: 'pattern-unknown border border-line-strong bg-surface text-ink',
@@ -64,6 +65,8 @@ function SeatButtonView({
   const showText = stage !== 'zoom'
   const hatched = isHatched(seat.status)
   const away = seat.status === 'AWAY'
+  // 빈자리 칸의 2px 틸 테두리(shadow-seat 의 inset)만큼 글자 영역을 안으로 들인다
+  const ring = seat.status === 'EMPTY' ? 2 : 0
   const chip = hatched ? 'self-start rounded-chip bg-surface px-2 py-px' : ''
 
   const justLabel =
@@ -93,8 +96,8 @@ function SeatButtonView({
         )}
         {showText && (
           <span
-            className={`absolute inset-x-0 top-0 flex flex-col justify-between ${stage === 'full' ? 'p-2' : 'p-1'}`}
-            style={{ bottom: away ? '25%' : 0 }}
+            className={`absolute flex flex-col justify-between ${stage === 'full' ? 'p-2' : 'p-1'}`}
+            style={{ top: ring, left: ring, right: ring, bottom: away ? '25%' : ring }}
           >
             <span
               className={`num font-bold ${stage === 'full' ? 'text-number' : 'text-label'} ${chip}`}

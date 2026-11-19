@@ -7,11 +7,11 @@ export function Legend({ outletsHidden = false }: { outletsHidden?: boolean }) {
   return (
     <ul className="flex flex-wrap gap-x-5 gap-y-3 py-4 text-label text-ink-soft">
       <li className="flex items-center gap-2">
-        <span aria-hidden="true" className={`${SWATCH} bg-empty shadow-seat`} />
+        <span aria-hidden="true" className={`${SWATCH} bg-empty-tint shadow-seat`} />
         빈자리
       </li>
       <li className="flex items-center gap-2">
-        <span aria-hidden="true" className={`${SWATCH} border border-line-strong bg-occupied`} />
+        <span aria-hidden="true" className={`${SWATCH} bg-occupied`} />
         사용 중
       </li>
       <li className="flex items-center gap-2">
