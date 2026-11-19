@@ -43,6 +43,17 @@ describe('pickScenario', () => {
     })
   })
 
+  test('빈 값 scenario 는 없는 것으로 보고 저장값을 쓴다', () => {
+    expect(pickScenario({ search: '?scenario=', stored: 'error', known })).toEqual({
+      scenario: 'error',
+      unknownScenario: null,
+    })
+    expect(pickScenario({ search: '?scenario=', stored: null, known })).toEqual({
+      scenario: 'default',
+      unknownScenario: null,
+    })
+  })
+
   test('저장된 이름이 이제 없으면 조용히 버린다', () => {
     expect(pickScenario({ search: '', stored: 'gone', known })).toEqual({
       scenario: 'default',

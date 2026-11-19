@@ -30,7 +30,7 @@ test('offline 행의 좌석도 링크로 열면 띠에 이름이 보인다', asy
   const errors = collectErrors(page)
   await page.goto('/__preview')
   const row = page.getByRole('listitem').filter({ hasText: 'offline' }).first()
-  await row.getByRole('link', { name: '좌석도' }).click()
+  await row.getByRole('link', { name: /^좌석도/ }).click()
   await expect(band(page).getByText('offline', { exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: '장치 연결이 끊겼어요' })).toBeVisible()
   expect(errors).toEqual([])
@@ -80,6 +80,25 @@ test('seat 쿼리로 좌석 상세 시트가 열린다', async ({ page }) => {
   expect(errors).toEqual([])
 })
 
+test('좌석 시트가 열리면 띠 링크가 흐려져 보인다', async ({ page }) => {
+  const errors = collectErrors(page)
+  // 시트가 열리면 띠가 aria-hidden 이 되어 role 로는 찾을 수 없다
+  const link = page.locator('aside[aria-label="미리보기 안내"] a[target="_blank"]')
+  const style = () =>
+    link.evaluate((el) => {
+      const text = el.firstElementChild as HTMLElement
+      const css = getComputedStyle(text)
+      return { opacity: Number(css.opacity), underline: css.textDecorationLine }
+    })
+  await page.goto('/rooms/IT4-101?scenario=seat-details')
+  await expect(link).toBeVisible()
+  expect(await style()).toEqual({ opacity: 1, underline: 'underline' })
+  await page.goto('/rooms/IT4-101?scenario=seat-details&seat=B-03')
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await expect.poll(style).toEqual({ opacity: 0.5, underline: 'none' })
+  expect(errors).toEqual([])
+})
+
 test('방 목록에서 방으로 이동하고 새로고침해도 시나리오가 유지된다', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('/?scenario=offline')
@@ -89,6 +108,7 @@ test('방 목록에서 방으로 이동하고 새로고침해도 시나리오가
     .first()
     .click()
   await expect(page.getByRole('button', { name: /^A1 / })).toBeVisible()
+  await expect(page).toHaveURL(/\/rooms\/IT4-101$/)
   await page.reload()
   await expect(band(page).getByText('offline', { exact: true })).toBeVisible()
   expect(errors).toEqual([])
@@ -97,11 +117,13 @@ test('방 목록에서 방으로 이동하고 새로고침해도 시나리오가
 test('모르는 시나리오는 기본으로 열고 목록 화면에서 알려 준다', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('/?scenario=nope')
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: '어느 방으로 갈까요' })).toBeVisible()
   await expect(band(page).getByText('default', { exact: true })).toBeVisible()
 
   await page.goto('/__preview?scenario=nope')
-  await expect(page.getByText('모르는 시나리오예요: nope. 기본(mixed)으로 열었어요.')).toBeVisible()
+  await expect(
+    page.getByText('모르는 시나리오예요: nope. 기본 시나리오(default)로 열었어요.'),
+  ).toBeVisible()
   expect(errors).toEqual([])
 })
 

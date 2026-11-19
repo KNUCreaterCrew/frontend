@@ -56,3 +56,37 @@ describe('미리보기 빌드(MODE mock)', () => {
     expect(isPreviewBuild()).toBe(false)
   })
 })
+
+describe('개발 서버(MODE development)', () => {
+  const start = vi.fn().mockResolvedValue(undefined)
+
+  beforeEach(() => {
+    vi.resetModules()
+    start.mockClear()
+    vi.doMock('@mocks/browser', () => ({ worker: { use: vi.fn(), start } }))
+    vi.stubEnv('MODE', 'development')
+    vi.stubEnv('DEV', true)
+    vi.stubEnv('VITE_API_MOCKING', '')
+  })
+
+  afterEach(() => {
+    vi.doUnmock('@mocks/browser')
+    vi.unstubAllEnvs()
+    sessionStorage.clear()
+    window.history.replaceState(null, '', '/')
+  })
+
+  test('모르는 시나리오 이름이면 알려진 이름을 담아 throw 한다', async () => {
+    window.history.replaceState(null, '', '/?scenario=nope')
+    const { enableMocking } = await import('./enableMocking')
+    await expect(enableMocking()).rejects.toThrow(/nope/)
+  })
+
+  test('알려진 시나리오여도 sessionStorage 에 쓰지 않는다', async () => {
+    window.history.replaceState(null, '', '/?scenario=offline')
+    const { enableMocking } = await import('./enableMocking')
+    await expect(enableMocking()).resolves.toEqual({ scenario: 'offline', unknownScenario: null })
+    expect(sessionStorage.getItem('zf-preview-scenario')).toBeNull()
+    expect(start).toHaveBeenCalledTimes(1)
+  })
+})

@@ -17,6 +17,11 @@ test('안내 랜드마크에 모의 데이터와 시나리오 이름을 보인�
   expect(within(band).getByText('offline')).toBeInTheDocument()
 })
 
+test('띠는 좌석 포커스 z-20 위, 시트 막 z-30 아래인 z-25 다', () => {
+  renderBand({ showSwitch: true })
+  expect(screen.getByRole('complementary', { name: '미리보기 안내' })).toHaveClass('z-25')
+})
+
 test('바꾸기 링크는 시나리오 목록으로 간다', () => {
   renderBand({ showSwitch: true })
   expect(screen.getByRole('link', { name: '시나리오 바꾸기' })).toHaveAttribute(

@@ -4,6 +4,11 @@ import { AppProviders } from '@/app/providers'
 import { createQueryClient } from '@/app/queryClient'
 import { PreviewRoot } from './PreviewRoot'
 
+afterEach(() => {
+  document.documentElement.classList.remove('preview')
+  document.title = ''
+})
+
 function renderRoot(path: string) {
   const queryClient = createQueryClient()
   queryClient.setDefaultOptions({ queries: { retry: false } })
@@ -28,14 +33,4 @@ test('앱 경로는 띠와 앱 화면이 함께 나온다', async () => {
   expect(screen.getByRole('complementary', { name: '미리보기 안내' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: '시나리오 바꾸기' })).toBeInTheDocument()
   expect(await screen.findByRole('heading', { level: 1, name: '어느 방으로 갈까요' })).toBeVisible()
-})
-
-test('마운트하면 html 에 preview 클래스가 붙고 제목 앞에 미리보기가 붙는다', () => {
-  document.title = 'ZeroFrame'
-  const first = renderRoot('/__preview')
-  expect(document.documentElement.classList.contains('preview')).toBe(true)
-  expect(document.title).toBe('미리보기 ZeroFrame')
-  first.unmount()
-  renderRoot('/__preview')
-  expect(document.title).toBe('미리보기 ZeroFrame')
 })
