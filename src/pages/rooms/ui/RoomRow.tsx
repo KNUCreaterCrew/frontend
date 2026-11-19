@@ -73,7 +73,7 @@ export function RoomRow({ room }: { room: RoomListItem }) {
       <li className={ROW}>
         <Link
           to={to}
-          aria-label={`${room.roomName}, 빈자리 모름, ${unknown}, ${total}, ${sentence}`}
+          aria-label={`${room.roomName}, 빈자리 확인 불가, ${unknown}, ${total}, ${sentence}`}
           className={LINK}
         >
           <div className={BODY}>
@@ -84,7 +84,9 @@ export function RoomRow({ room }: { room: RoomListItem }) {
                   빈자리
                   <UnknownSwatch />
                 </span>
-                <span className="block text-title font-bold text-ink">모름</span>
+                <span className="block text-title font-bold whitespace-nowrap text-ink">
+                  확인 불가
+                </span>
               </div>
               <dl className="min-w-0 flex-1">
                 <Fact term="확인 불가" value={`${summary.unknownSeats}석`} />

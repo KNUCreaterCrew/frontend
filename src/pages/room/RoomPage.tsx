@@ -242,7 +242,7 @@ export function RoomPage() {
             <RoomSummary summary={summary} />
             {summary.kind === 'allUnknown' && data.edgeOnline && (
               <p className="mt-4 text-body text-on-ink-soft">
-                지금은 모든 자리를 확인할 수 없어요. 만석이라는 뜻은 아니에요.
+                지금은 모든 자리를 확인할 수 없어요.
               </p>
             )}
           </section>
