@@ -28,6 +28,12 @@ jobs:
       - run: pnpm format:check
       - run: pnpm test
       - run: pnpm build
+      - name: 운영 결과물에 모의 데이터 흔적이 없는지 확인
+        run: node config/checkDist.ts dist
+      - name: 미리보기 결과물 빌드
+        run: pnpm exec vite build --mode mock --outDir dist-mock
+      - name: 미리보기 결과물에 워커와 표지가 있고 실제 백엔드 주소가 없는지 확인
+        run: node config/checkDist.ts dist-mock --expect
 
   e2e:
     runs-on: ubuntu-latest

@@ -12,6 +12,15 @@ function fail(reason: string): never {
 
 /** 운영 빌드에서만 백엔드 출처를 검증하고, 끝 / 를 뗀 값을 돌려준다. 그 밖에는 undefined. */
 export function checkApiOrigin({ command, mode, value }: Input): string | undefined {
+  if (command === 'build' && mode === 'mock') {
+    if (value) {
+      throw new Error(
+        '미리보기 빌드(mode mock)는 실제 백엔드를 부르지 않아야 합니다. ' +
+          'VITE_API_ORIGIN 을 비우세요(셸이나 Render 환경 변수 확인).',
+      )
+    }
+    return undefined
+  }
   if (command !== 'build' || mode !== 'production') return undefined
   if (!value) fail('값이 비어 있습니다')
 

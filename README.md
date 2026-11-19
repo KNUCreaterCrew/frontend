@@ -62,9 +62,9 @@ $env:BACKEND_ORIGIN='https://zeroframe-backend-p1wa.onrender.com'; pnpm dev
 
 ### 모의 데이터로 실행
 
-백엔드 없이 화면만 볼 때는 MSW 로 응답을 흉내 냅니다. 개발 서버에서만 켜집니다.
+백엔드 없이 화면만 볼 때는 MSW 로 응답을 흉내 냅니다. 개발 서버와 미리보기 빌드(`pnpm build:mock`)에서만 켜집니다.
 
-- 주소에 `?scenario=<이름>` 을 붙입니다. 시나리오: `default`(= `mixed`), `mixed`, `all-unknown`, `offline`, `loading`, `error`, `not-found`, `slow-wake`, `many-seats`, `no-seats`. 방 화면 예: `http://localhost:5173/rooms/IT4-101?scenario=offline`. 모르는 이름이면 알려진 이름을 담은 오류가 납니다.
+- 주소에 `?scenario=<이름>` 을 붙입니다. 시나리오 19개의 이름은 `mocks/scenarios.ts` 에 있습니다(`default`(= `mixed`), `offline`, `slow-wake`, `many-seats` 등). 방 화면 예: `http://localhost:5173/rooms/IT4-101?scenario=offline`. 모르는 이름이면 알려진 이름을 담은 오류가 납니다.
 - 또는 `.env.local` 에 `VITE_API_MOCKING=enabled` 를 적고 `pnpm dev` 를 실행합니다. 한 번만 쓸 때는 셸에서 지정합니다.
 
 ```sh
@@ -74,22 +74,23 @@ VITE_API_MOCKING=enabled pnpm dev
 $env:VITE_API_MOCKING='enabled'; pnpm dev
 ```
 
-운영 빌드에는 MSW 가 들어가지 않습니다.
+운영 빌드에는 MSW 가 들어가지 않습니다. 모의 데이터를 공유용 사이트로 올리는 방법은 아래 "미리보기 사이트" 를 봅니다.
 
 ## 스크립트
 
-| 명령                | 하는 일                                                    |
-| ------------------- | ---------------------------------------------------------- |
-| `pnpm dev`          | 개발 서버 (포트 5173)                                      |
-| `pnpm build`        | 운영 빌드 (`dist/`)                                        |
-| `pnpm preview`      | 빌드 결과 미리 보기 (실제 백엔드에 연결, CORS 등록 필요)   |
-| `pnpm typecheck`    | `tsc -b`                                                   |
-| `pnpm lint`         | ESLint, 경고도 실패                                        |
-| `pnpm format`       | Prettier 로 고침                                           |
-| `pnpm format:check` | Prettier 검사만                                            |
-| `pnpm test`         | Vitest 한 번 실행                                          |
-| `pnpm test:watch`   | Vitest 감시 모드                                           |
-| `pnpm test:e2e`     | Playwright (360px, 390px 폭, 모의 데이터로 자체 서버 띄움) |
+| 명령                | 하는 일                                                                                                               |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`          | 개발 서버 (포트 5173)                                                                                                 |
+| `pnpm build`        | 운영 빌드 (`dist/`)                                                                                                   |
+| `pnpm build:mock`   | 모의 데이터 미리보기 빌드 (`dist/`, MSW 포함). `dist/` 를 덮으므로 그 뒤 `pnpm preview` 는 미리보기 사이트를 띄웁니다 |
+| `pnpm preview`      | 빌드 결과 미리 보기 (실제 백엔드에 연결, CORS 등록 필요)                                                              |
+| `pnpm typecheck`    | `tsc -b`                                                                                                              |
+| `pnpm lint`         | ESLint, 경고도 실패                                                                                                   |
+| `pnpm format`       | Prettier 로 고침                                                                                                      |
+| `pnpm format:check` | Prettier 검사만                                                                                                       |
+| `pnpm test`         | Vitest 한 번 실행                                                                                                     |
+| `pnpm test:watch`   | Vitest 감시 모드                                                                                                      |
+| `pnpm test:e2e`     | Playwright (360px, 390px 폭, 모의 데이터로 자체 서버 띄움)                                                            |
 
 ## E2E 브라우저 설치
 
@@ -105,7 +106,7 @@ Linux 에서 시스템 라이브러리까지 필요하면 `--with-deps` 를 붙�
 
 ```
 src/
-  app/        진입, 라우터, Provider, 전역 스타일
+  app/        진입, 라우터, Provider, 전역 스타일, 미리보기(preview/)
   pages/      화면 (rooms, not-found)
   shared/     공용 코드 (test: renderApp 등)
 mocks/        MSW 핸들러와 시나리오 (개발 서버, Vitest 공용)
@@ -135,6 +136,21 @@ curl -i -H "Origin: <웹 출처>" https://zeroframe-backend-p1wa.onrender.com/ap
 - 백엔드 주소를 바꾸려면 `.env.production` 의 한 줄을 고칩니다.
 - 시연 점검과 기록은 [DEMO.md](DEMO.md) 를 봅니다.
 
+### 미리보기 사이트
+
+백엔드 없이 모의 데이터로 화면을 보여 주는 두 번째 서비스입니다. `render.yaml` 의 `zeroframe-web-preview` 이고 `pnpm build:mock` 으로 빌드합니다.
+
+- 주소: Blueprint Sync 뒤 기록. 처음 공유할 주소는 `/__preview` 로, 시나리오 목록과 설명이 있습니다.
+- 시나리오는 `?scenario=<이름>` 으로 고르고 탭을 닫기 전까지 기억합니다. 화면 위 띠에 지금 시나리오가 보입니다.
+- 의견은 GitHub 이슈 양식 "미리보기 의견"(`.github/ISSUE_TEMPLATE/preview-feedback.yml`)으로 받습니다. 시나리오와 화면 주소를 적게 해 재현할 수 있습니다.
+- 실제 백엔드를 부르지 않으므로 백엔드 CORS 에 등록할 필요가 없습니다. Environment 에 `VITE_API_ORIGIN` 을 넣으면 빌드가 실패합니다.
+- Blueprint Sync 는 운영 서비스의 자동 배포 설정을 다시 켤 수 있습니다(미확인). 시연 기간에는 Sync 하지 않습니다.
+
 ## CI
 
 PR 과 `main` push 마다 GitHub Actions 가 `checks`(typecheck, lint, format:check, test, build)와 `e2e` 를 돌립니다.
+
+`checks` 는 빌드 결과물도 검사합니다.
+
+- 운영 `dist` 에 모의 데이터 흔적(`mockServiceWorker`, `__preview`, 워커 파일)이 없어야 합니다. 운영 번들에서 MSW 가 빠졌는지 확인합니다.
+- 미리보기 빌드(`vite build --mode mock --outDir dist-mock`)의 `dist-mock` 에는 워커와 표지가 있고 실제 백엔드 주소가 없어야 합니다.

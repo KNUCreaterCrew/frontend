@@ -40,13 +40,7 @@ const sliceOnly = (files) => ({
 
 export default tseslint.config(
   {
-    ignores: [
-      'dist',
-      'coverage',
-      'playwright-report',
-      'test-results',
-      'public/mockServiceWorker.js',
-    ],
+    ignores: ['dist', 'dist-mock', 'coverage', 'playwright-report', 'test-results'],
   },
   js.configs.recommended,
   {
