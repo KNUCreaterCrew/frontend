@@ -1,6 +1,6 @@
 # ZeroFrame Frontend
 
-실습실과 과방의 빈자리를 보여 주는 웹 앱입니다. Vite + React + TypeScript SPA 이고, 백엔드의 REST 와 WebSocket 을 같은 출처의 `/api`, `/ws` 로 부릅니다. 작업 규칙과 코드 규칙은 [AGENTS.md](AGENTS.md) 에 있습니다.
+실습실과 과방의 빈자리를 보여 주는 웹 앱입니다. Vite + React + TypeScript SPA 이고, 백엔드의 REST 와 WebSocket 을 부릅니다. 개발 서버에서는 같은 출처의 `/api`, `/ws` 를 프록시로 넘기고, 운영 빌드는 `.env.production` 의 `VITE_API_ORIGIN` 으로 백엔드에 직접 연결합니다. 작업 규칙과 코드 규칙은 [AGENTS.md](AGENTS.md) 에 있습니다.
 
 ## 요구 사항
 
@@ -82,7 +82,7 @@ $env:VITE_API_MOCKING='enabled'; pnpm dev
 | ------------------- | ---------------------------------------------------------- |
 | `pnpm dev`          | 개발 서버 (포트 5173)                                      |
 | `pnpm build`        | 운영 빌드 (`dist/`)                                        |
-| `pnpm preview`      | 빌드 결과 미리 보기                                        |
+| `pnpm preview`      | 빌드 결과 미리 보기 (실제 백엔드에 연결, CORS 등록 필요)   |
 | `pnpm typecheck`    | `tsc -b`                                                   |
 | `pnpm lint`         | ESLint, 경고도 실패                                        |
 | `pnpm format`       | Prettier 로 고침                                           |
@@ -110,10 +110,30 @@ src/
   shared/     공용 코드 (test: renderApp 등)
 mocks/        MSW 핸들러와 시나리오 (개발 서버, Vitest 공용)
 e2e/          Playwright
-config/       개발 서버 프록시
+config/       개발 서버 프록시, 빌드 값 검증
 ```
 
 `features/`, `entities/`, `shared/api` 는 필요해질 때 만듭니다. 층 규칙은 AGENTS.md 를 봅니다.
+
+## 배포
+
+Render static site 로 올립니다. 설정은 [`render.yaml`](render.yaml)(Blueprint)에 있고, 서비스 이름은 `zeroframe-web` 입니다. 아래 내용 중 Render 쪽 동작(corepack, Node 버전, rewrite 와 실제 파일의 우선순위)은 서비스를 만들 때 확인해야 하는 `미확인` 항목입니다.
+
+1. Render 대시보드에서 **New → Blueprint** 를 누르고 `KNUCreaterCrew/frontend` 저장소를 고릅니다.
+2. `render.yaml` 의 `zeroframe-web` 서비스를 확인하고 **Apply** 를 누릅니다.
+3. 빌드 로그에서 pnpm 이 맞춰지고 Node 가 24 인지 확인합니다. 안 맞으면 Environment 에 `NODE_VERSION=24` 를 넣습니다.
+4. 배포된 웹 출처(예: `https://zeroframe-web.onrender.com`, Render 가 뒤에 접미사를 붙일 수 있으니 실제 주소는 대시보드에서 확인합니다)를 백엔드의 `CORS_ALLOW_ORIGINS` 에 넣습니다. 방법은 백엔드 README 의 [다른 주소의 웹에서 부르기 (CORS)](https://github.com/KNUCreaterCrew/backend#다른-주소의-웹에서-부르기-cors) 를 봅니다.
+5. 아래 두 명령 모두 응답 헤더에 `access-control-allow-origin` 이 붙는지 확인합니다. 두 번째는 404 응답이라도 붙어야 합니다.
+
+```sh
+curl -i -H "Origin: <웹 출처>" https://zeroframe-backend-p1wa.onrender.com/api/v1/rooms
+curl -i -H "Origin: <웹 출처>" https://zeroframe-backend-p1wa.onrender.com/api/v1/rooms/NOPE
+```
+
+- WebSocket 은 CORS 와 무관합니다.
+- `pnpm preview`(`http://localhost:4173`)도 실제 백엔드를 부르므로, 그 출처를 `CORS_ALLOW_ORIGINS` 에 잠시 넣어야 합니다.
+- 백엔드 주소를 바꾸려면 `.env.production` 의 한 줄을 고칩니다.
+- 시연 점검과 기록은 [DEMO.md](DEMO.md) 를 봅니다.
 
 ## CI
 

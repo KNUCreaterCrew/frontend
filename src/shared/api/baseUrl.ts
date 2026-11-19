@@ -1,6 +1,11 @@
-// 백엔드 주소를 바꿀 때는 이 파일만 고친다(#7).
+// 백엔드 주소는 `.env.production` 의 `VITE_API_ORIGIN` 으로 정한다. 값이 없으면(개발 서버, 테스트) 현재 출처를 쓴다.
+export function apiOrigin(): string {
+  const v = import.meta.env.VITE_API_ORIGIN
+  return v ? new URL(v).origin : location.origin
+}
+
 export function httpUrl(path: string): URL {
-  return new URL(path, location.origin)
+  return new URL(path, apiOrigin())
 }
 
 export function wsUrlFrom(origin: string, path: string): string {
@@ -10,5 +15,5 @@ export function wsUrlFrom(origin: string, path: string): string {
 }
 
 export function wsUrl(path: string): string {
-  return wsUrlFrom(location.origin, path)
+  return wsUrlFrom(apiOrigin(), path)
 }
