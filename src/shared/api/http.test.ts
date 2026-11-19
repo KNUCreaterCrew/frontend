@@ -1,7 +1,10 @@
+import { afterEach, vi } from 'vitest'
 import { delay, http as mswHttp, HttpResponse } from 'msw'
 import { z } from 'zod'
 import { server } from '@mocks/node'
 import { ApiError, http as api, isNotFoundError } from '@/shared/api'
+
+afterEach(() => vi.unstubAllEnvs())
 
 const schema = z.object({ a: z.number() })
 
@@ -88,4 +91,17 @@ test('상대 경로를 location.origin 기준 절대 URL 로 요청한다', asyn
   )
   await api.get('/api/test', schema)
   expect(url).toBe(new URL('/api/test', location.origin).href)
+})
+
+test('VITE_API_ORIGIN 이 있으면 그 출처로 요청한다', async () => {
+  vi.stubEnv('VITE_API_ORIGIN', 'https://zeroframe-backend-p1wa.onrender.com')
+  let url = ''
+  server.use(
+    mswHttp.get('*/api/test', ({ request }) => {
+      url = request.url
+      return HttpResponse.json({ a: 1 })
+    }),
+  )
+  await api.get('/api/test', schema)
+  expect(url).toBe('https://zeroframe-backend-p1wa.onrender.com/api/test')
 })
