@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router'
 import { feedbackUrl } from '../model/feedbackUrl'
 
 // 누르는 영역은 44x44 로 두고, 밑줄과 포커스 윤곽선은 안쪽 글자 칸에 그려 띠 가장자리에 닿지 않게 한다.
-const LINK = 'group inline-flex min-h-tap min-w-tap items-center justify-end'
+const LINK = 'group inline-flex min-h-tap min-w-tap items-center justify-end outline-none'
 const LINK_TEXT =
   'underline underline-offset-4 group-focus-visible:outline-3 group-focus-visible:outline-offset-2 group-focus-visible:outline-paper in-data-scroll-locked:no-underline in-data-scroll-locked:opacity-50'
 
