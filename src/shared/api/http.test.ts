@@ -4,7 +4,10 @@ import { z } from 'zod'
 import { server } from '@mocks/node'
 import { ApiError, http as api, isNotFoundError } from '@/shared/api'
 
-afterEach(() => vi.unstubAllEnvs())
+afterEach(() => {
+  vi.unstubAllEnvs()
+  vi.restoreAllMocks()
+})
 
 const schema = z.object({ a: z.number() })
 
@@ -91,6 +94,15 @@ test('상대 경로를 location.origin 기준 절대 URL 로 요청한다', asyn
   )
   await api.get('/api/test', schema)
   expect(url).toBe(new URL('/api/test', location.origin).href)
+})
+
+test('CORS 사전 요청이 생기지 않게 accept 헤더만 보낸다', async () => {
+  server.use(mswHttp.get('*/api/test', () => HttpResponse.json({ a: 1 })))
+  const spy = vi.spyOn(globalThis, 'fetch')
+  await api.get('/api/test', schema)
+  const init = spy.mock.calls[0]?.[1]
+  expect([...new Headers(init?.headers).keys()]).toEqual(['accept'])
+  expect(init?.method).toBe('GET')
 })
 
 test('VITE_API_ORIGIN 이 있으면 그 출처로 요청한다', async () => {
