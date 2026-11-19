@@ -17,7 +17,12 @@ export const scenarioGroups: readonly { id: GuideGroupId; title: string }[] = [
 const ROOM = '/rooms/IT4-101'
 const list: GuideLink = { label: '방 목록', path: '/' }
 const room: GuideLink = { label: '좌석도', path: ROOM }
-const seat = (id: string): GuideLink => ({ label: `${id} 좌석`, path: ROOM, seat: id })
+// 보이는 글자는 앱 표기(A1)이고 주소의 seat 는 계약의 좌석 ID(A-01)다.
+const seat = (id: string): GuideLink => ({
+  label: `${id.replace('-0', '')} 좌석`,
+  path: ROOM,
+  seat: id,
+})
 
 export const scenarioGuide: Record<string, GuideEntry> = {
   mixed: {
@@ -28,7 +33,7 @@ export const scenarioGuide: Record<string, GuideEntry> = {
   },
   'all-unknown': {
     title: '자리를 하나도 확인하지 못한 방',
-    description: '모든 좌석이 확인 불가예요. 빈자리 숫자 대신 "모름"이 보여요.',
+    description: '모든 좌석이 확인 불가예요. 빈자리 숫자 대신 “모름”이 보여요.',
     group: 'seats',
     links: [list, room, seat('A-01')],
   },
@@ -48,7 +53,7 @@ export const scenarioGuide: Record<string, GuideEntry> = {
   },
   'many-seats': {
     title: '좌석이 40개인 방',
-    description: '좌석이 작아져 "확대" 버튼이 생겨요.',
+    description: '좌석이 작아져 “확대” 버튼이 생겨요.',
     group: 'seats',
     links: [list, room],
   },
@@ -76,26 +81,26 @@ export const scenarioGuide: Record<string, GuideEntry> = {
   },
   'rooms-empty': {
     title: '방이 하나도 없음',
-    description: '등록된 방이 없을 때의 첫 화면이에요. 좌석도는 "이 방을 찾을 수 없어요"로 보여요.',
+    description: '등록된 방이 없을 때의 첫 화면이에요. 좌석도는 “이 방을 찾을 수 없어요”로 보여요.',
     group: 'rooms',
     links: [list, room],
   },
   'rooms-refresh-fail': {
     title: '방 목록 갱신 실패',
     description:
-      '처음에는 정상이고, 30초쯤 뒤 다시 불러오기에 실패해 "갱신하지 못했어요"가 보여요.',
+      '처음에는 정상이고, 30초쯤 뒤 다시 불러오기에 실패해 “갱신하지 못했어요”가 보여요.',
     group: 'rooms',
     links: [list],
   },
   loading: {
     title: '응답이 오지 않는 서버',
-    description: '5초 뒤 "깨우는 중", 60초 뒤 "오래 걸림", 90초에 오류 화면이에요.',
+    description: '5초 뒤 “깨우는 중”, 60초 뒤 “오래 걸림”, 90초에 오류 화면이에요.',
     group: 'waiting',
     links: [list, room],
   },
   'slow-wake': {
     title: '깨어나는 서버',
-    description: '5초 뒤 "깨우는 중", 60초 뒤 "오래 걸림"이 보이고 65초에 정상 화면이 떠요.',
+    description: '5초 뒤 “깨우는 중”, 60초 뒤 “오래 걸림”이 보이고 65초에 정상 화면이 떠요.',
     group: 'waiting',
     links: [list, room],
   },
@@ -107,7 +112,7 @@ export const scenarioGuide: Record<string, GuideEntry> = {
   },
   'not-found': {
     title: '없는 방',
-    description: '방 목록은 비어 있고, 좌석도는 "이 방을 찾을 수 없어요"로 보여요.',
+    description: '방 목록은 비어 있고, 좌석도는 “이 방을 찾을 수 없어요”로 보여요.',
     group: 'waiting',
     links: [list, room],
   },

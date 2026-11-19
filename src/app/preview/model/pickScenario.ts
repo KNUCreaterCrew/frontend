@@ -8,7 +8,7 @@ export function pickScenario(input: {
   known: readonly string[]
 }): MockingResult {
   const fromUrl = new URLSearchParams(input.search).get('scenario')
-  if (fromUrl !== null) {
+  if (fromUrl !== null && fromUrl !== '') {
     return input.known.includes(fromUrl)
       ? { scenario: fromUrl, unknownScenario: null }
       : { scenario: 'default', unknownScenario: fromUrl }

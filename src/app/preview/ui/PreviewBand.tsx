@@ -1,8 +1,10 @@
 import { Link, useLocation } from 'react-router'
 import { feedbackUrl } from '../model/feedbackUrl'
 
-const LINK =
-  'inline-flex min-h-tap min-w-tap items-center justify-center underline underline-offset-4 focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-paper'
+// 누르는 영역은 44x44 로 두고, 밑줄과 포커스 윤곽선은 안쪽 글자 칸에 그려 띠 가장자리에 닿지 않게 한다.
+const LINK = 'group inline-flex min-h-tap min-w-tap items-center justify-end'
+const LINK_TEXT =
+  'underline underline-offset-4 group-focus-visible:outline-3 group-focus-visible:outline-offset-2 group-focus-visible:outline-paper in-data-scroll-locked:no-underline in-data-scroll-locked:opacity-50'
 
 export function PreviewBand({ scenario, showSwitch }: { scenario: string; showSwitch: boolean }) {
   const location = useLocation()
@@ -10,7 +12,7 @@ export function PreviewBand({ scenario, showSwitch }: { scenario: string; showSw
   return (
     <aside
       aria-label="미리보기 안내"
-      className="fixed inset-x-0 top-0 z-20 bg-ink text-paper"
+      className="fixed inset-x-0 top-0 z-25 bg-ink text-paper"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div
@@ -24,10 +26,12 @@ export function PreviewBand({ scenario, showSwitch }: { scenario: string; showSw
           <span className="font-bold">모의 데이터</span>{' '}
           <span className="font-num">{scenario}</span>
         </p>
-        <div className="flex shrink-0 items-center">
+        <div className="flex shrink-0 items-center gap-4">
           {showSwitch && (
             <Link to="/__preview" className={LINK}>
-              <span className="sr-only">시나리오</span> 바꾸기
+              <span className={LINK_TEXT}>
+                <span className="sr-only">시나리오</span> 바꾸기
+              </span>
             </Link>
           )}
           <a
@@ -36,7 +40,9 @@ export function PreviewBand({ scenario, showSwitch }: { scenario: string; showSw
             rel="noopener noreferrer"
             className={LINK}
           >
-            의견 <span className="sr-only">남기기, 새 탭에서 열림</span>
+            <span className={LINK_TEXT}>
+              의견 <span className="sr-only">남기기, 새 탭에서 열림</span>
+            </span>
           </a>
         </div>
       </div>
