@@ -1,30 +1,19 @@
 import { useId, type ReactNode } from 'react'
 import { statsSourceLabel, weekdayLabel } from '@/entities/room'
-import type { DailyStats, RoomSummary, StatsDataSource, WeeklyStats } from '@/entities/room'
+import type { DailyStats, RoomSummary, WeeklyStats } from '@/entities/room'
 import { freshnessWarning, formatKstHour, useDelayedVisibility, type KstClock } from '@/shared/lib'
 import { Button } from '@/shared/ui'
 import { useRoomStats } from '../lib/useRoomStats'
 import { buildTodayChart } from '../model/chartModel'
 import { compareWithUsual, comparisonSentence } from '../model/compareWithUsual'
 import { todaySummary } from '../model/statsSummary'
+import { usualSourceSentence } from '../model/usualSource'
 import { StatsLegend } from './StatsLegend'
 import { StatsSkeleton } from './StatsSkeleton'
 import { StepChart } from './StepChart'
+import { WeekdayStats } from './WeekdayStats'
 
 const TITLE = '오늘 빈자리 흐름'
-
-function usualSourceSentence(source: StatsDataSource): string | null {
-  switch (source) {
-    case 'SEED':
-      return '평소 값은 최근 4주 예시 데이터예요.'
-    case 'MIXED':
-      return '평소 값에는 예시 데이터가 섞여 있어요.'
-    case 'UNRECOGNIZED':
-      return '평소 값의 출처를 알 수 없어요.'
-    default:
-      return null
-  }
-}
 
 function formatSeats(value: number): string {
   return String(Number(value.toFixed(1)))
@@ -164,6 +153,9 @@ function StatsBody({ daily, weekly, clock, summary, staleNotice }: StatsBodyProp
         showLowConfidence={showLowConfidence}
       />
       {readout !== '' && <p className="sr-only">{readout}</p>}
+      {weekly.dataSource !== null && (
+        <WeekdayStats weekly={weekly} today={clock.weekday} nowMinute={clock.minuteOfDay} />
+      )}
       {stale}
     </>
   )

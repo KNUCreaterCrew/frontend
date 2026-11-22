@@ -30,7 +30,7 @@ async function statsRegion(): Promise<HTMLElement> {
 // 그래프가 그려질 때까지(축 글자가 보일 때까지) 기다린다
 async function chartReady(): Promise<HTMLElement> {
   const region = await statsRegion()
-  await within(region).findByText('0석')
+  await within(region).findAllByText('0석')
   return region
 }
 
@@ -92,7 +92,7 @@ describe('방 화면 오늘 빈자리 흐름', () => {
       .getAllByRole('listitem')
       .map((li) => li.textContent)
     expect(legend).toEqual(['오늘 빈자리', '평소 화요일', '확인하지 못한 시간', '잠깐만 본 시간'])
-    const chart = within(region).getByText('0석').parentElement
+    const chart = within(region).getAllByText('0석')[0]?.parentElement
     expect(chart?.querySelector('.opacity-40.bg-empty-tint')).not.toBeNull()
   })
 
@@ -102,14 +102,14 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     expect(
       within(region).getByText('오늘은 아직 기록이 없어요. 평소 화요일 흐름만 보여요.'),
     ).toBeInTheDocument()
-    expect(within(region).getByText('평소 값은 최근 4주 예시 데이터예요.')).toBeInTheDocument()
+    expect(within(region).getAllByText('평소 값은 최근 4주 예시 데이터예요.')).toHaveLength(2)
     expect(within(region).getByText('평소 화요일 (예시 데이터)')).toBeInTheDocument()
   })
 
   test('stats-mixed: 평소 값에 예시 데이터가 섞여 있음을 알린다', async () => {
     renderApp(PATH, { scenario: 'stats-mixed' })
     const region = await chartReady()
-    expect(within(region).getByText('평소 값에는 예시 데이터가 섞여 있어요.')).toBeInTheDocument()
+    expect(within(region).getAllByText('평소 값에는 예시 데이터가 섞여 있어요.')).toHaveLength(2)
   })
 
   test('stats-empty: 안내만 보이고 그래프가 없다', async () => {
@@ -147,7 +147,7 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     renderApp(PATH)
     const region = await chartReady()
     await act(() => vi.advanceTimersByTimeAsync(150_000))
-    expect(within(region).getByText('0석')).toBeInTheDocument()
+    expect(within(region).getAllByText('0석')).not.toHaveLength(0)
     expect(within(region).queryByText(/갱신하지 못했어요|1분 넘게/)).not.toBeInTheDocument()
   })
 
@@ -162,7 +162,7 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     await act(() => vi.advanceTimersByTimeAsync(61_000))
     const notice = await within(region).findByText(/^갱신하지 못했어요, /)
     expect(notice).toHaveClass('font-bold')
-    expect(within(region).getByText('0석')).toBeInTheDocument()
+    expect(within(region).getAllByText('0석')).not.toHaveLength(0)
   })
 
   test('stats-error: 판에만 오류를 보이고, 다시 불러오면 그래프가 그려진다', async () => {
@@ -173,7 +173,7 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     expect(seatButtons()).toHaveLength(4)
     server.use(...statsHandlers())
     await user.click(within(region).getByRole('button', { name: '다시 불러오기' }))
-    await within(region).findByText('0석')
+    await within(region).findAllByText('0석')
     expect(within(region).queryByText('빈자리 흐름을 불러오지 못했어요.')).not.toBeInTheDocument()
   })
 
@@ -209,5 +209,83 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     renderApp(PATH, { scenario: 'no-seats' })
     expect(await screen.findByText('이 방에는 등록된 좌석이 없어요.')).toBeInTheDocument()
     await waitFor(() => expect(screen.queryByRole('region', { name: REGION })).toBeNull())
+  })
+})
+
+describe('방 화면 요일별 평소 빈자리', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    vi.setSystemTime(new Date('2026-11-24T14:05:00+09:00'))
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  test('오늘 요일이 골라져 있고 평소 문장이 보인다', async () => {
+    renderApp(PATH)
+    const region = await chartReady()
+    expect(
+      within(region).getByRole('heading', { level: 3, name: '요일별 평소 빈자리' }),
+    ).toBeInTheDocument()
+    const group = within(region).getByRole('group', { name: '요일' })
+    const buttons = within(group).getAllByRole('button')
+    expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual([
+      '월요일',
+      '화요일',
+      '수요일',
+      '목요일',
+      '금요일',
+      '토요일',
+      '일요일',
+    ])
+    expect(buttons.map((b) => b.textContent)).toEqual(['월', '화', '수', '목', '금', '토', '일'])
+    expect(buttons.filter((b) => b.getAttribute('aria-pressed') === 'true')).toEqual([
+      within(group).getByRole('button', { name: '화요일' }),
+    ])
+    expect(
+      within(region).getByText('화요일은 보통 16시쯤 가장 붐비고 8시쯤 가장 한산해요.'),
+    ).toBeInTheDocument()
+  })
+
+  test('다른 요일을 고르면 문장이 바뀌고 다시 조회하지 않는다', async () => {
+    let weeklyRequests = 0
+    const count = ({ request }: { request: Request }) => {
+      if (new URL(request.url).pathname.includes('/stats/weekly')) weeklyRequests += 1
+    }
+    server.events.on('request:start', count)
+    try {
+      const { user } = renderApp(PATH)
+      const region = await chartReady()
+      const group = within(region).getByRole('group', { name: '요일' })
+      await user.click(within(group).getByRole('button', { name: '토요일' }))
+      expect(within(group).getByRole('button', { name: '토요일' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      )
+      expect(within(group).getByRole('button', { name: '화요일' })).toHaveAttribute(
+        'aria-pressed',
+        'false',
+      )
+      expect(within(region).getByText('토요일은 시간대별 차이가 크지 않아요.')).toBeInTheDocument()
+      expect(weeklyRequests).toBe(1)
+    } finally {
+      server.events.removeListener('request:start', count)
+    }
+  })
+
+  test('stats-empty: 요일 영역이 없다', async () => {
+    renderApp(PATH, { scenario: 'stats-empty' })
+    const region = await statsRegion()
+    await within(region).findByText('아직 기록이 없어요.')
+    expect(within(region).queryByRole('heading', { level: 3 })).not.toBeInTheDocument()
+    expect(within(region).queryByRole('group', { name: '요일' })).not.toBeInTheDocument()
+  })
+
+  test('stats-seed: 요일 영역에도 예시 데이터 출처가 보인다', async () => {
+    renderApp(PATH, { scenario: 'stats-seed' })
+    const region = await chartReady()
+    const section = within(region).getByRole('group', { name: '요일' }).parentElement!
+    expect(within(section).getByText('평소 값은 최근 4주 예시 데이터예요.')).toBeInTheDocument()
+    expect(within(section).getByText('예시 데이터')).toBeInTheDocument()
   })
 })
