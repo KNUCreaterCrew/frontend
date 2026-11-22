@@ -1,4 +1,11 @@
-import type { CongestionLevel, Seat, SeatReason, SeatStatus } from './types'
+import type {
+  CongestionLevel,
+  Seat,
+  SeatReason,
+  SeatStatus,
+  StatsDataSource,
+  Weekday,
+} from './types'
 
 const STATUS_LABEL: Record<SeatStatus, string> = {
   EMPTY: '빈자리',
@@ -40,4 +47,35 @@ export function congestionLabel(level: CongestionLevel): string {
 export function seatAccessibleName(seat: Seat): string {
   const base = `${seat.label} ${seatStatusLabel(seat.status)}`
   return seat.hasOutlet ? `${base}, 콘센트 있음` : base
+}
+
+const WEEKDAY_LABEL: Record<Weekday, string> = {
+  MON: '월요일',
+  TUE: '화요일',
+  WED: '수요일',
+  THU: '목요일',
+  FRI: '금요일',
+  SAT: '토요일',
+  SUN: '일요일',
+}
+
+export function weekdayLabel(weekday: Weekday): string {
+  return WEEKDAY_LABEL[weekday]
+}
+
+export function weekdayShortLabel(weekday: Weekday): string {
+  return WEEKDAY_LABEL[weekday].slice(0, 1)
+}
+
+export function statsSourceLabel(source: StatsDataSource): string | null {
+  switch (source) {
+    case 'SEED':
+      return '예시 데이터'
+    case 'MIXED':
+      return '예시 데이터 포함'
+    case 'UNRECOGNIZED':
+      return '출처를 알 수 없는 데이터'
+    default:
+      return null
+  }
 }

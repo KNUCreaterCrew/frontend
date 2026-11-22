@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router'
 import { getRoomSummary } from '@/entities/room'
 import type { Seat } from '@/entities/room'
 import { useRoomLive } from '@/features/room-live'
+import { RoomStats } from '@/features/room-stats'
 import { freshnessWarning, getScreenState, useElapsed, useNow } from '@/shared/lib'
 import { EdgeOfflineBanner } from './ui/EdgeOfflineBanner'
 import { Legend } from './ui/Legend'
@@ -264,6 +265,7 @@ export function RoomPage() {
           </div>
           <div className="lg:col-start-1 lg:row-start-2 lg:pt-2">
             <Legend outletsHidden={outletsHidden} />
+            {summary.kind !== 'noSeats' && <RoomStats roomId={roomId} summary={summary} />}
           </div>
         </div>
       </main>

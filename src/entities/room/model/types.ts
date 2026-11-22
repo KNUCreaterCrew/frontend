@@ -1,4 +1,5 @@
 import type { z } from 'zod'
+import type { KstWeekday } from '@/shared/lib'
 import type { seatReasonSchema } from './dto'
 
 export type SeatStatus = 'EMPTY' | 'OCCUPIED' | 'AWAY' | 'UNKNOWN' | 'UNRECOGNIZED'
@@ -69,3 +70,46 @@ export type RoomEvent =
       congestionLevel: CongestionLevel
       changes: SeatChange[]
     }
+
+export type Weekday = KstWeekday
+export const WEEKDAYS: readonly Weekday[] = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+
+export type StatsDataSource = 'OBSERVED' | 'SEED' | 'MIXED' | 'UNRECOGNIZED' | null
+
+export interface StatsBucket {
+  start: string
+  observedMinutes: number
+  avgAvailableSeats: number | null
+  avgUnknownSeats: number | null
+  congestionLevel: CongestionLevel | null
+}
+
+export interface DailyStats {
+  roomId: string
+  date: string
+  bucketMinutes: number
+  totalSeats: number
+  dataSource: StatsDataSource
+  buckets: StatsBucket[]
+}
+
+export interface WeeklyCell {
+  weekday: Weekday
+  hour: number
+  observedMinutes: number
+  observedDays: number
+  avgAvailableSeats: number | null
+  avgUnknownSeats: number | null
+  congestionLevel: CongestionLevel | null
+}
+
+export interface WeeklyStats {
+  roomId: string
+  startDate: string
+  endDate: string
+  weeks: number
+  bucketMinutes: number
+  totalSeats: number
+  dataSource: StatsDataSource
+  cells: WeeklyCell[]
+}

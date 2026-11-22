@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
+  formatKstHour,
   formatKstTime,
   formatRelative,
   freshnessWarning,
+  kstClock,
   lastObservedParts,
   timeParts,
 } from './time'
@@ -85,5 +87,40 @@ describe('freshnessWarning', () => {
   })
   it('갱신 실패가 우선', () => {
     expect(freshnessWarning(now, true, now)).toBe('갱신하지 못했어요, 방금 정보')
+  })
+})
+
+describe('kstClock', () => {
+  it('UTC 01:15 는 KST 10:15 화요일', () => {
+    expect(kstClock(Date.parse('2026-11-24T01:15:00Z'))).toEqual({
+      date: '2026-11-24',
+      weekday: 'TUE',
+      hour: 10,
+      minuteOfDay: 615,
+    })
+  })
+
+  it('KST 자정은 다음 날 0시', () => {
+    expect(kstClock(Date.parse('2026-11-23T15:00:00Z'))).toEqual({
+      date: '2026-11-24',
+      weekday: 'TUE',
+      hour: 0,
+      minuteOfDay: 0,
+    })
+  })
+
+  it('자정 1분 전은 같은 날 23시 59분', () => {
+    expect(kstClock(Date.parse('2026-11-23T14:59:00Z'))).toEqual({
+      date: '2026-11-23',
+      weekday: 'MON',
+      hour: 23,
+      minuteOfDay: 1439,
+    })
+  })
+})
+
+describe('formatKstHour', () => {
+  it('시를 "9시" 로 쓴다', () => {
+    expect(formatKstHour(9)).toBe('9시')
   })
 })

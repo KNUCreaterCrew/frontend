@@ -7,6 +7,7 @@ import {
   buildRoom,
   manyRooms,
   manySeatsRoom,
+  calmRoom,
   mixedRoom,
   noSeatsRoom,
   offlineRoom,
@@ -14,6 +15,18 @@ import {
   toListItemDto,
 } from './fixtures/rooms'
 import { startupRoomDto } from './fixtures/interfacesFlow'
+import {
+  DAILY_STATS_URL,
+  WEEKLY_STATS_URL,
+  dailyStatsHandler,
+  weeklyStatsHandler,
+} from './handlers/stats'
+import {
+  defaultDailyStats,
+  defaultWeeklyStats,
+  emptyDailyStats,
+  emptyWeeklyStats,
+} from './fixtures/stats'
 import type { LiveRoom } from './handlers/rooms'
 import {
   ROOM_LIST_URL,
@@ -197,6 +210,41 @@ export const scenarios: Record<string, () => MockHandler[]> = {
     roomHandler(Object.fromEntries(manyRooms.map((room) => [room.room_id, room]))),
     roomListHandler(manyRooms.map(toListItemDto)),
     quietRoomSocket(),
+  ],
+  'stats-seed': () => [
+    ...single(mixedRoom)(),
+    dailyStatsHandler(emptyDailyStats),
+    weeklyStatsHandler(() => defaultWeeklyStats('SEED', Date.now())),
+  ],
+  'stats-mixed': () => [
+    ...single(calmRoom)(),
+    dailyStatsHandler((date) => defaultDailyStats(date, Date.now())),
+    weeklyStatsHandler(() => defaultWeeklyStats('MIXED', Date.now())),
+  ],
+  'stats-empty': () => [
+    ...single(mixedRoom)(),
+    dailyStatsHandler(emptyDailyStats),
+    weeklyStatsHandler(() => emptyWeeklyStats(Date.now())),
+  ],
+  'stats-error': () => [
+    ...single(mixedRoom)(),
+    http.get(DAILY_STATS_URL, () =>
+      HttpResponse.json({ detail: '일시적인 오류입니다.' }, { status: 500 }),
+    ),
+    http.get(WEEKLY_STATS_URL, () =>
+      HttpResponse.json({ detail: '일시적인 오류입니다.' }, { status: 500 }),
+    ),
+  ],
+  'stats-loading': () => [
+    ...single(mixedRoom)(),
+    http.get(DAILY_STATS_URL, async () => {
+      await delay('infinite')
+      return HttpResponse.json({})
+    }),
+    http.get(WEEKLY_STATS_URL, async () => {
+      await delay('infinite')
+      return HttpResponse.json({})
+    }),
   ],
   'rooms-empty': () => [roomHandler({}), roomListHandler([]), quietRoomSocket()],
   // 첫 목록 요청부터 10초 동안만 정상이고 이후는 500. 개발 서버의 StrictMode 가 시작 때 요청을

@@ -1,4 +1,4 @@
-export type GuideGroupId = 'seats' | 'rooms' | 'waiting' | 'live'
+export type GuideGroupId = 'seats' | 'rooms' | 'waiting' | 'live' | 'stats'
 export type GuideLink = { label: string; path: string; seat?: string }
 export type GuideEntry = {
   title: string
@@ -12,6 +12,7 @@ export const scenarioGroups: readonly { id: GuideGroupId; title: string }[] = [
   { id: 'rooms', title: '방 목록' },
   { id: 'waiting', title: '기다림과 오류' },
   { id: 'live', title: '실시간' },
+  { id: 'stats', title: '혼잡도 통계' },
 ]
 
 const ROOM = '/rooms/IT4-101'
@@ -145,6 +146,37 @@ export const scenarioGuide: Record<string, GuideEntry> = {
     title: '실시간 연결 불가',
     description: '화면은 mixed 와 같아요. 실시간 연결이 계속 실패해 30초마다 다시 불러오기만 해요.',
     group: 'live',
+    links: [room],
+  },
+  'stats-seed': {
+    title: '평소 값만 있는 방',
+    description:
+      '오늘 기록은 없고 평소 값만 예시 데이터인 방이에요. 배포 서버와 시연 당일 모습이에요.',
+    group: 'stats',
+    links: [room],
+  },
+  'stats-mixed': {
+    title: '평소 값이 섞인 방',
+    description: '평소 값에 예시 데이터가 섞이고, 빈자리 2석에 확인 불가 없는 방이에요.',
+    group: 'stats',
+    links: [room],
+  },
+  'stats-empty': {
+    title: '통계 기록이 없는 방',
+    description: '오늘도 평소도 기록이 없는 방이에요.',
+    group: 'stats',
+    links: [room],
+  },
+  'stats-error': {
+    title: '통계 불러오기 실패',
+    description: '좌석은 보이지만 혼잡도 통계를 불러오지 못하는 방이에요.',
+    group: 'stats',
+    links: [room],
+  },
+  'stats-loading': {
+    title: '통계를 계속 불러오는 방',
+    description: '혼잡도 통계를 계속 불러오는 중인 방이에요.',
+    group: 'stats',
     links: [room],
   },
 }

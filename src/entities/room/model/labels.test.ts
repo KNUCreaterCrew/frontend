@@ -1,4 +1,12 @@
-import { congestionLabel, seatAccessibleName, seatReasonLabel, seatStatusLabel } from './labels'
+import {
+  congestionLabel,
+  seatAccessibleName,
+  seatReasonLabel,
+  seatStatusLabel,
+  statsSourceLabel,
+  weekdayLabel,
+  weekdayShortLabel,
+} from './labels'
 import type { Seat } from './types'
 
 function seat(label: string, status: Seat['status'], hasOutlet: boolean): Seat {
@@ -54,5 +62,20 @@ describe('seatReasonLabel', () => {
     [null, '이유 정보가 없어요'],
   ] as const)('%s', (reason, text) => {
     expect(seatReasonLabel(reason)).toBe(text)
+  })
+})
+
+describe('통계 라벨', () => {
+  it('데이터 출처 말', () => {
+    expect(statsSourceLabel('SEED')).toBe('예시 데이터')
+    expect(statsSourceLabel('MIXED')).toBe('예시 데이터 포함')
+    expect(statsSourceLabel('UNRECOGNIZED')).toBe('출처를 알 수 없는 데이터')
+    expect(statsSourceLabel('OBSERVED')).toBeNull()
+    expect(statsSourceLabel(null)).toBeNull()
+  })
+
+  it('요일 말', () => {
+    expect(weekdayLabel('TUE')).toBe('화요일')
+    expect(weekdayShortLabel('SUN')).toBe('일')
   })
 })

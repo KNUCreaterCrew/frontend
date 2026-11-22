@@ -89,11 +89,11 @@ config/       개발 서버 프록시, 빌드 값 검증
 
 개발 서버에서 `shouldEnableMocking({ dev, flag, search })` 가 참일 때만 켠다. 조건은 DEV 이고 (`VITE_API_MOCKING === 'enabled'` 또는 URL 에 `?scenario=<이름>`) 이다. 그 밖에는 꺼지고 프록시로 실제 백엔드에 간다.
 
-- 시나리오 이름은 부팅 때 한 번 읽어 고정한다. 모르는 이름이면 알려진 이름 목록을 담은 오류가 난다. 있는 이름: `default`(= `mixed`), `mixed`, `all-unknown`, `offline`, `loading`, `error`, `not-found`, `slow-wake`, `many-seats`, `no-seats`, `live-flow`, `ws-reject`, `ws-slow-close`, `ws-down`, `live-demo`, `seat-details`, `rooms-many`, `rooms-empty`, `rooms-refresh-fail`. 방 ID 는 `IT4-101`.
+- 시나리오 이름은 부팅 때 한 번 읽어 고정한다. 모르는 이름이면 알려진 이름 목록을 담은 오류가 난다. 있는 이름: `default`(= `mixed`), `mixed`, `all-unknown`, `offline`, `loading`, `error`, `not-found`, `slow-wake`, `many-seats`, `no-seats`, `live-flow`, `ws-reject`, `ws-slow-close`, `ws-down`, `live-demo`, `seat-details`, `rooms-many`, `rooms-empty`, `rooms-refresh-fail`, `stats-seed`, `stats-mixed`, `stats-empty`, `stats-error`, `stats-loading`. 방 ID 는 `IT4-101`.
 - 운영 빌드는 `import.meta.env.DEV` 또는 `MODE === 'mock'` 분기 안의 동적 import 로 MSW 와 미리보기 UI 를 뺀다. 이 분기를 깨지 않는다. CI 가 `config/checkDist.ts` 로 확인한다(`dist` 에는 흔적이 없어야 하고 `dist-mock --expect` 에는 있어야 한다).
 - 미리보기 빌드: `pnpm build:mock`(`vite build --mode mock`)이 MSW 를 담은 정적 사이트를 만든다. 코드는 `src/app/preview/`(공개 `PreviewRoot`), 설명 데이터는 `mocks/scenarioGuide.ts`. 시나리오는 URL `?scenario` → sessionStorage `zf-preview-scenario` → `default` 순으로 정하고 저장한다. 모르는 이름이면 기본으로 열고 `/__preview` 에 안내한다(개발 서버는 그대로 오류). 미리보기 띠는 mock 빌드에서만 보인다. mock 빌드에 `VITE_API_ORIGIN` 이 있으면 `config/apiOrigin.ts` 가 빌드를 실패시킨다.
 - 서비스 워커 파일은 `msw/vite` 플러그인(`worker-only`)이 개발 서버에서 서빙하고 serve 와 mock 빌드 결과물에만 낸다. `public/mockServiceWorker.js` 는 두지 않는다.
-- `default` 핸들러는 `IT4-101` 에 혼합 방(mixed)을 준다. `/api/v1/rooms`(목록)와 `/api/v1/rooms/` 아래 경로는 기본으로 모두 처리된다. 처리되지 않은 요청이 필요한 테스트는 그 밖의 경로를 써야 한다.
+- `default` 핸들러는 `IT4-101` 에 혼합 방(mixed)을 준다. `/api/v1/rooms`(목록)와 `/api/v1/rooms/:roomId` 와 그 아래 `stats/daily`, `stats/weekly` 가 기본으로 처리된다. 처리되지 않은 요청이 필요한 테스트는 그 밖의 경로를 써야 한다.
 - 새 시나리오는 `mocks/scenarios.ts` 에 더하고, 개발 서버, Vitest, E2E 가 같은 것을 쓴다.
 
 ## 프록시
