@@ -45,3 +45,51 @@ export function freshnessWarning(
   if (updatedAt !== null && now - updatedAt >= 60_000) return '1분 넘게 갱신되지 않았어요'
   return null
 }
+
+export type KstWeekday = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN'
+
+export interface KstClock {
+  date: string
+  weekday: KstWeekday
+  hour: number
+  minuteOfDay: number
+}
+
+const kstClockFormat = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  weekday: 'short',
+  hourCycle: 'h23',
+})
+
+const weekdayByShort: Record<string, KstWeekday> = {
+  Mon: 'MON',
+  Tue: 'TUE',
+  Wed: 'WED',
+  Thu: 'THU',
+  Fri: 'FRI',
+  Sat: 'SAT',
+  Sun: 'SUN',
+}
+
+// 서버 시각이 아니라 브라우저 시계로 KST 날짜, 요일, 시를 구한다.
+export function kstClock(nowMs: number): KstClock {
+  const parts: Record<string, string> = {}
+  for (const part of kstClockFormat.formatToParts(new Date(nowMs))) parts[part.type] = part.value
+  const hour = Number(parts.hour) % 24
+  const minute = Number(parts.minute)
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    weekday: weekdayByShort[parts.weekday ?? ''] ?? 'MON',
+    hour,
+    minuteOfDay: hour * 60 + minute,
+  }
+}
+
+export function formatKstHour(hour: number): string {
+  return `${hour}시`
+}
