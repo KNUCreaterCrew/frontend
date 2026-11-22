@@ -98,6 +98,34 @@ describe('buildTodayChart', () => {
   })
 })
 
+describe('buildTodayChart 확인 불가 판단 기준 시각', () => {
+  const stats = daily([
+    bucket('10:00', 10, 1, 0),
+    bucket('10:10', 0, null, null),
+    bucket('10:20', 0, null, null),
+  ])
+
+  it('자료를 받은 시각 이전의 null 칸만 빈 구간이고, 지금 선은 시계 그대로다', () => {
+    const chart = buildTodayChart(stats, null, 'TUE', 700, 615)
+    expect(chart.missingSpans).toEqual([{ startMinute: 610, endMinute: 620 }])
+    expect(chart.nowMinute).toBe(700)
+  })
+
+  it('받은 뒤 시계만 흘렀다고 칸을 빈 구간으로 바꾸지 않는다', () => {
+    expect(buildTodayChart(stats, null, 'TUE', 700, 610).missingSpans).toEqual([])
+  })
+})
+
+describe('buildTodayChart 높이 상한', () => {
+  it('평균이 현재 좌석 수를 넘어도 막대와 평소 계단은 0~100 안이다', () => {
+    const d = daily([bucket('10:00', 10, 6, 3), bucket('10:10', 10, 3, 3)])
+    const chart = buildTodayChart(d, weekly([wcell('TUE', 10, 9)]), 'TUE', 700, 700)
+    expect(chart.bars[0]).toMatchObject({ availablePct: 100, unknownPct: 0 })
+    expect(chart.bars[1]).toMatchObject({ availablePct: 75, unknownPct: 25 })
+    expect(chart.usualSteps[0]?.pct).toBe(100)
+  })
+})
+
 describe('buildWeekdayChart', () => {
   const w = weekly([
     wcell('TUE', 8, 2.6, 0.4),

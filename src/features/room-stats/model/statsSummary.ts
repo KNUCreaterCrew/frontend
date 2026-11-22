@@ -1,7 +1,6 @@
 import type { DailyStats, StatsDataSource } from '@/entities/room'
 import { formatKstHour, kstClock } from '@/shared/lib'
-
-const DEFAULT_RANGE_START = 480
+import { DEFAULT_RANGE_START } from './chartModel'
 
 function formatMinuteOfDay(minute: number): string {
   const hour = Math.floor(minute / 60)
@@ -33,7 +32,11 @@ function sourceSuffix(source: StatsDataSource): string {
   }
 }
 
-export function todaySummary(daily: DailyStats, nowMinute: number): string {
+export function todaySummary(
+  daily: DailyStats,
+  nowMinute: number,
+  dataMinute: number = nowMinute,
+): string {
   const empty = '오늘은 아직 기록이 없어요.'
   if (daily.dataSource === null) return empty
 
@@ -60,7 +63,7 @@ export function todaySummary(daily: DailyStats, nowMinute: number): string {
   const rangeStart = Math.min(DEFAULT_RANGE_START, Math.floor(first / 60) * 60)
   const missingMinutes =
     buckets.filter(
-      (b) => b.avg === null && b.startMinute >= rangeStart && b.startMinute < nowMinute,
+      (b) => b.avg === null && b.startMinute >= rangeStart && b.startMinute < dataMinute,
     ).length * daily.bucketMinutes
 
   let text =

@@ -186,6 +186,41 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     expect(within(region).getAllByText('0석')).not.toHaveLength(0)
   })
 
+  test('재조회가 20분 실패해도 받지 못한 시간을 확인하지 못한 시간으로 그리지 않는다', async () => {
+    server.use(
+      dailyStatsHandler((date) => {
+        const base = emptyDailyStats(date)
+        return {
+          ...base,
+          data_source: 'OBSERVED',
+          buckets: base.buckets.map((b, i) =>
+            i >= 48 && i <= 84
+              ? { ...b, observed_minutes: 10, avg_available_seats: 2, avg_unknown_seats: 0 }
+              : b,
+          ),
+        }
+      }),
+    )
+    renderApp(PATH)
+    const region = await chartReady()
+    const hatching = () => region.querySelectorAll('.inset-y-0.pattern-unknown').length
+    const legend = () =>
+      within(region)
+        .getAllByRole('listitem')
+        .map((li) => li.textContent)
+    expect(hatching()).toBe(0)
+    server.use(
+      http.get(DAILY_STATS_URL, () =>
+        HttpResponse.json({ detail: '일시적인 오류입니다.' }, { status: 500 }),
+      ),
+    )
+    await act(() => vi.advanceTimersByTimeAsync(20 * 60_000))
+    expect(await within(region).findByText(/^갱신하지 못했어요, /)).toBeInTheDocument()
+    expect(hatching()).toBe(0)
+    expect(legend()).not.toContain('확인하지 못한 시간')
+    expect(within(region).getByText(/^오늘 8시부터/).textContent).not.toContain('확인하지 못한')
+  })
+
   test('stats-error: 판에만 오류를 보이고, 다시 불러오면 그래프가 그려진다', async () => {
     const { user } = renderApp(PATH, { scenario: 'stats-error' })
     const region = await statsRegion()
@@ -196,6 +231,7 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     await user.click(within(region).getByRole('button', { name: '다시 불러오기' }))
     await within(region).findAllByText('0석')
     expect(within(region).queryByText('빈자리 흐름을 불러오지 못했어요.')).not.toBeInTheDocument()
+    expect(within(region).getByRole('heading', { level: 2, name: REGION })).toHaveFocus()
   })
 
   test('stats-loading: 200ms 뒤 판 안에 뼈대를 보인다', async () => {

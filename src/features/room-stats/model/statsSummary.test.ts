@@ -16,6 +16,11 @@ describe('todaySummary', () => {
     expect(todaySummary(daily(buckets), 510)).toBe(BASE)
   })
 
+  it('자료를 받은 시각 이후의 null 칸은 확인하지 못한 시간으로 세지 않는다', () => {
+    expect(todaySummary(daily(buckets), 700, 510)).toContain('확인하지 못한 시간이 10분 있어요.')
+    expect(todaySummary(daily(buckets), 700, 490)).not.toContain('확인하지 못한')
+  })
+
   it('예시 데이터 출처를 끝에 붙인다', () => {
     expect(todaySummary(daily(buckets, 'SEED'), 510)).toBe(`${BASE} 예시 데이터예요.`)
     expect(todaySummary(daily(buckets, 'MIXED'), 510)).toBe(`${BASE} 예시 데이터가 섞여 있어요.`)

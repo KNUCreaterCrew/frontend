@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query'
-import { endpoints, http } from '@/shared/api'
+import { endpoints, http, isNotFoundError } from '@/shared/api'
 import { dailyStatsDtoSchema, weeklyStatsDtoSchema } from '../model/statsDto'
 import { toDailyStats, toWeeklyStats } from '../model/statsMapping'
 import type { DailyStats, WeeklyStats } from '../model/types'
@@ -33,7 +33,7 @@ export function dailyStatsQueryOptions(roomId: string, date: string) {
   return queryOptions({
     queryKey: roomKeys.dailyStats(roomId, date),
     queryFn: ({ signal }) => fetchDailyStats(roomId, date, signal),
-    refetchInterval: 60_000,
+    refetchInterval: (query) => (isNotFoundError(query.state.error) ? false : 60_000),
     refetchOnWindowFocus: unlessNotFound,
     refetchOnReconnect: unlessNotFound,
     retryOnMount: unlessNotFound,

@@ -32,12 +32,12 @@ export interface DayChart {
   xTickHours: number[]
 }
 
-const DEFAULT_RANGE_START = 480
+export const DEFAULT_RANGE_START = 480
 const RANGE_END = 1440
 const LOW_CONFIDENCE_MINUTES = 5
 
 function pct(seats: number, total: number): number {
-  return total > 0 ? (seats / total) * 100 : 0
+  return total > 0 ? Math.min(100, Math.max(0, (seats / total) * 100)) : 0
 }
 
 function rangeStartFor(firstRecordedMinute: number | null): number {
@@ -58,6 +58,8 @@ export function buildTodayChart(
   weekly: WeeklyStats | null,
   weekday: Weekday,
   nowMinute: number,
+  // 확인 불가 판단 기준. 자료를 받은 시각이라 시계(nowMinute)가 앞서도 받지 못한 시간은 빈 구간이 아니다
+  dataMinute: number = nowMinute,
 ): DayChart {
   const total = daily.totalSeats
   const buckets =
@@ -79,16 +81,17 @@ export function buildTodayChart(
   for (const { bucket, startMinute } of buckets) {
     if (!inRange(startMinute)) continue
     if (bucket.avgAvailableSeats !== null) {
+      const availablePct = pct(bucket.avgAvailableSeats, total)
       bars.push({
         startMinute,
         widthMinutes: daily.bucketMinutes,
         kind: bucket.observedMinutes < LOW_CONFIDENCE_MINUTES ? 'lowConfidence' : 'observed',
-        availablePct: pct(bucket.avgAvailableSeats, total),
-        unknownPct: pct(bucket.avgUnknownSeats ?? 0, total),
+        availablePct,
+        unknownPct: Math.min(pct(bucket.avgUnknownSeats ?? 0, total), 100 - availablePct),
       })
       continue
     }
-    if (startMinute >= nowMinute) continue
+    if (startMinute >= dataMinute) continue
     const endMinute = startMinute + daily.bucketMinutes
     const last = missingSpans[missingSpans.length - 1]
     if (last !== undefined && last.endMinute === startMinute) last.endMinute = endMinute
@@ -136,13 +139,16 @@ export function buildWeekdayChart(
 
   const bars: ChartBar[] = cells
     .filter((cell) => cell.hour * 60 >= rangeStart && cell.hour * 60 < RANGE_END)
-    .map((cell) => ({
-      startMinute: cell.hour * 60,
-      widthMinutes: 60,
-      kind: 'observed',
-      availablePct: pct(cell.avgAvailableSeats ?? 0, total),
-      unknownPct: pct(cell.avgUnknownSeats ?? 0, total),
-    }))
+    .map((cell) => {
+      const availablePct = pct(cell.avgAvailableSeats ?? 0, total)
+      return {
+        startMinute: cell.hour * 60,
+        widthMinutes: 60,
+        kind: 'observed' as const,
+        availablePct,
+        unknownPct: Math.min(pct(cell.avgUnknownSeats ?? 0, total), 100 - availablePct),
+      }
+    })
 
   return {
     rangeStartMinute: rangeStart,

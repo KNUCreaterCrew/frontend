@@ -1,7 +1,13 @@
-import { useId, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { statsSourceLabel, weekdayLabel } from '@/entities/room'
 import type { DailyStats, RoomSummary, WeeklyStats } from '@/entities/room'
-import { freshnessWarning, formatKstHour, useDelayedVisibility, type KstClock } from '@/shared/lib'
+import {
+  freshnessWarning,
+  formatKstHour,
+  kstClock,
+  useDelayedVisibility,
+  type KstClock,
+} from '@/shared/lib'
 import { Button } from '@/shared/ui'
 import { useRoomStats } from '../lib/useRoomStats'
 import { buildTodayChart, type DayChart } from '../model/chartModel'
@@ -31,10 +37,25 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
     (daily.data === undefined && daily.isError) || (weekly.data === undefined && weekly.isError)
   const loading = !failed && (daily.data === undefined || weekly.data === undefined)
   const skeletonVisible = useDelayedVisibility(loading)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const focusAfterRetry = useRef(false)
+  const ready = daily.data !== undefined && weekly.data !== undefined && !failed
+  // 다시 불러오기를 누르면 버튼이 사라지므로, 자료가 오면 제목으로 포커스를 옮긴다
+  useEffect(() => {
+    if (ready && focusAfterRetry.current) {
+      focusAfterRetry.current = false
+      headingRef.current?.focus()
+    }
+  }, [ready])
+  // 확인 불가 판단은 자료를 받은 시각까지만. 지금 선은 시계 그대로
+  const dataMinute =
+    daily.data === undefined
+      ? clock.minuteOfDay
+      : Math.min(clock.minuteOfDay, kstClock(daily.dataUpdatedAt).minuteOfDay)
   // 오늘 기록이 있는지는 출처가 아니라 그려지는 막대로 정한다
   const chart =
     daily.data !== undefined && weekly.data !== undefined
-      ? buildTodayChart(daily.data, weekly.data, clock.weekday, clock.minuteOfDay)
+      ? buildTodayChart(daily.data, weekly.data, clock.weekday, clock.minuteOfDay, dataMinute)
       : null
   const todaySource =
     daily.data !== undefined && chart !== null && chart.bars.length > 0
@@ -42,6 +63,7 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
       : null
 
   const retry = () => {
+    focusAfterRetry.current = true
     void daily.refetch()
     void weekly.refetch()
   }
@@ -67,6 +89,7 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
         weekly={weekly.data}
         chart={chart}
         clock={clock}
+        dataMinute={dataMinute}
         summary={summary}
         staleNotice={staleNotice}
       />
@@ -82,7 +105,12 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
       className="rounded-panel bg-surface p-4 shadow-plate"
     >
       <div className="flex flex-wrap items-center gap-2">
-        <h2 id={titleId} className="text-fact font-semibold text-ink">
+        <h2
+          ref={headingRef}
+          id={titleId}
+          tabIndex={-1}
+          className="text-fact font-semibold text-ink"
+        >
           {TITLE}
         </h2>
         {todaySource !== null && (
@@ -101,11 +129,20 @@ interface StatsBodyProps {
   weekly: WeeklyStats
   chart: DayChart
   clock: KstClock
+  dataMinute: number
   summary: RoomSummary
   staleNotice: string | null
 }
 
-function StatsBody({ daily, weekly, chart, clock, summary, staleNotice }: StatsBodyProps) {
+function StatsBody({
+  daily,
+  weekly,
+  chart,
+  clock,
+  dataMinute,
+  summary,
+  staleNotice,
+}: StatsBodyProps) {
   const weekday = weekdayLabel(clock.weekday)
   const usualCell = weekly.cells.find(
     (cell) => cell.weekday === clock.weekday && cell.hour === clock.hour,
@@ -135,7 +172,7 @@ function StatsBody({ daily, weekly, chart, clock, summary, staleNotice }: StatsB
   const showLowConfidence = chart.bars.some((b) => b.kind === 'lowConfidence')
 
   const readout = [
-    hasToday ? todaySummary(daily, clock.minuteOfDay) : null,
+    hasToday ? todaySummary(daily, clock.minuteOfDay, dataMinute) : null,
     usualCell?.avgAvailableSeats == null
       ? null
       : `평소 ${weekday} ${formatKstHour(clock.hour)} 평균 빈자리는 ${formatSeats(usualCell.avgAvailableSeats)}석이에요.`,
