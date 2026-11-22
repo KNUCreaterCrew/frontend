@@ -6,10 +6,14 @@ interface WeekdayPickerProps {
   onChange: (weekday: Weekday) => void
 }
 
-// 360px 에서도 칸 폭 44px 이상이 되도록 판 안쪽 여백까지 쓴다
+// 바깥 테두리 하나에 둥근 모서리, 칸 사이는 세로 선만. 선택 칸의 모서리도 바깥 반경에 맞춘다
 export function WeekdayPicker({ value, onChange }: WeekdayPickerProps) {
   return (
-    <div role="group" aria-label="요일" className="-mx-2 mt-3 grid grid-cols-7">
+    <div
+      role="group"
+      aria-label="요일"
+      className="mt-3 grid grid-cols-7 rounded-control border border-line-strong"
+    >
       {WEEKDAYS.map((weekday) => {
         const selected = weekday === value
         return (
@@ -20,8 +24,9 @@ export function WeekdayPicker({ value, onChange }: WeekdayPickerProps) {
             aria-pressed={selected}
             onClick={() => onChange(weekday)}
             className={[
-              'h-tap text-body font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-              selected ? 'bg-ink text-on-ink' : 'border border-line-strong bg-surface text-ink',
+              'h-tap text-body font-semibold focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+              'not-first:border-l not-first:border-line-strong first:rounded-l-control last:rounded-r-control',
+              selected ? 'bg-ink text-on-ink' : 'bg-surface text-ink',
             ].join(' ')}
           >
             {weekdayShortLabel(weekday)}

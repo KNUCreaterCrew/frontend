@@ -28,7 +28,7 @@ for (const width of [360, 390]) {
     }
   })
 
-  test(`mixed ${width}: 요일 버튼은 44px 이상이다`, async ({ page }) => {
+  test(`mixed ${width}: 요일 버튼은 높이 44px 이상, 폭 40px 이상이다`, async ({ page }) => {
     await page.setViewportSize({ width, height: 800 })
     await page.goto(url('mixed'))
     const group = panel(page).getByRole('group', { name: '요일' })
@@ -37,7 +37,7 @@ for (const width of [360, 390]) {
     await expect(buttons).toHaveCount(7)
     for (let i = 0; i < 7; i++) {
       const box = await buttons.nth(i).boundingBox()
-      expect(box!.width, `button ${i} width`).toBeGreaterThanOrEqual(44)
+      expect(box!.width, `button ${i} width`).toBeGreaterThanOrEqual(40)
       expect(box!.height, `button ${i} height`).toBeGreaterThanOrEqual(44)
     }
   })
