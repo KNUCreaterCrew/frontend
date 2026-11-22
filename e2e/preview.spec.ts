@@ -18,7 +18,7 @@ test('시나리오 목록에 모든 시나리오가 보이고 가로로 넘치�
   await page.goto('/__preview')
   await expect(page.getByRole('heading', { level: 1, name: '어떤 화면을 볼까요' })).toBeVisible()
   const names = Object.keys(scenarioGuide)
-  expect(names).toHaveLength(19)
+  expect(names).toHaveLength(24)
   for (const name of names) {
     await expect(page.getByText(name, { exact: true }).first(), name).toBeVisible()
   }
