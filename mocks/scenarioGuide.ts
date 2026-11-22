@@ -157,7 +157,7 @@ export const scenarioGuide: Record<string, GuideEntry> = {
   },
   'stats-mixed': {
     title: '평소 값이 섞인 방',
-    description: '평소 값에 예시 데이터가 섞인 방이에요.',
+    description: '평소 값에 예시 데이터가 섞이고, 빈자리 2석에 확인 불가 없는 방이에요.',
     group: 'stats',
     links: [room],
   },

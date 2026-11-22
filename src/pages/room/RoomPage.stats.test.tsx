@@ -112,6 +112,27 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     expect(within(region).getAllByText('평소 값에는 예시 데이터가 섞여 있어요.')).toHaveLength(2)
   })
 
+  test('stats-mixed: 빈자리 2, 확인 불가 0 이라 평소 대비 문장이 보인다', async () => {
+    renderApp(PATH, { scenario: 'stats-mixed' })
+    const region = await chartReady()
+    expect(within(region).getByText('지금은 평소 화요일 이 시간보다 한산해요.')).toBeInTheDocument()
+  })
+
+  test('오늘 응답이 OBSERVED 여도 관측된 칸이 없으면 기록 없음 안내를 보이고 오늘 범례는 없다', async () => {
+    server.use(dailyStatsHandler((date) => ({ ...emptyDailyStats(date), data_source: 'OBSERVED' })))
+    renderApp(PATH)
+    const region = await chartReady()
+    expect(
+      within(region).getByText('오늘은 아직 기록이 없어요. 평소 화요일 흐름만 보여요.'),
+    ).toBeInTheDocument()
+    const legend = within(region)
+      .getAllByRole('listitem')
+      .map((li) => li.textContent)
+    expect(legend).toContain('평소 화요일')
+    expect(legend).not.toContain('오늘 빈자리')
+    expect(within(region).queryByText(/^오늘 8시부터/)).not.toBeInTheDocument()
+  })
+
   test('stats-empty: 안내만 보이고 그래프가 없다', async () => {
     renderApp(PATH, { scenario: 'stats-empty' })
     const region = await statsRegion()

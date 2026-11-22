@@ -71,11 +71,11 @@ describe('오늘 통계는 지금 시각까지만 채운다', () => {
     expect(at(d, '13:00').avg_available_seats).toBeNull()
     expect(at(d, '09:50').observed_minutes).toBe(10)
   })
-  test('8시 전이면 모든 칸이 비고 data_source 는 그대로다', () => {
+  test('8시 전이면 모든 칸이 비고 관측이 없으니 data_source 는 null 이다', () => {
     const d = defaultDailyStats('2026-11-24', Date.parse('2026-11-24T07:30:00+09:00'), 'MIXED')
     expect(d.buckets).toHaveLength(144)
     expect(d.buckets.every((b) => b.observed_minutes === 0)).toBe(true)
-    expect(d.data_source).toBe('MIXED')
+    expect(d.data_source).toBeNull()
   })
 })
 
@@ -119,4 +119,12 @@ test('emptyWeeklyStats 는 data_source 가 null 이고 모든 칸 0분이다', (
   expect(weeklyStatsDtoSchema.safeParse(empty).success).toBe(true)
   expect(empty.data_source).toBeNull()
   expect(empty.cells.every((c) => c.observed_minutes === 0 && c.observed_days === 0)).toBe(true)
+})
+
+describe('defaultDailyStats 자정 직후', () => {
+  test('관측된 칸이 하나도 없으면 data_source 는 null 이다', () => {
+    const daily = defaultDailyStats('2026-11-24', Date.parse('2026-11-24T00:49:00+09:00'))
+    expect(daily.buckets.every((b) => b.observed_minutes === 0)).toBe(true)
+    expect(daily.data_source).toBeNull()
+  })
 })

@@ -7,6 +7,7 @@ import {
   buildRoom,
   manyRooms,
   manySeatsRoom,
+  calmRoom,
   mixedRoom,
   noSeatsRoom,
   offlineRoom,
@@ -216,7 +217,7 @@ export const scenarios: Record<string, () => MockHandler[]> = {
     weeklyStatsHandler(() => defaultWeeklyStats('SEED', Date.now())),
   ],
   'stats-mixed': () => [
-    ...single(mixedRoom)(),
+    ...single(calmRoom)(),
     dailyStatsHandler((date) => defaultDailyStats(date, Date.now())),
     weeklyStatsHandler(() => defaultWeeklyStats('MIXED', Date.now())),
   ],

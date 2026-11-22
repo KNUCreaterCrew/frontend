@@ -99,12 +99,14 @@ export function defaultDailyStats(
     if (i === current) return filled(start, 1, 1, currentMinutes(i))
     return offBucket(start)
   })
+  // 배포된 서버처럼 관측된 칸이 하나도 없으면 출처도 없다
+  const observed = buckets.some((b) => b.observed_minutes > 0)
   return {
     room_id: 'IT4-101',
     date,
     bucket_minutes: BUCKET_MINUTES,
     total_seats: TOTAL_SEATS,
-    data_source: source,
+    data_source: observed ? source : null,
     buckets,
   }
 }

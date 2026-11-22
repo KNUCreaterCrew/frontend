@@ -4,7 +4,7 @@ import type { DailyStats, RoomSummary, WeeklyStats } from '@/entities/room'
 import { freshnessWarning, formatKstHour, useDelayedVisibility, type KstClock } from '@/shared/lib'
 import { Button } from '@/shared/ui'
 import { useRoomStats } from '../lib/useRoomStats'
-import { buildTodayChart } from '../model/chartModel'
+import { buildTodayChart, type DayChart } from '../model/chartModel'
 import { compareWithUsual, comparisonSentence } from '../model/compareWithUsual'
 import { todaySummary } from '../model/statsSummary'
 import { usualSourceSentence } from '../model/usualSource'
@@ -31,7 +31,15 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
     (daily.data === undefined && daily.isError) || (weekly.data === undefined && weekly.isError)
   const loading = !failed && (daily.data === undefined || weekly.data === undefined)
   const skeletonVisible = useDelayedVisibility(loading)
-  const todaySource = daily.data ? statsSourceLabel(daily.data.dataSource) : null
+  // 오늘 기록이 있는지는 출처가 아니라 그려지는 막대로 정한다
+  const chart =
+    daily.data !== undefined && weekly.data !== undefined
+      ? buildTodayChart(daily.data, weekly.data, clock.weekday, clock.minuteOfDay)
+      : null
+  const todaySource =
+    daily.data !== undefined && chart !== null && chart.bars.length > 0
+      ? statsSourceLabel(daily.data.dataSource)
+      : null
 
   const retry = () => {
     void daily.refetch()
@@ -48,7 +56,7 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
         </Button>
       </>
     )
-  } else if (daily.data !== undefined && weekly.data !== undefined) {
+  } else if (daily.data !== undefined && weekly.data !== undefined && chart !== null) {
     // 경고는 재조회가 실패했을 때만. 평소 값은 30분 동안 다시 조회하지 않으므로 경과 시간만으로 경고하지 않는다
     const refreshFailed = daily.isRefetchError || weekly.isRefetchError
     const updatedAt = daily.isRefetchError ? daily.dataUpdatedAt : weekly.dataUpdatedAt
@@ -57,6 +65,7 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
       <StatsBody
         daily={daily.data}
         weekly={weekly.data}
+        chart={chart}
         clock={clock}
         summary={summary}
         staleNotice={staleNotice}
@@ -90,12 +99,13 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
 interface StatsBodyProps {
   daily: DailyStats
   weekly: WeeklyStats
+  chart: DayChart
   clock: KstClock
   summary: RoomSummary
   staleNotice: string | null
 }
 
-function StatsBody({ daily, weekly, clock, summary, staleNotice }: StatsBodyProps) {
+function StatsBody({ daily, weekly, chart, clock, summary, staleNotice }: StatsBodyProps) {
   const weekday = weekdayLabel(clock.weekday)
   const usualCell = weekly.cells.find(
     (cell) => cell.weekday === clock.weekday && cell.hour === clock.hour,
@@ -104,8 +114,8 @@ function StatsBody({ daily, weekly, clock, summary, staleNotice }: StatsBodyProp
     <p className="mt-3 text-label font-bold text-ink">{staleNotice}</p>
   )
 
-  const chart = buildTodayChart(daily, weekly, clock.weekday, clock.minuteOfDay)
-  if (daily.dataSource === null && chart.usualSteps.length === 0) {
+  const hasToday = chart.bars.length > 0
+  if (!hasToday && chart.usualSteps.length === 0) {
     return (
       <>
         <p className="mt-2 text-body text-ink">아직 기록이 없어요.</p>
@@ -125,7 +135,7 @@ function StatsBody({ daily, weekly, clock, summary, staleNotice }: StatsBodyProp
   const showLowConfidence = chart.bars.some((b) => b.kind === 'lowConfidence')
 
   const readout = [
-    daily.dataSource === null ? null : todaySummary(daily, clock.minuteOfDay),
+    hasToday ? todaySummary(daily, clock.minuteOfDay) : null,
     usualCell?.avgAvailableSeats == null
       ? null
       : `평소 ${weekday} ${formatKstHour(clock.hour)} 평균 빈자리는 ${formatSeats(usualCell.avgAvailableSeats)}석이에요.`,
@@ -141,13 +151,14 @@ function StatsBody({ daily, weekly, clock, summary, staleNotice }: StatsBodyProp
         </p>
       )}
       {usualSource !== null && <p className="mt-1 text-label text-ink-soft">{usualSource}</p>}
-      {daily.dataSource === null && (
+      {!hasToday && (
         <p className="mt-2 text-body text-ink">
           {`오늘은 아직 기록이 없어요. 평소 ${weekday} 흐름만 보여요.`}
         </p>
       )}
       <StepChart chart={chart} />
       <StatsLegend
+        showToday={hasToday}
         usualLabel={usualLabel}
         showMissing={showMissing}
         showLowConfidence={showLowConfidence}

@@ -76,6 +76,14 @@ export const mixedRoom: RoomDto = buildRoom(
   { version: 12 },
 )
 
+// mixedRoom 에서 확인 불가 좌석을 빈자리로 바꾼 방. 빈자리 2, 확인 불가 0 이라 평소 대비 문장이 보인다
+export const calmRoom: RoomDto = buildRoom(
+  mixedRoom.seats.map((s) =>
+    s.status === 'UNKNOWN' ? { ...s, status: 'EMPTY', reason: null } : s,
+  ),
+  { version: 12 },
+)
+
 export const allUnknownRoom: RoomDto = buildRoom(
   [
     seat({ row: 'A', n: 1, x: 0, y: 0, status: 'UNKNOWN', reason: 'OCCLUDED', outlet: true }),
