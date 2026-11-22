@@ -83,19 +83,20 @@ export function defaultDailyStats(
   const clock = kstClock(nowMs)
   const today = clock.date === date
   const current = Math.floor(clock.minuteOfDay / BUCKET_MINUTES)
+  const currentMinutes = (i: number) => Math.max(1, clock.minuteOfDay - i * BUCKET_MINUTES)
   const buckets = Array.from({ length: BUCKETS_PER_DAY }, (_, i): Bucket => {
     const start = bucketStart(date, i)
     if (i < FIRST_INDEX || i >= END_INDEX) return offBucket(start)
+    const slot = i < AFTERNOON_INDEX ? MORNING[i - FIRST_INDEX] : null
     if (i < AFTERNOON_INDEX) {
-      const slot = MORNING[i - FIRST_INDEX]
-      return slot ? filled(start, slot[0], slot[1], slot[2]) : offBucket(start)
+      if (!slot) return offBucket(start)
+      if (today && i > current) return offBucket(start)
+      const minutes = today && i === current ? currentMinutes(i) : slot[2]
+      return filled(start, slot[0], slot[1], minutes)
     }
     if (!today) return filled(start, 2, 0, BUCKET_MINUTES)
     if (i < current) return filled(start, 1, 1, BUCKET_MINUTES)
-    if (i === current) {
-      const minutes = Math.max(1, clock.minuteOfDay - i * BUCKET_MINUTES)
-      return filled(start, 1, 1, minutes)
-    }
+    if (i === current) return filled(start, 1, 1, currentMinutes(i))
     return offBucket(start)
   })
   return {

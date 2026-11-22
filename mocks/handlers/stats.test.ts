@@ -57,6 +57,28 @@ describe('defaultDailyStats', () => {
   })
 })
 
+describe('오늘 통계는 지금 시각까지만 채운다', () => {
+  const at = (d: ReturnType<typeof defaultDailyStats>, hhmm: string) =>
+    d.buckets.find((b) => b.start.includes(`T${hhmm}:00+09:00`))!
+
+  test('10시 5분이면 10시 칸은 5분, 그 뒤는 비어 있다', () => {
+    const d = defaultDailyStats('2026-11-24', Date.parse('2026-11-24T10:05:00+09:00'))
+    expect(at(d, '10:00').observed_minutes).toBe(5)
+    expect(at(d, '10:00').avg_available_seats).toBe(1)
+    expect(at(d, '10:10').observed_minutes).toBe(0)
+    expect(at(d, '10:10').avg_available_seats).toBeNull()
+    expect(at(d, '13:00').observed_minutes).toBe(0)
+    expect(at(d, '13:00').avg_available_seats).toBeNull()
+    expect(at(d, '09:50').observed_minutes).toBe(10)
+  })
+  test('8시 전이면 모든 칸이 비고 data_source 는 그대로다', () => {
+    const d = defaultDailyStats('2026-11-24', Date.parse('2026-11-24T07:30:00+09:00'), 'MIXED')
+    expect(d.buckets).toHaveLength(144)
+    expect(d.buckets.every((b) => b.observed_minutes === 0)).toBe(true)
+    expect(d.data_source).toBe('MIXED')
+  })
+})
+
 test('emptyDailyStats 는 144칸 모두 0분이고 data_source 가 null 이다', () => {
   const empty = emptyDailyStats('2026-11-24')
   expect(dailyStatsDtoSchema.safeParse(empty).success).toBe(true)
