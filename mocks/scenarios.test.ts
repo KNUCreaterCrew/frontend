@@ -1,6 +1,8 @@
 import { HttpHandler } from 'msw'
 import {
   applyRoomEvent,
+  dailyStatsDtoSchema,
+  weeklyStatsDtoSchema,
   parseRoomEvent,
   roomDtoSchema,
   roomListDtoSchema,
@@ -51,6 +53,11 @@ const SCENARIO_NAMES = [
   'rooms-many',
   'rooms-empty',
   'rooms-refresh-fail',
+  'stats-seed',
+  'stats-mixed',
+  'stats-empty',
+  'stats-error',
+  'stats-loading',
 ]
 
 test.each(SCENARIO_NAMES)('시나리오 %s 는 ws 핸들러를 하나 이상 가진다', (name) => {
@@ -460,4 +467,44 @@ describe('목록 핸들러 시나리오', () => {
       for (const field of SUMMARY_FIELDS) expect(list[0]![field], field).toEqual(detail[field])
     },
   )
+})
+
+describe('통계 시나리오', () => {
+  const DAILY = 'http://localhost/api/v1/rooms/IT4-101/stats/daily?date=2026-11-24'
+  const WEEKLY = 'http://localhost/api/v1/rooms/IT4-101/stats/weekly?weeks=4'
+
+  test('기본 핸들러가 두 경로를 스키마대로 답한다', async () => {
+    const daily = await fetch(DAILY)
+    expect(daily.status).toBe(200)
+    const dailyBody = dailyStatsDtoSchema.parse(await daily.json())
+    expect(dailyBody.date).toBe('2026-11-24')
+    expect(dailyBody.buckets[48]!.start.startsWith('2026-11-24T08:00')).toBe(true)
+    const weekly = await fetch(WEEKLY)
+    expect(weekly.status).toBe(200)
+    expect(weeklyStatsDtoSchema.parse(await weekly.json()).data_source).toBe('OBSERVED')
+  })
+  test('없는 방은 404 다', async () => {
+    expect((await fetch('http://localhost/api/v1/rooms/NOPE/stats/daily')).status).toBe(404)
+    expect((await fetch('http://localhost/api/v1/rooms/NOPE/stats/weekly')).status).toBe(404)
+  })
+  test('stats-seed 는 오늘 기록이 없고 평소 값은 SEED 다', async () => {
+    server.use(...resolveScenario('stats-seed'))
+    expect(dailyStatsDtoSchema.parse(await (await fetch(DAILY)).json()).data_source).toBeNull()
+    expect(weeklyStatsDtoSchema.parse(await (await fetch(WEEKLY)).json()).data_source).toBe('SEED')
+  })
+  test('stats-mixed 는 평소 값이 MIXED 다', async () => {
+    server.use(...resolveScenario('stats-mixed'))
+    expect(weeklyStatsDtoSchema.parse(await (await fetch(WEEKLY)).json()).data_source).toBe('MIXED')
+  })
+  test('stats-empty 는 둘 다 기록이 없다', async () => {
+    server.use(...resolveScenario('stats-empty'))
+    expect(dailyStatsDtoSchema.parse(await (await fetch(DAILY)).json()).data_source).toBeNull()
+    expect(weeklyStatsDtoSchema.parse(await (await fetch(WEEKLY)).json()).data_source).toBeNull()
+  })
+  test('stats-error 는 두 경로 500 이고 방은 정상이다', async () => {
+    server.use(...resolveScenario('stats-error'))
+    expect((await fetch(DAILY)).status).toBe(500)
+    expect((await fetch(WEEKLY)).status).toBe(500)
+    expect((await fetch('http://localhost/api/v1/rooms/IT4-101')).status).toBe(200)
+  })
 })
