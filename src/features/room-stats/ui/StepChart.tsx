@@ -1,8 +1,7 @@
 import type { CSSProperties } from 'react'
 import { formatKstHour } from '@/shared/lib'
 import type { DayChart } from '../model/chartModel'
-
-const USUAL_STEP_MINUTES = 60
+import { usualPath } from '../model/usualPath'
 
 // 좌석도처럼 위치와 크기는 % inline style 로 준다
 export function StepChart({ chart }: { chart: DayChart }) {
@@ -65,16 +64,22 @@ export function StepChart({ chart }: { chart: DayChart }) {
         </div>
       ))}
 
-      {chart.usualSteps.map((step) => (
-        <div
-          key={`usual-${step.startMinute}`}
-          className="absolute h-0 border-t-2 border-dashed border-ink-soft"
-          style={{
-            ...horizontal(step.startMinute, step.startMinute + USUAL_STEP_MINUTES),
-            bottom: `${step.pct}%`,
-          }}
-        />
-      ))}
+      {chart.usualSteps.length > 0 && (
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          className="absolute inset-0 h-full w-full overflow-visible text-ink-soft"
+        >
+          <path
+            d={usualPath(chart.usualSteps, start, end)}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeDasharray="5 4"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      )}
 
       {showNow && (
         <div
