@@ -8,6 +8,10 @@ export const roomKeys = {
   all: ['rooms'] as const,
   list: () => ['rooms', 'list'] as const,
   detail: (roomId: string) => ['rooms', 'detail', roomId] as const,
+  stats: (roomId: string) => ['rooms', 'stats', roomId] as const,
+  dailyStats: (roomId: string, date: string) => ['rooms', 'stats', roomId, 'daily', date] as const,
+  weeklyStats: (roomId: string, weeks: number) =>
+    ['rooms', 'stats', roomId, 'weekly', weeks] as const,
 }
 
 export async function fetchRoom(roomId: string, signal?: AbortSignal): Promise<Room> {
@@ -20,7 +24,8 @@ export async function fetchRoom(roomId: string, signal?: AbortSignal): Promise<R
 
 // retry 는 queryClient 기본값에 맡긴다.
 // 404 로 실패한 조회는 포커스, 재연결, 다시 마운트에서 다시 부르지 않는다(다시 부르면 대기 상태로 돌아가 화면이 비는다).
-const unlessNotFound = (query: { state: { error: unknown } }) => !isNotFoundError(query.state.error)
+export const unlessNotFound = (query: { state: { error: unknown } }) =>
+  !isNotFoundError(query.state.error)
 
 export function roomQueryOptions(roomId: string) {
   return queryOptions({
