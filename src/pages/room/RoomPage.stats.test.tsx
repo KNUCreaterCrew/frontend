@@ -1,9 +1,16 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
+import { HttpResponse, http } from 'msw'
 import { renderApp } from '@/shared/test/renderApp'
 import { server } from '@mocks/node'
 import { roomHandler } from '@mocks/handlers/rooms'
-import { statsHandlers } from '@mocks/handlers/stats'
+import {
+  DAILY_STATS_URL,
+  dailyStatsHandler,
+  statsHandlers,
+  weeklyStatsHandler,
+} from '@mocks/handlers/stats'
 import { ROOM_ID, buildRoom, mixedRoom } from '@mocks/fixtures/rooms'
+import { emptyDailyStats, emptyWeeklyStats } from '@mocks/fixtures/stats'
 
 const PATH = `/rooms/${ROOM_ID}`
 const ROOM_NAME = '제1실습실 (예시)'
@@ -111,6 +118,51 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     expect(await within(region).findByText('아직 기록이 없어요.')).toBeInTheDocument()
     expect(within(region).queryByText('0석')).not.toBeInTheDocument()
     expect(within(region).queryByText(/평소 화요일/)).not.toBeInTheDocument()
+  })
+
+  test('오늘 기록이 없고 평소 칸이 그래프 범위 밖에만 있으면 안내만 보인다', async () => {
+    server.use(
+      dailyStatsHandler(emptyDailyStats),
+      weeklyStatsHandler(() => {
+        const weekly = emptyWeeklyStats(Date.now())
+        return {
+          ...weekly,
+          data_source: 'OBSERVED',
+          cells: weekly.cells.map((cell) =>
+            cell.weekday === 'TUE' && cell.hour === 3
+              ? { ...cell, observed_days: 4, observed_minutes: 240, avg_available_seats: 2 }
+              : cell,
+          ),
+        }
+      }),
+    )
+    renderApp(PATH)
+    const region = await statsRegion()
+    expect(await within(region).findByText('아직 기록이 없어요.')).toBeInTheDocument()
+    expect(within(region).queryByText(/흐름만 보여요/)).not.toBeInTheDocument()
+    expect(within(region).queryByText('0석')).not.toBeInTheDocument()
+  })
+
+  test('정상 판은 몇 분이 지나도 갱신 경고가 없다', async () => {
+    renderApp(PATH)
+    const region = await chartReady()
+    await act(() => vi.advanceTimersByTimeAsync(150_000))
+    expect(within(region).getByText('0석')).toBeInTheDocument()
+    expect(within(region).queryByText(/갱신하지 못했어요|1분 넘게/)).not.toBeInTheDocument()
+  })
+
+  test('오늘 기록 재조회가 실패하면 그래프는 두고 굵은 갱신 경고를 보인다', async () => {
+    renderApp(PATH)
+    const region = await chartReady()
+    server.use(
+      http.get(DAILY_STATS_URL, () =>
+        HttpResponse.json({ detail: '일시적인 오류입니다.' }, { status: 500 }),
+      ),
+    )
+    await act(() => vi.advanceTimersByTimeAsync(61_000))
+    const notice = await within(region).findByText(/^갱신하지 못했어요, /)
+    expect(notice).toHaveClass('font-bold')
+    expect(within(region).getByText('0석')).toBeInTheDocument()
   })
 
   test('stats-error: 판에만 오류를 보이고, 다시 불러오면 그래프가 그려진다', async () => {

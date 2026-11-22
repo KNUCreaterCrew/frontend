@@ -60,15 +60,17 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
       </>
     )
   } else if (daily.data !== undefined && weekly.data !== undefined) {
+    // 경고는 재조회가 실패했을 때만. 평소 값은 30분 동안 다시 조회하지 않으므로 경과 시간만으로 경고하지 않는다
     const refreshFailed = daily.isRefetchError || weekly.isRefetchError
     const updatedAt = daily.isRefetchError ? daily.dataUpdatedAt : weekly.dataUpdatedAt
+    const staleNotice = refreshFailed ? freshnessWarning(updatedAt, true, now) : null
     body = (
       <StatsBody
         daily={daily.data}
         weekly={weekly.data}
         clock={clock}
         summary={summary}
-        staleNotice={freshnessWarning(updatedAt, refreshFailed, now)}
+        staleNotice={staleNotice}
       />
     )
   } else if (skeletonVisible) {
@@ -109,14 +111,12 @@ function StatsBody({ daily, weekly, clock, summary, staleNotice }: StatsBodyProp
   const usualCell = weekly.cells.find(
     (cell) => cell.weekday === clock.weekday && cell.hour === clock.hour,
   )
-  const hasUsualToday = weekly.cells.some(
-    (cell) => cell.weekday === clock.weekday && cell.avgAvailableSeats !== null,
-  )
   const stale = staleNotice !== null && (
     <p className="mt-3 text-label font-bold text-ink">{staleNotice}</p>
   )
 
-  if (daily.dataSource === null && !hasUsualToday) {
+  const chart = buildTodayChart(daily, weekly, clock.weekday, clock.minuteOfDay)
+  if (daily.dataSource === null && chart.usualSteps.length === 0) {
     return (
       <>
         <p className="mt-2 text-body text-ink">아직 기록이 없어요.</p>
@@ -125,7 +125,6 @@ function StatsBody({ daily, weekly, clock, summary, staleNotice }: StatsBodyProp
     )
   }
 
-  const chart = buildTodayChart(daily, weekly, clock.weekday, clock.minuteOfDay)
   const comparison = compareWithUsual(summary, usualCell, weekly.totalSeats)
   const usualSource = usualSourceSentence(weekly.dataSource)
   const weeklySourceLabel = statsSourceLabel(weekly.dataSource)
