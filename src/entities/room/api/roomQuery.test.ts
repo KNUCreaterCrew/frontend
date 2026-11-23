@@ -7,6 +7,7 @@ import {
   fetchRoomList,
   roomKeys,
   roomListQueryOptions,
+  roomPreviewQueryOptions,
   roomQueryOptions,
 } from './roomQuery'
 
@@ -28,6 +29,35 @@ describe('roomQuery', () => {
     const q = (error: unknown) => ({ state: { error } }) as never
     const notFound = q(new ApiError('http', { status: 404 }))
     const serverError = q(new ApiError('http', { status: 500 }))
+    for (const key of ['refetchOnWindowFocus', 'refetchOnReconnect', 'retryOnMount'] as const) {
+      const fn = opts[key] as unknown as (query: never) => boolean
+      expect(fn(notFound), key).toBe(false)
+      expect(fn(serverError), key).toBe(true)
+    }
+  })
+})
+
+describe('roomPreviewQuery', () => {
+  const q = (error: unknown) => ({ state: { error } }) as never
+  const notFound = q(new ApiError('http', { status: 404 }))
+  const serverError = q(new ApiError('http', { status: 500 }))
+
+  it('방 화면의 실시간 캐시와 다른 키를 쓴다', () => {
+    expect(roomKeys.preview('IT4-101')).toEqual(['rooms', 'preview', 'IT4-101'])
+    expect(roomKeys.preview('IT4-101')).not.toEqual(roomKeys.detail('IT4-101'))
+    expect(roomPreviewQueryOptions('IT4-101').queryKey).toEqual(['rooms', 'preview', 'IT4-101'])
+  })
+
+  it('30초마다 다시 조회하고 404 면 멈춘다', () => {
+    const interval = roomPreviewQueryOptions('IT4-101').refetchInterval as unknown as (
+      query: never,
+    ) => number | false
+    expect(interval(serverError)).toBe(30000)
+    expect(interval(notFound)).toBe(false)
+  })
+
+  it('404 로 실패한 조회는 포커스, 재연결, 다시 마운트에서 다시 부르지 않는다', () => {
+    const opts = roomPreviewQueryOptions('IT4-101')
     for (const key of ['refetchOnWindowFocus', 'refetchOnReconnect', 'retryOnMount'] as const) {
       const fn = opts[key] as unknown as (query: never) => boolean
       expect(fn(notFound), key).toBe(false)

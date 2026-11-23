@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { roomListQueryOptions } from '@/entities/room'
 import { getScreenState, useElapsed } from '@/shared/lib'
-import { RoomRow } from './ui/RoomRow'
+import { pickStageRoom } from './lib/pickStageRoom'
+import { RoomStage } from './ui/RoomStage'
+import { RoomTile } from './ui/RoomTile'
 import { RoomsError } from './ui/RoomsError'
 import { RoomsLoading } from './ui/RoomsLoading'
 import { RoomsTopBar } from './ui/RoomsTopBar'
@@ -19,6 +21,7 @@ export function RoomsPage() {
     elapsedMs,
     fetchStatus,
   })
+  const pick = useMemo(() => (data ? pickStageRoom(data) : null), [data])
 
   // 404 도 목록에서는 오류로 다룬다
   if (state === 'error' || state === 'notFound') {
@@ -47,17 +50,25 @@ export function RoomsPage() {
   return (
     <>
       <RoomsTopBar updatedAt={dataUpdatedAt} refreshFailed={state === 'refreshFailed'} />
-      <main className="page pt-6 lg:pt-10">
-        <h1 className="text-title font-bold tracking-tight">방을 골라 주세요</h1>
-        {data.length === 0 ? (
-          <p className="mt-4 text-body text-ink-soft">아직 등록된 방이 없어요.</p>
-        ) : (
-          <ul className="mt-5 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {data.map((room) => (
-              <RoomRow key={room.roomId} room={room} />
-            ))}
-          </ul>
-        )}
+      <main>
+        {pick && <RoomStage pick={pick} />}
+        <div className={`page ${pick ? 'pt-6' : 'pt-below-float'}`}>
+          <div className="flex items-baseline justify-between gap-3">
+            <h1 className="text-heading font-bold tracking-tight">방을 골라 주세요</h1>
+            {data.length > 0 && (
+              <p className="num text-label text-ink-soft">{`${data.length}곳`}</p>
+            )}
+          </div>
+          {data.length === 0 ? (
+            <p className="mt-4 text-body text-ink-soft">아직 등록된 방이 없어요.</p>
+          ) : (
+            <ul className="mt-4 grid grid-cols-2 items-start gap-3 md:grid-cols-3 lg:grid-cols-4">
+              {data.map((room) => (
+                <RoomTile key={room.roomId} room={room} />
+              ))}
+            </ul>
+          )}
+        </div>
       </main>
     </>
   )

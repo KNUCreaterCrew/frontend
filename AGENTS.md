@@ -16,6 +16,7 @@
 | 라우터     | React Router 8 (선언형 `<Routes>`)                                                                    | 데이터 라우터: 서버 상태는 TanStack Query 가 맡으므로 loader 가 필요 없음                                                                                                           |
 | 모션       | motion                                                                                                | CSS 전환만: 시트 드래그와 변경 강조 완성도 부족                                                                                                                                     |
 | 바텀시트   | Radix Dialog + motion 드래그                                                                          | vaul: 관리 중단                                                                                                                                                                     |
+| 입체 무대  | three(방 목록 머리 영역만, 따로 늦게 불러오는 묶음)                                                   | react-three-fiber: 장면 하나라 선언형 계층이 이득 없고 의존성만 늘어남. CSS 3D: 빛과 재질 표현 부족. 동작 줄이기와 WebGL 없음은 SVG 정지 그림                                       |
 | 테스트     | Vitest + Testing Library + MSW 3(`ws` 포함) + Playwright                                              | Storybook: 같은 상태를 세 곳에서 그림. `?scenario=` URL 로 대체                                                                                                                     |
 
 TypeScript `strict` + `noUncheckedIndexedAccess`. ESLint flat(type-checked, react-hooks, jsx-a11y) + Prettier(`semi:false`, `singleQuote`, `printWidth:100`). pnpm, Node 24(`.nvmrc`). **이 목록 밖의 런타임 의존성은 사람 확인 후 추가한다.**
@@ -26,9 +27,9 @@ TypeScript `strict` + `noUncheckedIndexedAccess`. ESLint flat(type-checked, reac
 
 | 구분   | 패키지와 버전                                                                                                                                                                                                 |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 런타임 | react, react-dom 19.3.1 / @tanstack/react-query 5.108.0 / zod 4.6.7 / react-router 8.5.1 / @radix-ui/react-dialog 1.3.1 / motion 14.14.0                                                                      |
+| 런타임 | react, react-dom 19.3.1 / @tanstack/react-query 5.108.0 / zod 4.6.7 / react-router 8.5.1 / @radix-ui/react-dialog 1.3.1 / motion 14.14.0 / three 0.187.0                                                      |
 | 빌드   | vite 8.3.8 / @vitejs/plugin-react 6.3.0 / tailwindcss, @tailwindcss/vite 4.3.5                                                                                                                                |
-| 언어   | typescript 6.0.3                                                                                                                                                                                              |
+| 언어   | typescript 6.0.3, @types/three 0.187.0                                                                                                                                                                        |
 | lint   | eslint 9.39.5, @eslint/js 9.39.5, typescript-eslint 8.73.0, eslint-plugin-react-hooks 7.1.1, eslint-plugin-jsx-a11y 6.10.2, eslint-plugin-react-refresh 0.5.8, eslint-config-prettier 10.1.8, globals 17.14.0 |
 | 포맷   | prettier 3.10.1, prettier-plugin-tailwindcss 0.8.1                                                                                                                                                            |
 | 테스트 | msw 3.0.7, vitest 5.1.0, jsdom 31.0.1, @testing-library/react 16.3.3, @testing-library/dom 10.4.2, @testing-library/user-event 14.6.12, @testing-library/jest-dom 7.0.1, @playwright/test 1.65.1              |

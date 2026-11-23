@@ -72,7 +72,7 @@ test('rooms-many: 6행이고 긴 이름 행도 화면 폭 안에 있다', async 
   }
 })
 
-test('rooms-many: 방 이름과 표가 모든 행에서 같은 x 에서 시작하고 확인 불가 글자가 줄바꿈되지 않는다', async ({
+test('rooms-many: 타일이 2열이고 같은 열의 이름과 표가 같은 x, 확인 불가 글자가 줄바꿈되지 않는다', async ({
   page,
 }) => {
   await page.goto(url('rooms-many'))
@@ -80,19 +80,47 @@ test('rooms-many: 방 이름과 표가 모든 행에서 같은 x 에서 시작�
   await expect(rows).toHaveCount(6)
   const xs = await rows.evaluateAll((items) =>
     items.map((li) => {
-      const name = li.querySelector('a > div > span')?.getBoundingClientRect()
+      const name = li.querySelector('a > span > span')?.getBoundingClientRect()
       const table = li.querySelector('dl')?.getBoundingClientRect()
       return { name: name?.left ?? null, table: table?.left ?? null }
     }),
   )
-  expect(new Set(xs.map((x) => x.name)).size).toBe(1)
-  const tables = xs.map((x) => x.table).filter((x) => x !== null)
-  expect(tables).toHaveLength(5)
-  expect(new Set(tables).size).toBe(1)
+  // 휴대폰은 2열: 이름이 시작하는 x 는 두 가지뿐이고, 표가 있는 타일은 그 열의 이름과 같은 x
+  expect(new Set(xs.map((x) => x.name)).size).toBe(2)
+  for (const x of xs) if (x.table !== null) expect(x.table).toBe(x.name)
+  expect(xs.filter((x) => x.table !== null)).toHaveLength(5)
   const word = page
     .getByText('확인 불가', { exact: true })
-    .and(page.locator('span.text-title'))
+    .and(page.locator('span.text-heading'))
     .first()
   const box = await word.boundingBox()
   expect(box!.height).toBeLessThan(40)
+})
+
+test('좌석 무대: 캡슐이 보이고 누르면 그 방으로 간다', async ({ page }) => {
+  await page.goto(url('rooms-many'))
+  const stage = page.getByRole('region', { name: '좌석 무대' })
+  // WebGL 이 되면 캔버스, 안 되면 정지 그림. 어느 쪽이든 무대가 그려진다
+  await expect(stage.locator('canvas, svg rect').first()).toBeVisible()
+  const caption = stage.getByRole('link', {
+    name: '지금 빈자리가 가장 많은 방, 제1실습실 (예시), 빈자리 3석',
+  })
+  await expect(caption).toBeInViewport()
+  await caption.click()
+  await expect(page).toHaveURL(/\/rooms\/IT4-101/)
+})
+
+test('좌석 무대: 동작 줄이기면 three.js 없이 정지 그림', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto(url('mixed'))
+  const stage = page.getByRole('region', { name: '좌석 무대' })
+  await expect(stage.locator('svg rect')).toHaveCount(4)
+  await expect(stage.locator('canvas')).toHaveCount(0)
+})
+
+test('첫 화면에 좌석 무대 캡슐과 첫 타일의 빈자리 숫자가 함께 보인다', async ({ page }) => {
+  await page.goto(url('rooms-many'))
+  await expect(page.getByRole('region', { name: '좌석 무대' }).getByRole('link')).toBeInViewport()
+  const first = page.getByRole('listitem').first()
+  await expect(first.getByText('3', { exact: true })).toBeInViewport()
 })
