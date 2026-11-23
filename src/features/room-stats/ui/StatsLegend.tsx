@@ -52,7 +52,7 @@ export function StatsLegend({
         <li className="flex items-center gap-2">
           <span
             aria-hidden="true"
-            className={`${SWATCH} border-t-2 border-empty bg-empty-tint opacity-40`}
+            className={`${SWATCH} border-t-2 border-dotted border-empty bg-empty-tint/40`}
           />
           잠깐만 본 시간
         </li>

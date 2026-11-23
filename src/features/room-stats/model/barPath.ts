@@ -1,7 +1,10 @@
 import type { BarKind, ChartBar } from './chartModel'
 
 export interface KindPaths {
-  line: string
+  /** 묶음마다의 가로 윗선. 그 시간 동안의 값이라 굵게 그린다 */
+  top: string
+  /** 이어진 묶음 사이의 세로 이음. 잠깐의 오르내림이 가장 굵은 획이 되지 않게 가늘게 그린다 */
+  rise: string
   area: string
 }
 
@@ -24,9 +27,8 @@ function joins(previous: ChartBar | null, bar: ChartBar): previous is ChartBar {
 }
 
 /**
- * viewBox 0 0 100 100 안의 오늘 빈자리 윗선과 면. 묶음마다 따로 그리면 윗선이 끊기고 이웃 사이에
- * 틈이 생기므로, 이어진 묶음은 한 path 로 잇고 빈 시간에서만 끊는다. 잠깐만 본 묶음은 흐리게
- * 그리도록 따로 모은다.
+ * viewBox 0 0 100 100 안의 계단 윗선, 세로 이음, 면. 면은 이어진 묶음을 한 path 로 이어 이웃 사이
+ * 틈을 없애고 빈 시간에서만 끊는다. 잠깐만 본 묶음은 다르게 그리도록 따로 모은다.
  */
 export function barPaths(
   bars: ChartBar[],
@@ -35,23 +37,23 @@ export function barPaths(
 ): Record<BarKind, KindPaths> {
   const { x, y } = scale(rangeStart, rangeEnd)
   const out: Record<BarKind, KindPaths> = {
-    observed: { line: '', area: '' },
-    lowConfidence: { line: '', area: '' },
+    observed: { top: '', rise: '', area: '' },
+    lowConfidence: { top: '', rise: '', area: '' },
   }
   let previous: ChartBar | null = null
   for (const bar of bars) {
     const target = out[bar.kind]
     const top = y(bar.availablePct)
+    const left = x(bar.startMinute)
     const right = x(endOf(bar))
+    target.top += `M${left} ${top}H${right}`
+    if (joins(previous, bar) && previous.availablePct !== bar.availablePct) {
+      target.rise += `M${left} ${y(previous.availablePct)}V${top}`
+    }
     if (joins(previous, bar) && previous.kind === bar.kind) {
-      target.line += `V${top}H${right}`
       target.area += `V${top}H${right}`
     } else {
       if (previous !== null) out[previous.kind].area += 'V100Z'
-      const left = x(bar.startMinute)
-      target.line += joins(previous, bar)
-        ? `M${left} ${y(previous.availablePct)}V${top}H${right}`
-        : `M${left} ${top}H${right}`
       target.area += `M${left} 100V${top}H${right}`
     }
     previous = bar

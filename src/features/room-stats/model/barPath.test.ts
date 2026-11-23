@@ -9,16 +9,18 @@ function bar(startMinute: number, availablePct: number, extra: Partial<ChartBar>
 }
 
 describe('barPaths', () => {
-  it('이어진 묶음은 세로 이음이 있는 한 줄과 바닥까지 닫힌 면 하나다', () => {
+  it('묶음마다 가로 윗선, 이어진 묶음 사이에는 따로 그릴 세로 이음, 면은 바닥까지 닫힌 하나다', () => {
     const paths = barPaths([bar(600, 50), bar(660, 25)], RANGE.start, RANGE.end)
-    expect(paths.observed.line).toBe('M12.5 50H18.75V75H25')
+    expect(paths.observed.top).toBe('M12.5 50H18.75M18.75 75H25')
+    expect(paths.observed.rise).toBe('M18.75 50V75')
     expect(paths.observed.area).toBe('M12.5 100V50H18.75V75H25V100Z')
-    expect(paths.lowConfidence).toEqual({ line: '', area: '' })
+    expect(paths.lowConfidence).toEqual({ top: '', rise: '', area: '' })
   })
 
-  it('비어 있는 시간이 있으면 선과 면을 끊고 새로 시작한다', () => {
+  it('비어 있는 시간이 있으면 세로 이음 없이 면을 끊고 새로 시작한다', () => {
     const paths = barPaths([bar(600, 50), bar(720, 25)], RANGE.start, RANGE.end)
-    expect(paths.observed.line).toBe('M12.5 50H18.75M25 75H31.25')
+    expect(paths.observed.top).toBe('M12.5 50H18.75M25 75H31.25')
+    expect(paths.observed.rise).toBe('')
     expect(paths.observed.area).toBe('M12.5 100V50H18.75V100ZM25 100V75H31.25V100Z')
   })
 
@@ -28,20 +30,23 @@ describe('barPaths', () => {
       RANGE.start,
       RANGE.end,
     )
-    expect(paths.observed.line).toBe('M12.5 50H18.75M25 75V25H31.25')
-    expect(paths.lowConfidence.line).toBe('M18.75 50V75H25')
+    expect(paths.observed.top).toBe('M12.5 50H18.75M25 25H31.25')
+    expect(paths.observed.rise).toBe('M25 75V25')
+    expect(paths.lowConfidence.top).toBe('M18.75 75H25')
+    expect(paths.lowConfidence.rise).toBe('M18.75 50V75')
     expect(paths.observed.area).toBe('M12.5 100V50H18.75V100ZM25 100V25H31.25V100Z')
     expect(paths.lowConfidence.area).toBe('M18.75 100V75H25V100Z')
   })
 
-  it('잠깐만 본 묶음이 먼저 오고 0% 와 100% 가 섞여도 면은 제 종류에서 닫힌다', () => {
+  it('잠깐만 본 묶음이 먼저 오고 0% 와 100% 가 섞여도 면은 제 종류에서 닫히고, 높이가 같으면 이음이 없다', () => {
     const paths = barPaths(
       [bar(600, 0, { kind: 'lowConfidence' }), bar(660, 100), bar(720, 100)],
       RANGE.start,
       RANGE.end,
     )
     expect(paths.lowConfidence.area).toBe('M12.5 100V100H18.75V100Z')
-    expect(paths.observed.line).toBe('M18.75 100V0H25V0H31.25')
+    expect(paths.observed.top).toBe('M18.75 0H25M25 0H31.25')
+    expect(paths.observed.rise).toBe('M18.75 100V0')
     expect(paths.observed.area).toBe('M18.75 100V0H25V0H31.25V100Z')
   })
 
@@ -51,13 +56,14 @@ describe('barPaths', () => {
       RANGE.start,
       RANGE.end,
     )
-    expect(paths.observed.line).toBe('M0 50H0V75H1.04M98.96 25H100')
+    expect(paths.observed.top).toBe('M0 50H0M0 75H1.04M98.96 25H100')
+    expect(paths.observed.rise).toBe('M0 50V75')
   })
 
   it('막대가 없으면 모두 빈 문자열이다', () => {
     expect(barPaths([], RANGE.start, RANGE.end)).toEqual({
-      observed: { line: '', area: '' },
-      lowConfidence: { line: '', area: '' },
+      observed: { top: '', rise: '', area: '' },
+      lowConfidence: { top: '', rise: '', area: '' },
     })
   })
 })
