@@ -116,8 +116,8 @@ export function StepChart({ chart, tone = 'today', showLatest = false }: StepCha
               className="text-surface"
               fill="none"
               stroke="currentColor"
-              strokeWidth={5}
-              strokeOpacity={0.85}
+              strokeWidth={3}
+              strokeOpacity={0.6}
               vectorEffect="non-scaling-stroke"
             />
             <path
