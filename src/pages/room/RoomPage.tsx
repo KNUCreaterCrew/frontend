@@ -1,7 +1,7 @@
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
-import { getRoomSummary } from '@/entities/room'
+import { getRoomSummary, presentHighlights, presentRoom } from '@/entities/room'
 import type { Seat } from '@/entities/room'
 import { useRoomLive } from '@/features/room-live'
 import { RoomStats } from '@/features/room-stats'
@@ -76,7 +76,12 @@ export function RoomPage() {
   const [hudRef, hudBox] = useElementBox<HTMLElement>()
   const [sheetCover, setSheetCover] = useState<number | null>(null)
   const live = useRoomLive(roomId)
-  const { data, status, fetchStatus, error, failureReason, dataUpdatedAt } = live.query
+  const { data: rawData, status, fetchStatus, error, failureReason, dataUpdatedAt } = live.query
+  const data = useMemo(() => (rawData ? presentRoom(rawData) : undefined), [rawData])
+  const highlights = useMemo(
+    () => presentHighlights(live.highlights, data?.edgeOnline ?? false),
+    [live.highlights, data?.edgeOnline],
+  )
   const elapsedMs = useElapsed(status === 'pending' && fetchStatus !== 'paused', attempt)
   const state = getScreenState({
     status,
@@ -308,7 +313,7 @@ export function RoomPage() {
           ) : (
             <SeatMap
               seats={data.seats}
-              highlights={live.highlights}
+              highlights={highlights}
               onOutletsHiddenChange={setOutletsHidden}
               onSelect={openSeat}
               selectedSeatId={seat?.seatId ?? null}

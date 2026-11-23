@@ -2,7 +2,7 @@ import { Component, Suspense, lazy, useCallback, useMemo, useState, type ReactNo
 import { useQuery } from '@tanstack/react-query'
 import { useReducedMotion } from 'motion/react'
 import { Link } from 'react-router'
-import { roomPreviewQueryOptions } from '@/entities/room'
+import { presentRoom, roomPreviewQueryOptions } from '@/entities/room'
 import { isNotFoundError } from '@/shared/api'
 import { ChevronRightIcon, SeatSwatch } from '@/shared/ui'
 import type { StagePick } from '../lib/pickStageRoom'
@@ -92,7 +92,7 @@ export function RoomStage({ pick }: { pick: StagePick }) {
   const [failed, setFailed] = useState(false)
   const onFail = useCallback(() => setFailed(true), [])
   const { data, error } = useQuery(roomPreviewQueryOptions(room.roomId))
-  const layout = useMemo(() => (data ? toStageLayout(data) : null), [data])
+  const layout = useMemo(() => (data ? toStageLayout(presentRoom(data)) : null), [data])
 
   // 목록에 있지만 조회에서 없는 방이면 무대를 비우고 안내도 하지 않는다
   if (isNotFoundError(error)) return null

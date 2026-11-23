@@ -32,6 +32,7 @@ export {
   weekdayLabel,
   weekdayShortLabel,
 } from './model/labels'
+export { presentHighlights, presentRoom, presentRoomListItem } from './model/display'
 export { toRoom, toRoomListItem } from './model/mapping'
 export { toDailyStats, toWeeklyStats } from './model/statsMapping'
 export { getRoomListSummary, getRoomSummary } from './model/summary'

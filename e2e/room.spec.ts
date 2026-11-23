@@ -54,7 +54,7 @@ test('mixed: 좌석 버튼은 44px 이상이고 핵심 정보가 첫 화면 안�
   const rowBox = await row.boundingBox()
   expect(rowBox!.y + rowBox!.height).toBeLessThanOrEqual(viewportHeight)
   const bigNumber = page.locator('main p[aria-hidden="true"]').filter({ hasText: /^\d+$/ })
-  await expect(bigNumber).toHaveText('1')
+  await expect(bigNumber).toHaveText('2')
   const big = await bigNumber.boundingBox()
   expect(big!.y + big!.height).toBeLessThanOrEqual(viewportHeight)
 })

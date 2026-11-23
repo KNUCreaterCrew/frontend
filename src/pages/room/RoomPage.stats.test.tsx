@@ -54,14 +54,15 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     expect(container.querySelectorAll('[aria-live="polite"]')).toHaveLength(2)
   })
 
-  test('mixed: 확인 불가 때문에 판단이 갈리면 평소 대비 문장이 없다', async () => {
-    renderApp(PATH, { scenario: 'mixed' })
+  test('확인 불가 때문에 판단이 갈리면 평소 대비 문장이 없다', async () => {
+    server.use(roomHandler({ [ROOM_ID]: { ...mixedRoom, edge_online: false } }))
+    renderApp(PATH)
     const region = await chartReady()
     expect(within(region).queryByText(/지금은 평소/)).not.toBeInTheDocument()
   })
 
-  test('all-unknown: 평소 대비 문장이 없다', async () => {
-    renderApp(PATH, { scenario: 'all-unknown' })
+  test('offline: 평소 대비 문장이 없다', async () => {
+    renderApp(PATH, { scenario: 'offline' })
     const region = await chartReady()
     expect(within(region).queryByText(/지금은 평소/)).not.toBeInTheDocument()
   })

@@ -190,7 +190,7 @@ export const seatDetailsRoom: RoomDto = buildRoom(
     seat({ row: 'B', n: 5, x: 320, y: 64, status: 'OCCUPIED', window: true }),
     seat({ row: 'B', n: 6, x: 400, y: 64, status: 'AWAY', outlet: true }),
   ],
-  { version: 12 },
+  { edge_online: false, version: 12 },
 )
 
 export const noSeatsRoom: RoomDto = buildRoom([], { version: 12 })

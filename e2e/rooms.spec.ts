@@ -103,11 +103,11 @@ test('좌석 무대: 캡슐이 보이고 누르면 그 방으로 간다', async 
   // WebGL 이 되면 캔버스, 안 되면 정지 그림. 어느 쪽이든 무대가 그려진다
   await expect(stage.locator('canvas, svg rect').first()).toBeVisible()
   const caption = stage.getByRole('link', {
-    name: '지금 빈자리가 가장 많은 방, 제1실습실 (예시), 빈자리 3석',
+    name: '지금 빈자리가 가장 많은 방, 제3실습실, 빈자리 4석',
   })
   await expect(caption).toBeInViewport()
   await caption.click()
-  await expect(page).toHaveURL(/\/rooms\/IT4-101/)
+  await expect(page).toHaveURL(/\/rooms\/IT4-103/)
 })
 
 test('좌석 무대: 동작 줄이기면 three.js 없이 정지 그림', async ({ page }) => {
@@ -130,8 +130,8 @@ test('좌석 무대: 블록 설명과 이 방에 있는 상태만의 범례가 �
   const stage = page.getByRole('region', { name: '좌석 무대' })
   const key = stage.getByText('블록 하나가 좌석 하나예요')
   await expect(key).toBeInViewport()
-  // 제1실습실(예시)은 빈자리, 짐 있음, 사용 중만 있다
-  await expect(stage.locator('span[data-tone]')).toHaveCount(3)
+  // 제3실습실은 연결된 확인 불가 좌석이 모두 빈자리로 보인다
+  await expect(stage.locator('span[data-tone]')).toHaveCount(1)
   const keyBox = (await key.boundingBox())!
   const capsuleBox = (await stage.getByRole('link').boundingBox())!
   expect(keyBox.y + keyBox.height).toBeLessThanOrEqual(capsuleBox.y)

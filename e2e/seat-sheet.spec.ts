@@ -160,10 +160,10 @@ test('mixed: 키보드로 A1 에서 Enter 로 열고 Escape 로 닫으면 A1 에
   await expect(seat).toBeFocused()
 })
 
-test('mixed: 제목 옆 견본은 좌석 칸과 같은 상태(확인 불가는 점선, 빈자리는 에메랄드)다', async ({
+test('offline/mixed: 제목 옆 견본은 좌석 칸과 같은 상태(확인 불가는 점선, 빈자리는 에메랄드)다', async ({
   page,
 }) => {
-  await openSeat(page, 'mixed', 'B2')
+  await openSeat(page, 'offline', 'B2')
   const swatch = dialogOf(page).getByRole('heading').locator('[data-tone]')
   await expect(swatch).toHaveAttribute('data-tone', 'unknown')
   const box = (await swatch.boundingBox())!
@@ -172,8 +172,7 @@ test('mixed: 제목 옆 견본은 좌석 칸과 같은 상태(확인 불가는 �
   expect(await swatch.evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe('dashed')
   await page.keyboard.press('Escape')
   await expect(dialogOf(page)).toHaveCount(0)
-  await seatButton(page, 'A1').click()
-  await expect(dialogOf(page)).toBeVisible()
+  await openSeat(page, 'mixed', 'A1')
   await expect(swatch).toHaveAttribute('data-tone', 'empty')
 })
 

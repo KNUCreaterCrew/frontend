@@ -53,7 +53,8 @@ describe('좌석 상세 바텀시트 연결', () => {
     expect(within(dialog).getByText('있음')).toBeInTheDocument()
   })
 
-  test('확인 불가 좌석은 이유가 보인다', async () => {
+  test('확인 불가 좌석은 장치 끊김일 때 이유가 보인다', async () => {
+    server.use(roomHandler({ 'IT4-101': { ...mixedRoom, edge_online: false } }))
     const { user } = renderApp(PATH)
     await user.click(await seatButton(/^B2 확인 불가/))
     const dialog = await screen.findByRole('dialog', { name: 'B2 확인 불가' })
@@ -131,7 +132,7 @@ describe('좌석 상세 바텀시트 연결', () => {
   test('주소로 바로 들어온 시트는 seat 만 지우고 닫는다', async () => {
     const loc = tracker()
     const { user } = renderApp(`${PATH}?scenario=x&seat=B-02`, { onLocation: loc.onLocation })
-    await screen.findByRole('dialog', { name: 'B2 확인 불가' })
+    await screen.findByRole('dialog', { name: 'B2 빈자리' })
     await user.keyboard('{Escape}')
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     expect(loc.location.search).toBe('?scenario=x')
@@ -140,7 +141,7 @@ describe('좌석 상세 바텀시트 연결', () => {
 
   test('?seat=B-02 로 들어오면 B2 시트가 열려 있다', async () => {
     renderApp(`${PATH}?seat=B-02`)
-    expect(await screen.findByRole('dialog', { name: 'B2 확인 불가' })).toBeInTheDocument()
+    expect(await screen.findByRole('dialog', { name: 'B2 빈자리' })).toBeInTheDocument()
   })
 
   test('없는 seat 는 알림 없이 param 만 지운다', async () => {

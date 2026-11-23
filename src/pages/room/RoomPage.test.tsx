@@ -27,9 +27,9 @@ describe('방 화면', () => {
   test('mixed: 이름, 요약 표, 좌석, 범례', async () => {
     renderApp(PATH, { scenario: 'mixed' })
     expect(await screen.findByRole('heading', { level: 1, name: ROOM_NAME })).toBeInTheDocument()
-    expect(rowValue('빈자리')).toHaveTextContent('1석')
+    expect(rowValue('빈자리')).toHaveTextContent('2석')
     expect(rowValue('전체')).toHaveTextContent('4석')
-    expect(rowValue('확인 불가')).toHaveTextContent('1석')
+    expect(rowValue('확인 불가')).toHaveTextContent('0석')
     expect(rowValue('혼잡도')).toHaveTextContent('보통')
     expect(
       screen
@@ -37,28 +37,29 @@ describe('방 화면', () => {
         .map((e) => e.textContent),
     ).toEqual(['빈자리', '확인 불가', '전체', '혼잡도'])
     expect(screen.getByText('빈자리', { selector: 'dt' })).toHaveClass('whitespace-nowrap')
-    expect(screen.getByText('1', { selector: 'p[aria-hidden="true"]' })).toHaveClass('shrink-0')
+    expect(screen.getByText('2', { selector: 'p[aria-hidden="true"]' })).toHaveClass('shrink-0')
     expect(screen.queryByText('지금은 모든 자리를 확인할 수 없어요.')).not.toBeInTheDocument()
     expect(
       seatButtons().map((b) => (b.getAttribute('aria-label') ?? b.textContent ?? '').slice(0, 2)),
     ).toEqual(['A1', 'A2', 'B1', 'B2'])
+    expect(screen.getByRole('button', { name: /^B2 빈자리/ })).toBeInTheDocument()
     expect(screen.getByText('짐 있음', { selector: 'li' })).toBeInTheDocument()
     expect(screen.queryByText('장치 연결이 끊겼어요')).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: '방 목록' })).toHaveAttribute('href', '/')
   })
 
-  test('all-unknown: 확인 불가와 마지막 확인, 혼잡 없음', async () => {
+  test('all-unknown: 장치가 연결돼 있으면 확인 불가 좌석을 빈자리로 표시한다', async () => {
     renderApp(PATH, { scenario: 'all-unknown' })
-    expect(await screen.findByText('확인 불가', { selector: '[aria-hidden="true"]' })).toBeVisible()
-    expect(screen.queryByText(/혼잡/)).not.toBeInTheDocument()
-    expect(screen.queryAllByText(/만석/)).toHaveLength(0)
-    expect(rowValue('확인 불가')).toHaveTextContent('4석')
-    expect(screen.getByText('마지막 확인', { selector: 'dt' })).toBeInTheDocument()
-    expect(screen.getByText('지금은 모든 자리를 확인할 수 없어요.')).toBeVisible()
+    expect(await screen.findByRole('heading', { level: 1, name: ROOM_NAME })).toBeInTheDocument()
+    expect(rowValue('빈자리')).toHaveTextContent('4석')
+    expect(rowValue('확인 불가')).toHaveTextContent('0석')
+    expect(rowValue('혼잡도')).toHaveTextContent('여유')
+    expect(screen.getByText('4', { selector: 'p[aria-hidden="true"]' })).toBeVisible()
+    expect(screen.queryByText('지금은 모든 자리를 확인할 수 없어요.')).not.toBeInTheDocument()
   })
 
   test('마지막 확인 시각은 상대 시각과 (시:분:초)만 끊을 수 있다', async () => {
-    renderApp(PATH, { scenario: 'all-unknown' })
+    renderApp(PATH, { scenario: 'offline' })
     await screen.findByRole('heading', { level: 1, name: ROOM_NAME })
     const dd = rowValue('마지막 확인')
     expect(dd.textContent).toMatch(/^.+ \(\d\d:\d\d:\d\d\)$/)
