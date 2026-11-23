@@ -99,6 +99,17 @@ describe('방 화면 오늘 빈자리 흐름', () => {
     )
   })
 
+  test('최근 값 점은 오늘 그래프에만 있고 요일별 평소 그래프에는 없다', async () => {
+    renderApp(PATH)
+    const region = await chartReady()
+    const [today, weekday] = within(region)
+      .getAllByText('0석')
+      .map((label) => label.parentElement)
+    expect(today?.querySelectorAll('[data-latest]')).toHaveLength(1)
+    expect(weekday).toBeTruthy()
+    expect(weekday?.querySelectorAll('[data-latest]')).toHaveLength(0)
+  })
+
   test('stats-seed: 오늘 기록이 없으면 평소 흐름만, 예시 데이터임을 알린다', async () => {
     renderApp(PATH, { scenario: 'stats-seed' })
     const region = await chartReady()

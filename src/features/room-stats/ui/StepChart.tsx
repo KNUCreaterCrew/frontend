@@ -130,6 +130,7 @@ export function StepChart({ chart, showLatest = false }: StepChartProps) {
 
       {latest !== null && (
         <span
+          data-latest=""
           className="absolute size-3 -translate-x-1/2 translate-y-1/2 rounded-full border-2 border-surface bg-empty"
           style={{ left: x(latest.minute), bottom: `${latest.pct}%` }}
         />

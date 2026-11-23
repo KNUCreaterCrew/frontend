@@ -34,6 +34,26 @@ describe('barPaths', () => {
     expect(paths.lowConfidence.area).toBe('M18.75 100V75H25V100Z')
   })
 
+  it('잠깐만 본 묶음이 먼저 오고 0% 와 100% 가 섞여도 면은 제 종류에서 닫힌다', () => {
+    const paths = barPaths(
+      [bar(600, 0, { kind: 'lowConfidence' }), bar(660, 100), bar(720, 100)],
+      RANGE.start,
+      RANGE.end,
+    )
+    expect(paths.lowConfidence.area).toBe('M12.5 100V100H18.75V100Z')
+    expect(paths.observed.line).toBe('M18.75 100V0H25V0H31.25')
+    expect(paths.observed.area).toBe('M18.75 100V0H25V0H31.25V100Z')
+  })
+
+  it('폭이 다른 묶음도 끝과 시작이 맞으면 잇고, 범위 밖 시각은 판 끝으로 자른다', () => {
+    const paths = barPaths(
+      [bar(420, 50), { ...bar(480, 25), widthMinutes: 10 }, bar(1430, 75)],
+      RANGE.start,
+      RANGE.end,
+    )
+    expect(paths.observed.line).toBe('M0 50H0V75H1.04M98.96 25H100')
+  })
+
   it('막대가 없으면 모두 빈 문자열이다', () => {
     expect(barPaths([], RANGE.start, RANGE.end)).toEqual({
       observed: { line: '', area: '' },
@@ -62,6 +82,15 @@ describe('unknownBands', () => {
     )
     expect(bands).toHaveLength(2)
     expect(bands[1]).toBe('polygon(25% 100%, 31.25% 100%, 31.25% 0%, 25% 0%)')
+  })
+
+  it('확인 불가 묶음 사이에 빈 시간이 있으면 잇지 않는다', () => {
+    const bands = unknownBands(
+      [bar(600, 50, { unknownPct: 25 }), bar(720, 50, { unknownPct: 25 })],
+      RANGE.start,
+      RANGE.end,
+    )
+    expect(bands).toHaveLength(2)
   })
 })
 
