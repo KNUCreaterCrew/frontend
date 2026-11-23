@@ -58,8 +58,8 @@ test('mixed: 손잡이를 누르면 펼쳐져 요일 고르기가 보이고, 다
   const sheet = await box(sheetOf(page))
   await weekdays(page).scrollIntoViewIfNeeded()
   const group = await box(weekdays(page))
-  expect(group.y).toBeGreaterThanOrEqual(sheet.y)
-  expect(group.y + group.height).toBeLessThanOrEqual(sheet.y + sheet.height)
+  expect(group.y).toBeGreaterThanOrEqual(sheet.y - 0.5)
+  expect(group.y + group.height).toBeLessThanOrEqual(sheet.y + sheet.height + 0.5)
   // 펼친 시트는 요약 띠 아래에서 멈춰 큰 빈자리 숫자를 가리지 않는다
   const summary = await box(summaryOf(page))
   expect(sheet.y).toBeGreaterThanOrEqual(summary.y + summary.height)

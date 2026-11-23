@@ -112,7 +112,7 @@ test('mixed: 손잡이를 30px 천천히 끌었다 놓으면 열린 채 제자�
   expect(held.y - handleBefore.y).toBeGreaterThan(15)
   await page.mouse.up()
   await expect(dialog).toBeVisible()
-  await settled(dialog)
+  await settled(handleOf(page))
   const after = (await dialog.boundingBox())!
   expect(Math.abs(after.y - before.y)).toBeLessThan(1)
   const handleAfter = (await handleOf(page).boundingBox())!
