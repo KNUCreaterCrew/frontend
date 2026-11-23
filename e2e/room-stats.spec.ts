@@ -57,17 +57,16 @@ test('mixed 390: 토요일을 누르면 문장이 바뀌고 눌린 상태가 된
   await expect(panel(page).getByText('토요일은 시간대별 차이가 크지 않아요.')).toBeVisible()
 })
 
-test('mixed 1280: 통계 판은 왼쪽 열에서 네이비 패널과 같은 x 이고 좌석도보다 왼쪽이다', async ({
+test('mixed 1280: 통계 판은 왼쪽 사이드 패널 안에서 방 이름과 같은 x 이고 좌석도보다 왼쪽이다', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto(url('mixed'))
   const stats = panel(page)
   await expect(stats).toBeVisible()
-  const navy = page.getByRole('heading', { level: 1 }).locator('xpath=ancestor::section[1]')
   const statsBox = await stats.boundingBox()
-  const navyBox = await navy.boundingBox()
-  expect(statsBox!.x).toBeCloseTo(navyBox!.x, 0)
+  const titleBox = await page.getByRole('heading', { level: 1 }).boundingBox()
+  expect(statsBox!.x).toBeCloseTo(titleBox!.x, 0)
   const seat = await page.getByRole('button', { name: /^A1 / }).boundingBox()
   expect(statsBox!.x + statsBox!.width).toBeLessThanOrEqual(seat!.x)
   expect(await pageOverflow(page)).toBeLessThanOrEqual(0)

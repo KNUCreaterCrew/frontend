@@ -42,17 +42,29 @@ body {
   caret-color: var(--color-accent);
 }
 
+/* 바닥판: 옅은 빛 번짐 셋과 점 격자. 화면에 붙어 있고 내용만 그 위로 지나간다.
+   유리는 이 번짐과 그 위를 지나는 좌석을 비춰서 유리로 읽힌다 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    var(--pattern-floor) 0 0 / 18px 18px,
+    radial-gradient(60vmax 60vmax at 0% 0%, var(--color-wash-blue), transparent 70%),
+    radial-gradient(50vmax 50vmax at 100% 55%, var(--color-wash-lilac), transparent 70%),
+    radial-gradient(45vmax 45vmax at 35% 100%, var(--color-wash-sky), transparent 70%),
+    var(--color-paper);
+}
+
 ::selection {
-  @apply bg-ink text-on-ink;
+  background-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  color: var(--color-ink);
 }
 
-/* 상단 줄은 화면 폭 전체에 붙고, 내용은 page-x 가 가운데 최대 폭으로 모은다.
-   아래 여백은 safe-area 를 함께 본다. */
-#root {
-  padding-bottom: max(var(--spacing-10), env(safe-area-inset-bottom));
-}
-
-/* 화면 가장자리 여백과 최대 폭. 노치와 둥근 모서리에 글자가 가리지 않게 safe-area 를 함께 본다. */
+/* 글 화면(방 목록, 오류, 404)의 가장자리 여백과 최대 폭.
+   노치와 둥근 모서리에 글자가 가리지 않게 safe-area 를 함께 본다. */
 @utility page-x {
   width: 100%;
   max-width: var(--container-page);
@@ -61,17 +73,13 @@ body {
   padding-right: max(var(--spacing-4), env(safe-area-inset-right));
 }
 
-#root main {
+/* 글 화면의 main. 아래 여백은 40px 와 safe-area 중 큰 값 */
+@utility page {
   @apply page-x;
+  padding-bottom: max(var(--spacing-10), env(safe-area-inset-bottom));
 }
 
-/* 데스크톱 방 화면: 왼쪽 열(패널, 범례)과 오른쪽 좌석도. 둘째 줄이 남는 높이를 받아 패널과 범례가 붙어 있다 */
-@utility grid-room {
-  grid-template-columns: var(--spacing-rail) minmax(0, 1fr);
-  grid-template-rows: auto 1fr;
-}
-
-/* 고정 상단 줄의 위치. 미리보기 띠가 있으면 그 아래에 붙는다(preview.css). */
+/* 고정된 조작층의 위치. 미리보기 띠가 있으면 그 아래에 붙는다(preview.css). */
 @utility top-sticky {
   top: var(--sticky-top, 0px);
 }
@@ -80,30 +88,177 @@ body {
   padding-top: var(--header-safe-top, env(safe-area-inset-top));
 }
 
-/* 떠 있는 상단 줄의 유리. backdrop-filter 를 못 쓰면 불투명한 바탕으로 읽힌다.
-   88% 는 네이비 패널이 바로 밑을 지날 때도 ink-soft 글자가 5.3:1 을 넘는 값이다 */
+/* 떠 있는 유리 면 위쪽 자리: 미리보기 띠와 safe-area 를 지나 12px 아래 */
+@utility top-float {
+  top: calc(
+    var(--sticky-top, 0px) + var(--header-safe-top, env(safe-area-inset-top)) + var(--spacing-3)
+  );
+}
+
+/* 휴대폰 요약 띠의 자리: 위 캡슐 줄(44px) 바로 아래 12px */
+@utility top-hud {
+  top: calc(
+    var(--sticky-top, 0px) + var(--header-safe-top, env(safe-area-inset-top)) + var(--spacing-tap) +
+      var(--spacing-3) * 2
+  );
+}
+
+/* 옅은 유리. 흰색 그라데이션 면, 흐림과 채도, 위 안쪽 반사와 넓은 그림자(--shadow-glass),
+   135도 반사 테두리(::before)와 위쪽 광택(::after). 모서리는 쓰는 곳에서 rounded-* 로 준다.
+   ::before 와 ::after 를 쓰므로 위치가 정해진 요소(relative, fixed 등)에만 건다.
+   backdrop-filter 를 못 쓰면 흰색 94% 면으로 읽힌다 */
 @utility glass {
-  background-color: var(--color-paper);
+  isolation: isolate;
+  background: var(--glass-fallback);
+  box-shadow: var(--shadow-glass);
   @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-    background-color: color-mix(in srgb, var(--color-paper) 88%, transparent);
-    -webkit-backdrop-filter: saturate(1.4) blur(var(--blur-glass));
-    backdrop-filter: saturate(1.4) blur(var(--blur-glass));
+    background: var(--glass-fill);
+    -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.9) brightness(1.04);
+    backdrop-filter: blur(var(--blur-glass)) saturate(1.9) brightness(1.04);
+  }
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    padding: 1.25px;
+    pointer-events: none;
+    background: var(--glass-rim);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: min(42%, 6rem);
+    z-index: -1;
+    border-radius: inherit;
+    border-bottom-left-radius: 50% 16%;
+    border-bottom-right-radius: 50% 16%;
+    pointer-events: none;
+    background: var(--glass-sheen);
   }
 }
 
-/* 확인 불가 좌석의 빗금. 무늬 정의는 tokens.css 의 --pattern-unknown */
+/* 스크롤되는 영역의 아래 끝을 흐리게 해 더 있다는 것을 보인다 */
+@utility fade-bottom {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent);
+}
+
+/* 유리 위에 놓인 흰 캡슐(사이드 패널의 방 목록, 선택한 요일) */
+@utility capsule {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.98), rgb(255 255 255 / 0.8));
+  box-shadow: var(--shadow-control);
+}
+
+/* 오목한 홈(요일 고르기 바탕) */
+@utility well {
+  background-color: rgb(14 32 54 / 0.05);
+  box-shadow: var(--shadow-well);
+}
+
+/* 방 화면의 바닥판 자리. 휴대폰은 위 요약 띠와 아래 시트 사이(높이는 RoomPage 가 재서
+   --floor-top, --floor-bottom 으로 준다), PC 는 왼쪽 사이드 패널 오른쪽 전체.
+   좌석이 많으면 문서가 스크롤되고 좌석이 떠 있는 유리 아래로 지나간다 */
+@utility room-floor {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  padding-top: var(--floor-top, 12rem);
+  padding-bottom: var(--floor-bottom, 15rem);
+  padding-left: max(var(--spacing-1), env(safe-area-inset-left));
+  padding-right: max(var(--spacing-1), env(safe-area-inset-right));
+  @media (width >= 64rem) {
+    padding: calc(var(--sticky-top, 0px) + var(--spacing-16)) var(--spacing-12) var(--spacing-12)
+      calc(var(--spacing-side) + var(--spacing-4) + var(--spacing-12));
+  }
+}
+
+/* 요약의 배치. 휴대폰 띠는 왼쪽 큰 숫자, 오른쪽 방 이름과 한 줄 요약.
+   PC 패널은 방 이름이 패널 폭 전체를 쓰고 그 아래 큰 숫자와 표 */
+@utility room-hud {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: 'head head' 'alert alert' 'big name' 'big facts' 'note note';
+  align-items: center;
+  column-gap: var(--spacing-4);
+  @media (width >= 64rem) {
+    grid-template-areas: 'head head' 'alert alert' 'name name' 'big facts' 'note note';
+    column-gap: var(--spacing-5);
+  }
+}
+@utility area-head {
+  grid-area: head;
+}
+@utility area-alert {
+  grid-area: alert;
+}
+@utility area-big {
+  grid-area: big;
+}
+@utility area-name {
+  grid-area: name;
+}
+@utility area-facts {
+  grid-area: facts;
+}
+@utility area-note {
+  grid-area: note;
+}
+
+/* 좌석 4상태. 밝기 순서가 곧 뜻이고 흑백에서도 갈린다 */
+@utility seat-empty {
+  color: var(--color-empty-ink);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 60%, #f3f8fb 100%);
+  box-shadow: var(--shadow-seat-empty);
+}
+@utility seat-away {
+  color: var(--color-ink);
+  background: linear-gradient(180deg, var(--color-away-top), var(--color-away));
+  box-shadow: var(--shadow-seat-away);
+}
+@utility seat-occupied {
+  color: var(--color-on-occupied);
+  background: linear-gradient(180deg, var(--color-occupied-top), var(--color-occupied));
+  box-shadow: var(--shadow-seat-occupied);
+}
+/* 확인 불가는 면을 칠하지 않는다. "없음"이 아니라 "모름"이다 */
+@utility seat-unknown {
+  color: var(--color-ink);
+  background-color: rgb(255 255 255 / 0.28);
+  border: 1.5px dashed var(--color-line-strong);
+}
+
+/* 범례 견본. 좌석 칸 4상태를 작게 되풀이한다 */
+@utility swatch-empty {
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-swatch-empty);
+}
+@utility swatch-away {
+  background-color: var(--color-away);
+}
+@utility swatch-occupied {
+  background-color: var(--color-occupied);
+}
+@utility swatch-unknown {
+  border: 1.5px dashed var(--color-line-strong);
+}
+
+/* 그래프의 "확인하지 못한 시간" 빗금. 무늬 정의는 tokens.css 의 --pattern-unknown */
 @utility pattern-unknown {
   background-image: var(--pattern-unknown);
 }
 
-/* 좌석도 바닥판의 점 격자(평면도 눈금) */
-@utility pattern-floor {
-  background-image: var(--pattern-floor);
-  background-size: 1rem 1rem;
-  background-position: center;
-}
-
-/* 바텀시트 높이 한계와 아래 여백(safe-area). 값은 tokens.css */
+/* 시트 높이 한계와 아래 여백(safe-area). 값은 tokens.css */
 @utility max-h-sheet {
   max-height: var(--sheet-max-height);
 }

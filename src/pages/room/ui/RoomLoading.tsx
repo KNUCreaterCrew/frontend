@@ -1,34 +1,51 @@
+import type { ReactNode } from 'react'
 import { useDelayedVisibility } from '@/shared/lib'
 import { LoadingStatus } from '@/shared/ui'
+
+const BAR = 'rounded-chip bg-ink/10'
 
 export function RoomLoading({
   elapsedMs,
   paused = false,
+  panelHead = null,
 }: {
   elapsedMs: number
   paused?: boolean
+  /** PC 사이드 패널 머리(서비스 이름, 방 목록). 준비된 화면과 같은 자리에 둔다 */
+  panelHead?: ReactNode
 }) {
   const showSkeleton = useDelayedVisibility(true)
 
   return (
-    <main className="pt-4 lg:pt-8">
-      <LoadingStatus elapsedMs={elapsedMs} paused={paused} />
-      {showSkeleton && (
-        <div aria-busy="true" className="mt-4 lg:grid lg:grid-room lg:items-start lg:gap-x-8">
-          <div className="rounded-panel bg-ink p-5">
-            <div className="motion-safe:animate-pulse">
-              <div className="h-6 w-1/2 rounded-chip bg-on-ink/15" />
-              <div className="mt-5 flex items-end gap-5 border-t border-on-ink/15 pt-5">
-                <div className="h-16 w-12 shrink-0 rounded-chip bg-on-ink/15" />
-                <div className="flex flex-1 flex-col gap-3">
-                  <div className="h-4 rounded-chip bg-on-ink/15" />
-                  <div className="h-3 rounded-chip bg-on-ink/10" />
-                  <div className="h-3 rounded-chip bg-on-ink/10" />
-                </div>
-              </div>
+    <main>
+      {/* 준비된 화면과 같은 자리: 휴대폰은 위 요약 띠, PC 는 왼쪽 사이드 패널 */}
+      <section className="glass fixed inset-x-3 top-hud z-20 mx-auto max-w-sheet rounded-glass px-5 py-4 lg:top-float lg:right-auto lg:bottom-4 lg:left-4 lg:w-side lg:max-w-none lg:p-5">
+        {panelHead !== null && <div className="mb-5">{panelHead}</div>}
+        <LoadingStatus elapsedMs={elapsedMs} paused={paused} />
+        {showSkeleton && (
+          <div
+            aria-hidden="true"
+            data-skeleton="summary"
+            className="flex items-center gap-4 motion-safe:animate-pulse lg:mt-4"
+          >
+            <div className={`h-16 w-12 shrink-0 ${BAR}`} />
+            <div className="flex flex-1 flex-col gap-3">
+              <div className={`h-5 w-2/3 ${BAR}`} />
+              <div className={`h-3 ${BAR}`} />
             </div>
           </div>
-          <div className="mt-4 aspect-4/3 rounded-panel bg-surface pattern-floor shadow-plate lg:mt-0" />
+        )}
+      </section>
+      {showSkeleton && (
+        <div aria-busy="true" className="room-floor">
+          <div
+            data-skeleton="floor"
+            className="grid w-full max-w-sheet grid-cols-3 gap-2 p-3 motion-safe:animate-pulse"
+          >
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="aspect-square rounded-seat bg-ink/10" />
+            ))}
+          </div>
         </div>
       )}
     </main>

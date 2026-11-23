@@ -243,9 +243,9 @@ describe('로딩', () => {
     await advance(250)
     const busy = document.querySelector('[aria-busy="true"]')
     expect(busy).not.toBeNull()
-    // 실제 화면 모양: 네이비 요약 패널과 점 격자 바닥판
-    expect(busy!.querySelector('.rounded-panel.bg-ink')).not.toBeNull()
-    expect(busy!.querySelector('.rounded-panel.pattern-floor')).not.toBeNull()
+    // 실제 화면 모양: 요약 유리 자리와 바닥판의 좌석 자리
+    expect(document.querySelector('[data-skeleton="summary"]')).not.toBeNull()
+    expect(busy!.querySelector('[data-skeleton="floor"]')).not.toBeNull()
     await advance(5000)
     expect(
       within(screen.getByRole('status')).getByText(/서버를 깨우는 중이에요/),

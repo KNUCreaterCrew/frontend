@@ -25,12 +25,24 @@ function formatSeats(value: number): string {
   return String(Number(value.toFixed(1)))
 }
 
+/** 접힌 시트가 보여 줄 끝. 비교 문장 바로 아래에 두고, 그 아래(그래프, 요일별 평소)는 펼쳐야 보인다 */
+export interface StatsFold {
+  mark: (el: HTMLElement | null) => void
+  hint: ReactNode
+}
+
+function FoldMark({ fold }: { fold: StatsFold }) {
+  const { mark, hint } = fold
+  return <div ref={mark}>{hint}</div>
+}
+
 interface RoomStatsProps {
   roomId: string
   summary: RoomSummary
+  fold?: StatsFold | null
 }
 
-export function RoomStats({ roomId, summary }: RoomStatsProps) {
+export function RoomStats({ roomId, summary, fold = null }: RoomStatsProps) {
   const titleId = useId()
   const { now, clock, daily, weekly } = useRoomStats(roomId, true)
   const failed =
@@ -92,6 +104,7 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
         dataMinute={dataMinute}
         summary={summary}
         staleNotice={staleNotice}
+        fold={fold}
       />
     )
   } else if (skeletonVisible) {
@@ -99,11 +112,7 @@ export function RoomStats({ roomId, summary }: RoomStatsProps) {
   }
 
   return (
-    <section
-      aria-labelledby={titleId}
-      aria-busy={loading}
-      className="rounded-panel bg-surface p-4 shadow-plate"
-    >
+    <section aria-labelledby={titleId} aria-busy={loading}>
       <div className="flex flex-wrap items-center gap-2">
         <h2
           ref={headingRef}
@@ -132,6 +141,7 @@ interface StatsBodyProps {
   dataMinute: number
   summary: RoomSummary
   staleNotice: string | null
+  fold: StatsFold | null
 }
 
 function StatsBody({
@@ -142,6 +152,7 @@ function StatsBody({
   dataMinute,
   summary,
   staleNotice,
+  fold,
 }: StatsBodyProps) {
   const weekday = weekdayLabel(clock.weekday)
   const usualCell = weekly.cells.find(
@@ -188,6 +199,7 @@ function StatsBody({
         </p>
       )}
       {usualSource !== null && <p className="mt-1 text-label text-ink-soft">{usualSource}</p>}
+      {fold !== null && <FoldMark fold={fold} />}
       {!hasToday && (
         <p className="mt-2 text-body text-ink">
           {`오늘은 아직 기록이 없어요. 평소 ${weekday} 흐름만 보여요.`}

@@ -4,12 +4,13 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'plain'
 }
 
+// 조작 요소는 캡슐이다. 주요 버튼은 ink 면, 보조 버튼은 유리 위의 흰 캡슐
 const BASE =
-  'rounded-control font-semibold transition active:scale-98 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
+  'rounded-full font-semibold transition active:scale-98 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
 
 const VARIANTS = {
   primary: 'h-12 w-full bg-ink text-on-ink hover:bg-ink/90',
-  plain: 'min-h-tap bg-surface px-4 text-ink shadow-plate hover:bg-paper',
+  plain: 'min-h-tap capsule px-5 text-ink',
 } as const
 
 export function Button({ variant = 'primary', type = 'button', className, ...rest }: ButtonProps) {

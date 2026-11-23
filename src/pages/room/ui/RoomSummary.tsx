@@ -4,16 +4,30 @@ import { congestionLabel } from '@/entities/room'
 import type { RoomSummary as Summary } from '@/entities/room'
 import { lastObservedParts, useNow } from '@/shared/lib'
 
-// 네이비 패널 안에 놓인다. 글자는 on-ink 계열만 쓴다.
-function Row({ term, value, first = false }: { term: string; value: ReactNode; first?: boolean }) {
+// 휴대폰은 한 줄로 흐르는 요약("빈자리 1석  확인 불가 1석  전체 4석"), PC 는 가는 선으로 나눈 표
+function Row({
+  term,
+  value,
+  first = false,
+  wideOnly = false,
+}: {
+  term: string
+  value: ReactNode
+  first?: boolean
+  wideOnly?: boolean
+}) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-x-3 border-t border-on-ink/15 py-2 first:border-t-0 first:pt-0">
+    <div
+      className={`flex items-baseline gap-x-1 lg:flex-wrap lg:justify-between lg:gap-x-3 lg:border-t lg:border-line lg:py-2 lg:first:border-t-0 lg:first:pt-0 ${wideOnly ? 'max-lg:hidden' : ''}`.trim()}
+    >
       <dt
-        className={`whitespace-nowrap ${first ? 'text-fact font-semibold text-on-ink' : 'text-on-ink-soft'}`}
+        className={`whitespace-nowrap ${first ? 'font-semibold text-ink lg:text-fact' : 'text-ink-soft'}`}
       >
         {term}
       </dt>
-      <dd className="ml-auto text-right num text-number font-semibold text-on-ink">{value}</dd>
+      <dd className="num font-semibold text-ink lg:ml-auto lg:text-right lg:text-number">
+        {value}
+      </dd>
     </div>
   )
 }
@@ -29,7 +43,7 @@ function Big({ summary }: { summary: Summary }) {
       <p
         key={summary.availableSeats}
         aria-hidden="true"
-        className={`shrink-0 font-num text-poster font-bold tracking-poster text-empty-bright ${flip}`.trim()}
+        className={`shrink-0 font-num text-count font-bold tracking-poster text-empty-ink area-big lg:text-poster ${flip}`.trim()}
       >
         {summary.availableSeats}
       </p>
@@ -39,7 +53,7 @@ function Big({ summary }: { summary: Summary }) {
     return (
       <p
         aria-hidden="true"
-        className="w-min shrink-0 text-poster-word font-bold tracking-tight wrap-normal text-on-ink"
+        className="w-min shrink-0 text-count-word font-bold tracking-tight wrap-normal text-ink area-big lg:text-poster-word"
       >
         확인 불가
       </p>
@@ -60,6 +74,7 @@ function LastObserved({ iso, now }: { iso: string | null; now: number }) {
   )
 }
 
+/** room-hud 격자 안에 큰 숫자(area-big)와 요약(area-facts)을 놓는다 */
 export function RoomSummary({ summary }: { summary: Summary }) {
   const now = useNow(1000)
   const total = summary.kind === 'noSeats' ? 0 : summary.totalSeats
@@ -72,14 +87,14 @@ export function RoomSummary({ summary }: { summary: Summary }) {
         : '0석'
 
   return (
-    <div className="mt-5 flex items-center gap-5 border-t border-on-ink/15 pt-5">
+    <>
       <Big summary={summary} />
-      <dl className="min-w-0 flex-1">
+      <dl className="mt-1 flex min-w-0 flex-wrap gap-x-3 gap-y-1 self-start text-body area-facts lg:mt-0 lg:block lg:self-center">
         <Row term="빈자리" value={available} first />
         <Row term="확인 불가" value={`${unknown}석`} />
         <Row term="전체" value={`${total}석`} />
         {summary.kind === 'known' && (
-          <Row term="혼잡도" value={congestionLabel(summary.congestionLevel)} />
+          <Row term="혼잡도" value={congestionLabel(summary.congestionLevel)} wideOnly />
         )}
         {summary.kind === 'allUnknown' && (
           <Row
@@ -88,6 +103,6 @@ export function RoomSummary({ summary }: { summary: Summary }) {
           />
         )}
       </dl>
-    </div>
+    </>
   )
 }

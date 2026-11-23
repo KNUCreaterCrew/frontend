@@ -36,3 +36,23 @@ export function UnlinkIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
+/** 짐 있음. 손잡이 달린 가방 */
+export function BagIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" {...props}>
+      <path d="M3.5 6h9l-.7 7.5H4.2L3.5 6Z" {...STROKE} />
+      <path d="M6 6V4.8a2 2 0 0 1 4 0V6" {...STROKE} />
+    </svg>
+  )
+}
+
+/** 확인 불가. 물음표 */
+export function QuestionIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" {...props}>
+      <path d="M5.8 5.8a2.3 2.3 0 1 1 3.3 2.1c-.7.3-1.1.9-1.1 1.6v.3" {...STROKE} />
+      <path d="M8 12.4h.01" {...STROKE} strokeWidth={2.4} />
+    </svg>
+  )
+}

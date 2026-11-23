@@ -99,8 +99,9 @@ export function SeatMap({
       : 1
 
   return (
-    <div>
-      <div className="rounded-panel bg-surface pattern-floor shadow-plate lg:px-8 lg:py-12">
+    <div className="w-full">
+      {/* 좌석은 화면 가득한 바닥판(body 의 점 격자) 위에 바로 놓인다 */}
+      <div>
         <div ref={boxRef} className="overflow-x-auto p-3">
           <div
             className="relative mx-auto"

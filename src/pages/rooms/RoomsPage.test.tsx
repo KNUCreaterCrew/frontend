@@ -278,21 +278,21 @@ describe('방 목록 행 구성', () => {
     expect(within(dl).getByText('보통')).toBeInTheDocument()
   })
 
-  test('전부 확인 불가 카드: 빈자리 라벨 옆에 좌석 칸과 같은 빗금 견본이 있고, 카드 옆면에는 띠가 없다', async () => {
+  test('전부 확인 불가 카드: 빈자리 라벨 옆에 좌석 칸과 같은 점선 견본이 있고, 카드 옆면에는 띠가 없다', async () => {
     useList([item({ total_seats: 4, available_seats: 0, unknown_seats: 4 })])
     renderApp('/')
     const link = await onlyRow()
     expect(link).toHaveClass('min-h-tap')
     const label = within(link).getByText('빈자리')
-    expect(label.querySelector('[aria-hidden="true"].pattern-unknown')).not.toBeNull()
-    expect(link.querySelectorAll('.pattern-unknown')).toHaveLength(1)
+    expect(label.querySelector('[aria-hidden="true"].swatch-unknown')).not.toBeNull()
+    expect(link.querySelectorAll('.swatch-unknown')).toHaveLength(1)
     expect(link.querySelector('.w-band')).toBeNull()
   })
 
-  test('확인된 방 카드에는 빗금 견본이 없다', async () => {
+  test('확인된 방 카드에는 점선 견본이 없다', async () => {
     useList([item()])
     renderApp('/')
-    expect((await onlyRow()).querySelector('.pattern-unknown')).toBeNull()
+    expect((await onlyRow()).querySelector('.swatch-unknown')).toBeNull()
   })
 
   test('카드 전체가 링크라 이름에는 밑줄 대신 화면 읽기 도구에 숨은 이동 아이콘이 붙는다', async () => {
@@ -360,8 +360,7 @@ describe('방 목록 로딩과 재조회', () => {
     expect(busy).not.toBeNull()
     // 실제 행 모양: 방 카드와 같은 면, 모서리, 그림자의 카드 세 장
     expect(busy!.children).toHaveLength(3)
-    for (const row of Array.from(busy!.children))
-      expect(row).toHaveClass('rounded-panel', 'bg-surface', 'shadow-plate')
+    for (const row of Array.from(busy!.children)) expect(row).toHaveClass('rounded-glass', 'glass')
     await advance(5000)
     expect(screen.getByRole('status')).toHaveTextContent('서버를 깨우는 중이에요')
     await advance(55_000)

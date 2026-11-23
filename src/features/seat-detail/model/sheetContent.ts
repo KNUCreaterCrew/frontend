@@ -2,7 +2,8 @@ import { seatReasonLabel, seatStatusLabel } from '@/entities/room'
 import type { Seat } from '@/entities/room'
 import { timeParts } from '@/shared/lib'
 
-export type SheetBand = 'empty' | 'ink' | 'hatched'
+/** 제목 옆 견본. 좌석 칸 4상태와 같다 */
+export type SheetTone = 'empty' | 'away' | 'occupied' | 'unknown'
 
 export interface SheetRow {
   key: 'place' | 'outlet' | 'lastObserved' | 'statusSince'
@@ -16,16 +17,16 @@ export interface SheetContent {
   statusTone: 'empty' | 'ink'
   title: string
   reason: string | null
-  band: SheetBand
+  tone: SheetTone
   rows: SheetRow[]
 }
 
-const BAND: Record<Seat['status'], SheetBand> = {
+const TONE: Record<Seat['status'], SheetTone> = {
   EMPTY: 'empty',
-  OCCUPIED: 'ink',
-  AWAY: 'ink',
-  UNKNOWN: 'hatched',
-  UNRECOGNIZED: 'hatched',
+  OCCUPIED: 'occupied',
+  AWAY: 'away',
+  UNKNOWN: 'unknown',
+  UNRECOGNIZED: 'unknown',
 }
 
 function timeValue(iso: string | null, now: number): string {
@@ -41,7 +42,7 @@ export function sheetContent(seat: Seat, now: number): SheetContent {
     statusTone: seat.status === 'EMPTY' ? 'empty' : 'ink',
     title: `${seat.label} ${statusLabel}`,
     reason: seat.status === 'UNKNOWN' ? seatReasonLabel(seat.reason) : null,
-    band: BAND[seat.status],
+    tone: TONE[seat.status],
     rows: [
       { key: 'place', label: '자리', value: seat.isWindow ? '창가' : '창가 아님' },
       { key: 'outlet', label: '콘센트', value: seat.hasOutlet ? '있음' : '없음' },

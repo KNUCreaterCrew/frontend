@@ -3,34 +3,41 @@
  * Tailwind 기본 테마를 모두 지우고 여기 선언한 값만 유틸리티로 쓴다.
  * 새 값이 필요하면 DESIGN.md 를 먼저 고치고 여기에 더한다. 컴포넌트에 hex 나 임의 값을 쓰지 않는다.
  * 대비는 WCAG 2.2 기준. 본문 4.5:1, 큰 글자와 아이콘, 의미 있는 경계 3:1 이상.
- * 색의 출발점은 경북대 컴퓨터학부 홈페이지(네이비 #0e2036, 인디고, 블루, 틸)다.
+ * 세계: 흰색에 가까운 바탕 위에 좌석 바닥판을 화면 가득 깔고, 조작층은 옅은 유리로 띄운다.
+ * 색은 빈자리 에메랄드 하나와 "방금 바뀜" 빨강뿐이다.
  */
 @theme {
   --*: initial;
 
   /* 색: 바탕과 글자 */
-  --color-paper: #f5f6f8; /* 바탕. 차가운 뉴트럴 */
-  --color-surface: #ffffff; /* 바닥판, 카드, 시트처럼 바탕 위에 놓이는 면 */
-  --color-ink: #0e2036; /* 본문, 네이비 패널. paper 15.2:1, surface 16.4:1 */
-  --color-ink-soft: #4b5768; /* 보조 글자. paper 6.8:1, surface 7.3:1 */
-  --color-on-ink: #ffffff; /* 네이비 패널 위 글자. 16.4:1 */
-  --color-on-ink-soft: #b9c4d6; /* 네이비 패널 위 보조 글자. 9.3:1 */
-  --color-accent: #0b5cad; /* 학부 블루를 어둡게. 링크, 포커스 링. paper 6.2:1, surface 6.7:1 */
+  --color-paper: #eef1f8; /* 바탕(바닥판). 옅은 블루 기운의 흰색 */
+  --color-surface: #ffffff; /* 유리를 못 쓸 때의 면, 유리 안 선택 칸 */
+  --color-ink: #0e2036; /* 본문, 주요 버튼 면. paper 14.5:1, 흰 면 16.4:1 */
+  --color-ink-soft: #4a5873; /* 보조 글자. paper 6.3:1, 흰 면 7.2:1 */
+  --color-on-ink: #ffffff; /* ink 면 위 글자. 16.4:1 */
+  --color-accent: #0e2036; /* 링크, 포커스 링, 글자 커서. 이 세계에는 파랑이 없어 ink 와 같다. paper 14.5:1 */
 
   /* 색: 선 */
-  --color-line: #dde2ea; /* 장식 구분선. 의미를 싣지 않는다 */
-  --color-line-strong: #7d8aa0; /* 의미 있는 경계(좌석 칸 테두리). surface 3.5:1, paper 3.2:1 */
+  --color-line: rgb(14 32 54 / 0.1); /* 유리 안 장식 구분선. 의미를 싣지 않는다 */
+  --color-line-strong: #7b85a3; /* 의미 있는 경계(확인 불가 점선, 요일 칸). paper 3.2:1, 흰 면 3.7:1 */
 
-  /* 색: 좌석 상태와 신호 */
-  --color-empty: #0a6b5e; /* 빈자리 칸 테두리와 글자, 방 카드의 빈자리 숫자. 학부 틸을 어둡게. paper 5.9:1, surface 6.4:1 */
-  --color-empty-tint: #d3f4ec; /* 빈자리 칸 면(밝은 민트). empty 글자 5.5:1 */
-  --color-empty-bright: #5eead4; /* 네이비 패널 위 빈자리 숫자. ink 대비 11.1:1 */
-  --color-occupied: #5b6779; /* 사용 중 면(진한 슬레이트). 흰 글자 5.7:1, 빈자리 면과 밝기 대비 4.9:1 */
+  /* 색: 좌석 상태와 신호. 밝기 순서가 곧 뜻이다(빈자리 > 짐 있음 > 사용 중) */
+  --color-empty: #0e9467; /* 빈자리 테두리, 오늘 막대 윗선. 흰 면 3.8:1 */
+  --color-empty-ink: #0b7a55; /* 빈자리 글자와 큰 빈자리 숫자. 흰 면 5.3:1, paper 4.7:1 */
+  --color-empty-tint: #d6f1e5; /* 오늘 빈자리 막대 면. 글자를 올리지 않는다 */
+  --color-away-top: #b4bbcd; /* 짐 있음 면 위쪽 */
+  --color-away: #a3aac0; /* 짐 있음 면 아래쪽, 범례 견본. ink 글자 7.1:1 이상 */
+  --color-occupied-top: #5f6987; /* 사용 중 면 위쪽 */
+  --color-occupied: #4b5474; /* 사용 중 면 아래쪽, 범례 견본. 흰 글자 7.4:1, 짐 있음과 밝기 3.2:1 */
   --color-on-occupied: #ffffff;
-  --color-live: #b42318; /* 방금 바뀐 좌석, 장치 끊김 표시에만. paper 6.1:1, 흰 글자 6.6:1 */
+  --color-live: #b42318; /* 방금 바뀐 좌석, 장치 끊김 표시에만. paper 5.8:1, 흰 글자 6.6:1 */
   --color-on-live: #ffffff;
-  --color-live-tint: #fdf0ee; /* 장치 끊김 안내 면. ink 글자 14.8:1, live 글자 5.9:1 */
-  --color-scrim: rgb(14 32 54 / 0.32); /* 바텀시트 뒤를 덮는 막. 글자를 올리지 않는다 */
+  --color-scrim: rgb(14 32 54 / 0.24); /* 좌석 상세 뒤를 덮는 막. 글자를 올리지 않는다 */
+
+  /* 색: 바탕의 빛 번짐. 글자를 올리지 않는다 */
+  --color-wash-blue: #d3dffb;
+  --color-wash-lilac: #e2dbf8;
+  --color-wash-sky: #d9eafa;
 
   /* 글꼴. Pretendard 하나로 한글, 숫자, 서비스 이름을 쓴다 */
   --font-sans:
@@ -45,27 +52,35 @@
   --font-weight-bold: 700;
 
   /* 글자 크기. 이름은 쓰임새 */
-  --text-caption: 0.75rem; /* 12px 좌석도 보조 표시 */
+  --text-caption: 0.75rem; /* 12px 그래프 눈금 */
   --text-caption--line-height: 1.4;
-  --text-label: 0.8125rem; /* 13px 좌석 칸 안 상태, 범례, 상단 줄 */
+  --text-label: 0.8125rem; /* 13px 좌석 칸 안 상태, 범례, 갱신 캡슐 */
   --text-label--line-height: 1.4;
   --text-body: 0.9375rem; /* 15px 본문 */
   --text-body--line-height: 1.55;
   --text-number: 1.0625rem; /* 17px 요약 표의 숫자 */
   --text-number--line-height: 1.3;
-  --text-fact: 1.0625rem; /* 17px 방 목록 행 이름, 요약 표 첫 줄 */
+  --text-fact: 1.0625rem; /* 17px 방 목록 행 이름, 통계 제목 */
   --text-fact--line-height: 1.35;
   --text-alert: 1.0625rem; /* 17px 장치 끊김 같은 안내 제목 */
   --text-alert--line-height: 1.35;
-  --text-title: 1.625rem; /* 26px 방 이름, 페이지 제목 */
+  --text-name: 1.1875rem; /* 19px 휴대폰 요약 띠의 방 이름 */
+  --text-name--line-height: 1.25;
+  --text-heading: 1.375rem; /* 22px PC 사이드 패널의 방 이름 */
+  --text-heading--line-height: 1.25;
+  --text-title: 1.625rem; /* 26px 페이지 제목 */
   --text-title--line-height: 1.2;
-  --text-sheet: 1.625rem; /* 26px 바텀시트의 좌석 번호와 상태 */
+  --text-sheet: 1.625rem; /* 26px 좌석 상세의 좌석 번호와 상태 */
   --text-sheet--line-height: 1.2;
-  --text-poster-word: 3rem; /* 48px 숫자 대신 "확인 불가"를 쓸 때 */
+  --text-count-word: 2.25rem; /* 36px 휴대폰에서 숫자 대신 "확인 불가"를 쓸 때 */
+  --text-count-word--line-height: 1;
+  --text-poster-word: 3rem; /* 48px PC 에서 숫자 대신 "확인 불가"를 쓸 때 */
   --text-poster-word--line-height: 1;
   --text-row-number: 2.75rem; /* 44px 방 목록 행의 빈자리 숫자 */
   --text-row-number--line-height: 1;
-  --text-poster: 6rem; /* 96px 빈자리 숫자 하나에만. 글자 제목에 쓰지 않는다 */
+  --text-count: 4.5rem; /* 72px 휴대폰 요약 띠의 빈자리 숫자 */
+  --text-count--line-height: 0.9;
+  --text-poster: 6rem; /* 96px PC 빈자리 숫자 하나에만. 글자 제목에 쓰지 않는다 */
   --text-poster--line-height: 0.9;
 
   --tracking-tight: -0.02em;
@@ -85,34 +100,52 @@
   --spacing-12: 3rem;
   --spacing-16: 4rem;
   --spacing-tap: 2.75rem; /* 44px 터치 목표 최소 크기 */
-  --spacing-band: 0.375rem; /* 6px 바텀시트 위 상태 띠, 방 목록 "모름" 띠 */
-  --spacing-rail: 24rem; /* 384px 데스크톱 방 화면의 왼쪽 열 */
+  --spacing-band: 0.375rem; /* 6px 미리보기 시나리오 목록의 "지금 보는 중" 막대 */
+  --spacing-side: 25rem; /* 400px PC 방 화면의 떠 있는 사이드 패널 폭 */
 
-  /* 모서리. 패널과 카드 16px, 버튼 12px, 좌석 칸 8px */
-  --radius-chip: 0.25rem; /* 좌석 칸 안 작은 글자 조각 */
-  --radius-seat: 0.5rem;
-  --radius-control: 0.75rem;
-  --radius-panel: 1rem;
-  --radius-sheet: 1.25rem;
-  --radius-full: 9999px;
+  /* 모서리. 같은 둥근 계열 하나. 비대칭 모서리는 두지 않는다 */
+  --radius-chip: 0.3125rem; /* 5px 범례 견본, 칸 안 작은 조각, 뼈대 막대 */
+  --radius-seat-sm: 0.5rem; /* 8px 확대해야 누를 수 있는 아주 작은 좌석 칸 */
+  --radius-seat: 0.75rem; /* 12px 좌석 칸 */
+  --radius-inner: 1.25rem; /* 20px 유리 안의 묶음 */
+  --radius-glass: 1.75rem; /* 28px 떠 있는 유리 판(요약 띠, 사이드 패널, 안내 판) */
+  --radius-sheet: 2.125rem; /* 34px 아래 유리 시트, 좌석 상세 */
+  --radius-full: 9999px; /* 캡슐 조작 요소, 끌기 손잡이 */
 
-  /* 깊이. 한 요소에 테두리와 그림자를 함께 쓰지 않는다 */
-  --shadow-plate: 0 1px 2px rgb(14 32 54 / 0.05), 0 12px 32px -12px rgb(14 32 54 / 0.16);
-  /* 빈자리 칸. 2px 틸 테두리도 그림자(inset)로 그려 테두리와 그림자를 함께 쓰지 않는다 */
-  --shadow-seat:
-    inset 0 0 0 2px var(--color-empty), 0 2px 4px -1px rgb(10 107 94 / 0.3),
-    0 6px 14px -6px rgb(14 32 54 / 0.3);
-  --shadow-sheet: 0 -12px 40px -12px rgb(14 32 54 / 0.28);
+  /* 깊이. 유리는 위 안쪽 반사, 아래 안쪽 빛, 0.5px 윤곽, 넓은 옅은 그림자를 함께 쓴다 */
+  --shadow-glass:
+    inset 0 1px 1px rgb(255 255 255 / 0.95), inset 0 -1px 1px rgb(255 255 255 / 0.5),
+    inset 0 -18px 28px -22px rgb(255 255 255 / 0.9), 0 0 0 0.5px rgb(14 32 54 / 0.08),
+    0 2px 6px rgb(30 45 90 / 0.06), 0 22px 44px -20px rgb(30 45 90 / 0.28);
+  /* 유리 위에 놓인 캡슐(선택한 요일, 사이드 패널의 방 목록) */
+  --shadow-control:
+    inset 0 1px 1px #ffffff, 0 0 0 0.5px rgb(14 32 54 / 0.08), 0 2px 4px rgb(30 45 90 / 0.08),
+    0 6px 14px -6px rgb(30 45 90 / 0.25);
+  /* 요일 고르기 같은 오목한 홈 */
+  --shadow-well: inset 0 1px 2px rgb(14 32 54 / 0.08), inset 0 -1px 0 rgb(255 255 255 / 0.7);
+  /* 좌석 칸. 빈자리는 2px 에메랄드 테두리와 바깥 빛으로 바닥판에서 가장 밝게 떠 있다 */
+  --shadow-seat-empty:
+    inset 0 0 0 2px var(--color-empty), inset 0 0 16px rgb(16 185 129 / 0.12),
+    inset 0 2px 1px #ffffff, 0 0 0 4px rgb(16 185 129 / 0.1),
+    0 10px 22px -10px rgb(16 185 129 / 0.55);
+  --shadow-seat-away:
+    inset 0 1px 1px rgb(255 255 255 / 0.55), inset 0 -1px 1px rgb(0 0 0 / 0.06),
+    0 3px 6px -3px rgb(30 45 90 / 0.3);
+  --shadow-seat-occupied:
+    inset 0 1px 1px rgb(255 255 255 / 0.3), inset 0 -1px 1px rgb(0 0 0 / 0.15),
+    0 4px 8px -4px rgb(30 45 90 / 0.45);
+  /* 범례 견본의 빈자리. 칸의 테두리와 빛을 작게 */
+  --shadow-swatch-empty: inset 0 0 0 1.75px var(--color-empty), 0 0 0 2px rgb(16 185 129 / 0.12);
 
-  /* 유리. 떠 있는 면(상단 줄, 시트 뒤 막)에만 */
-  --blur-glass: 14px;
-  --blur-scrim: 3px;
+  /* 유리 흐림 */
+  --blur-glass: 24px;
+  --blur-scrim: 2px;
 
   /* 화면 폭 */
   --breakpoint-md: 48rem; /* 768px */
-  --breakpoint-lg: 64rem; /* 1024px 방 화면이 2열이 되는 폭 */
-  --container-sheet: 30rem; /* 480px 데스크톱에서 바텀시트의 최대 폭 */
-  --container-page: 72rem; /* 1152px 모든 화면 내용의 최대 폭 */
+  --breakpoint-lg: 64rem; /* 1024px 방 화면이 사이드 패널 구조가 되는 폭 */
+  --container-sheet: 30rem; /* 480px 태블릿에서 아래 시트와 좌석 상세의 최대 폭 */
+  --container-page: 72rem; /* 1152px 방 목록 같은 글 화면의 최대 폭 */
 
   /* 움직임 */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -139,7 +172,7 @@
     }
   }
 
-  /* 출발 안내판의 판처럼 위에서 아래로 한 번 넘어온다. 크기와 자리는 그대로 */
+  /* 값이 바뀐 칸과 숫자가 위에서 한 번 넘어온다. 크기와 자리는 그대로 */
   @keyframes flip-in {
     from {
       transform: perspective(28rem) rotateX(-72deg);
@@ -153,16 +186,30 @@
 }
 
 :root {
-  /* 확인 불가 좌석의 빗금. 회색 면이 아니라 "모름"을 뜻하는 고유한 무늬 */
+  /* 그래프의 "확인하지 못한 시간" 빗금. 좌석 칸에는 쓰지 않는다(좌석은 점선 윤곽) */
   --pattern-unknown: repeating-linear-gradient(
     -45deg,
     var(--color-ink-soft) 0 1px,
     transparent 1px 6px
   );
-  /* 좌석도 바닥판의 점 격자. 평면도의 눈금이다 */
-  --pattern-floor: radial-gradient(rgb(14 32 54 / 0.09) 1px, transparent 1.2px);
-  --sheet-max-height: 85dvh; /* 바텀시트 최대 높이. 넘치면 내용만 스크롤 */
-  --duration-sheet: 240ms; /* 바텀시트 열고 닫기 */
+  /* 바닥판의 점 격자. 평면도의 눈금이다 */
+  --pattern-floor: radial-gradient(circle, rgb(14 32 54 / 0.11) 1px, transparent 1.5px);
+  /* 유리 면. 흰색 58% 에서 40% 세로 그라데이션 */
+  --glass-fill: linear-gradient(180deg, rgb(255 255 255 / 0.58), rgb(255 255 255 / 0.4));
+  /* 유리를 못 쓰는 브라우저의 면. 바닥판 위에서도 ink-soft 가 7.1:1 */
+  --glass-fallback: rgb(255 255 255 / 0.94);
+  /* 135도 반사 테두리. 왼쪽 위와 오른쪽 아래만 밝다 */
+  --glass-rim: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    rgb(255 255 255 / 0.25) 28%,
+    rgb(255 255 255 / 0) 50%,
+    rgb(255 255 255 / 0.2) 72%,
+    rgb(255 255 255 / 0.9) 100%
+  );
+  --glass-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.36), rgb(255 255 255 / 0));
+  --sheet-max-height: 85dvh; /* 시트 최대 높이. 넘치면 내용만 스크롤 */
+  --duration-sheet: 240ms; /* 시트 열고 닫기, 펼치고 접기 */
   --duration-live: 1600ms; /* 방금 바뀐 좌석 강조 한 번 */
   --duration-flip: 520ms; /* 좌석 칸과 빈자리 숫자가 바뀔 때 한 번 넘어오기 */
 }

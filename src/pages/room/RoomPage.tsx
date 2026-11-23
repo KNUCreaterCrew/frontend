@@ -1,19 +1,24 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router'
+import type { CSSProperties } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { getRoomSummary } from '@/entities/room'
 import type { Seat } from '@/entities/room'
 import { useRoomLive } from '@/features/room-live'
 import { RoomStats } from '@/features/room-stats'
 import { freshnessWarning, getScreenState, useElapsed, useNow } from '@/shared/lib'
+import { ChevronLeftIcon } from '@/shared/ui'
+import { useElementBox } from './lib/useElementBox'
+import { DESKTOP_QUERY, useMediaQuery } from './lib/useMediaQuery'
 import { EdgeOfflineBanner } from './ui/EdgeOfflineBanner'
 import { Legend } from './ui/Legend'
 import { RoomError } from './ui/RoomError'
 import { RoomLoading } from './ui/RoomLoading'
 import { RoomNotFound } from './ui/RoomNotFound'
+import { RoomSheet } from './ui/RoomSheet'
 import { SheetErrorBoundary } from './ui/SheetErrorBoundary'
 import { RoomSummary } from './ui/RoomSummary'
 import { SeatMap } from './ui/SeatMap'
-import { TopBar } from './ui/TopBar'
+import { BACK_PILL, TopBar } from './ui/TopBar'
 
 // 시트 코드는 좌석을 처음 누를 때까지 필요 없으니 따로 받는다. 방이 준비되면 미리 받아 둔다.
 const loadSeatDetail = () => import('@/features/seat-detail')
@@ -47,10 +52,29 @@ function SheetSlot({ dataUpdatedAt, refreshFailed, Sheet, onLoadFailed, ...rest 
   )
 }
 
+// PC 사이드 패널 머리: 서비스 이름과 방 목록 캡슐
+function PanelHead() {
+  return (
+    <div className="flex items-center justify-between">
+      <p className="flex items-center gap-2 text-fact font-bold tracking-tight text-ink">
+        <span aria-hidden="true" className="size-2 rounded-full bg-empty" />
+        ZeroFrame
+      </p>
+      <Link to="/" className={`capsule ${BACK_PILL}`}>
+        <ChevronLeftIcon className="size-4" />방 목록
+      </Link>
+    </div>
+  )
+}
+
 export function RoomPage() {
   const { roomId = '' } = useParams()
   const [attempt, setAttempt] = useState(0)
   const [outletsHidden, setOutletsHidden] = useState(false)
+  const desktop = useMediaQuery(DESKTOP_QUERY)
+  // 휴대폰에서 떠 있는 요약 띠와 아래 시트가 바닥판을 덮는 만큼 좌석을 안쪽으로 들인다
+  const [hudRef, hudBox] = useElementBox<HTMLElement>()
+  const [sheetCover, setSheetCover] = useState<number | null>(null)
   const live = useRoomLive(roomId)
   const { data, status, fetchStatus, error, failureReason, dataUpdatedAt } = live.query
   const elapsedMs = useElapsed(status === 'pending' && fetchStatus !== 'paused', attempt)
@@ -208,66 +232,111 @@ export function RoomPage() {
   if (state === 'loading' || !data) {
     return (
       <>
-        <TopBar updatedAt={null} />
-        <RoomLoading elapsedMs={elapsedMs} paused={fetchStatus === 'paused'} />
+        <TopBar updatedAt={null} showBack={!desktop} />
+        <RoomLoading
+          elapsedMs={elapsedMs}
+          paused={fetchStatus === 'paused'}
+          panelHead={desktop ? <PanelHead /> : null}
+        />
       </>
     )
   }
 
   const summary = getRoomSummary(data)
+  const floorStyle = (
+    desktop
+      ? undefined
+      : {
+          '--floor-top': hudBox ? `${Math.ceil(hudBox.bottom) + 16}px` : undefined,
+          '--floor-bottom': sheetCover !== null ? `${Math.ceil(sheetCover) + 16}px` : undefined,
+        }
+  ) as CSSProperties | undefined
+
   return (
     <>
-      <TopBar updatedAt={dataUpdatedAt} refreshFailed={state === 'refreshFailed'} />
-      <main className="pt-4 lg:pt-8">
+      <TopBar
+        updatedAt={dataUpdatedAt}
+        refreshFailed={state === 'refreshFailed'}
+        showBack={!desktop}
+      />
+      <main>
         <div aria-live="polite" aria-atomic="true" className="sr-only">
           {live.edgeNotice}
         </div>
         <div aria-live="polite" aria-atomic="true" className="sr-only">
           {goneNotice ?? (loadFailed ? SHEET_FAILED : null)}
         </div>
-        {!data.edgeOnline && (
-          <div className="mb-4">
-            <EdgeOfflineBanner />
-          </div>
+        {/* 읽는 순서는 요약 → 좌석도 → 범례와 흐름. 조작층은 모두 바닥판 위에 떠 있다.
+            휴대폰: 위 요약 띠와 아래 시트. PC: 왼쪽 유리 사이드 패널(뒤판) 안에 요약과 범례, 흐름 */}
+        {desktop && (
+          <div
+            aria-hidden="true"
+            className="glass fixed top-float bottom-4 left-4 z-10 w-side rounded-glass"
+          />
         )}
-        {/* 모바일은 패널, 좌석도, 범례 순서. lg 이상은 왼쪽 열에 패널과 범례, 오른쪽에 좌석도 */}
-        <div className="lg:grid lg:grid-room lg:items-start lg:gap-x-8">
-          <section className="rounded-panel bg-ink p-5 text-on-ink lg:col-start-1 lg:row-start-1">
-            <h1
-              ref={headingRef}
-              tabIndex={-1}
-              className="text-title font-bold tracking-tight focus:outline-hidden"
-            >
-              {data.roomName}
-            </h1>
-            <RoomSummary summary={summary} />
-            {summary.kind === 'allUnknown' && data.edgeOnline && (
-              <p className="mt-4 text-body text-on-ink-soft">
-                지금은 모든 자리를 확인할 수 없어요.
-              </p>
-            )}
-          </section>
-          <div className="mt-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0">
-            {summary.kind === 'noSeats' ? (
-              <p className="rounded-panel bg-surface p-6 shadow-plate">
-                이 방에는 등록된 좌석이 없어요.
-              </p>
-            ) : (
-              <SeatMap
-                seats={data.seats}
-                highlights={live.highlights}
-                onOutletsHiddenChange={setOutletsHidden}
-                onSelect={openSeat}
-                selectedSeatId={seat?.seatId ?? null}
-              />
-            )}
-            {loadFailed && <p className="mt-4 text-body text-ink">{SHEET_FAILED}</p>}
-          </div>
-          <div className="lg:col-start-1 lg:row-start-2 lg:pt-2">
-            <Legend outletsHidden={outletsHidden} />
-            {summary.kind !== 'noSeats' && <RoomStats roomId={roomId} summary={summary} />}
-          </div>
+        <section
+          ref={hudRef}
+          aria-labelledby="room-title"
+          className="fixed z-20 room-hud max-lg:glass max-lg:inset-x-3 max-lg:top-hud max-lg:mx-auto max-lg:max-w-sheet max-lg:rounded-glass max-lg:px-5 max-lg:py-4 lg:top-float lg:left-4 lg:w-side lg:p-5 lg:pb-0"
+        >
+          {desktop && (
+            <div className="mb-5 area-head">
+              <PanelHead />
+            </div>
+          )}
+          {!data.edgeOnline && <EdgeOfflineBanner />}
+          <h1
+            id="room-title"
+            ref={headingRef}
+            tabIndex={-1}
+            className="self-end text-name font-bold tracking-tight area-name focus:outline-hidden lg:mb-3 lg:text-heading"
+          >
+            {data.roomName}
+          </h1>
+          <RoomSummary summary={summary} />
+          {summary.kind === 'allUnknown' && data.edgeOnline && (
+            <p className="mt-3 text-body text-ink-soft area-note">
+              지금은 모든 자리를 확인할 수 없어요.
+            </p>
+          )}
+        </section>
+        <div className="room-floor" style={floorStyle}>
+          {summary.kind === 'noSeats' ? (
+            <p className="glass relative rounded-glass px-6 py-5">
+              이 방에는 등록된 좌석이 없어요.
+            </p>
+          ) : (
+            <SeatMap
+              seats={data.seats}
+              highlights={live.highlights}
+              onOutletsHiddenChange={setOutletsHidden}
+              onSelect={openSeat}
+              selectedSeatId={seat?.seatId ?? null}
+            />
+          )}
+          {loadFailed && (
+            <p className="glass relative rounded-full px-5 py-2 text-body text-ink">
+              {SHEET_FAILED}
+            </p>
+          )}
         </div>
+        <RoomSheet
+          desktop={desktop}
+          desktopTop={hudBox?.bottom ?? null}
+          mobileTop={hudBox?.bottom ?? null}
+          onCoverChange={setSheetCover}
+        >
+          {(fold) => (
+            <>
+              <Legend outletsHidden={outletsHidden} />
+              {summary.kind !== 'noSeats' && (
+                <div className="mt-4 border-t border-line pt-4">
+                  <RoomStats roomId={roomId} summary={summary} fold={fold} />
+                </div>
+              )}
+            </>
+          )}
+        </RoomSheet>
       </main>
       {sheetUsed && (
         <SheetSlot

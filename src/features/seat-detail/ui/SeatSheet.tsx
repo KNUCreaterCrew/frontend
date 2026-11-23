@@ -13,11 +13,10 @@ import {
   useTransform,
 } from 'motion/react'
 import type { Seat } from '@/entities/room'
-import { Button, OutletIcon } from '@/shared/ui'
+import { Button, OutletIcon, SeatSwatch } from '@/shared/ui'
 import { useNow } from '@/shared/lib'
 import { shouldClose } from '../model/drag'
 import { seatChangeNotice, sheetContent } from '../model/sheetContent'
-import type { SheetBand } from '../model/sheetContent'
 
 export interface SeatSheetProps {
   seat: Seat | null
@@ -30,12 +29,6 @@ export interface SeatSheetProps {
 const SHEET_SECONDS = 0.24
 const EASE = [0.16, 1, 0.3, 1] as const
 const TRANSITION = { duration: SHEET_SECONDS, ease: EASE }
-
-const BAND_CLASS: Record<SheetBand, string> = {
-  empty: 'bg-empty',
-  ink: 'bg-ink',
-  hatched: 'pattern-unknown',
-}
 
 export function SeatSheet({ seat, ...rest }: SeatSheetProps) {
   // 닫히는 동안에는 마지막 좌석을 계속 그린다.
@@ -121,7 +114,7 @@ function SheetLayers({
         onCloseAutoFocus={onCloseAutoFocus}
       >
         <m.div
-          className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-h-sheet w-full flex-col overflow-hidden rounded-t-sheet bg-surface shadow-sheet md:bottom-4 md:max-w-sheet md:rounded-b-sheet"
+          className="fixed inset-x-2 bottom-2 z-40 mx-auto flex max-h-sheet max-w-sheet flex-col lg:right-auto lg:bottom-4 lg:left-4 lg:w-side lg:max-w-none"
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
@@ -129,7 +122,7 @@ function SheetLayers({
         >
           <m.div
             ref={sheetRef}
-            className="flex min-h-0 flex-1 flex-col"
+            className="glass relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-sheet"
             style={{ y: dragY }}
             drag="y"
             dragListener={false}
@@ -146,22 +139,24 @@ function SheetLayers({
               }
             }}
           >
-            <div
-              aria-hidden="true"
-              className={`h-band w-full shrink-0 ${BAND_CLASS[content.band]}`}
-            />
-            <div className="touch-none px-4" onPointerDown={startDrag}>
+            <div className="touch-none px-5" onPointerDown={startDrag}>
               <div className="py-3">
-                <div aria-hidden="true" className="mx-auto h-1 w-10 rounded-full bg-line-strong" />
+                <div
+                  aria-hidden="true"
+                  className="mx-auto h-1 w-10 rounded-full bg-line-strong/50"
+                />
               </div>
-              <Dialog.Title className="text-sheet font-bold tracking-tight">
-                <span className="num text-ink">{content.seatLabel}</span>{' '}
-                <span className={content.statusTone === 'empty' ? 'text-empty' : 'text-ink'}>
-                  {content.statusLabel}
+              <Dialog.Title className="flex items-center gap-3 text-sheet font-bold tracking-tight">
+                <SeatSwatch tone={content.tone} size="lg" />
+                <span>
+                  <span className="num text-ink">{content.seatLabel}</span>{' '}
+                  <span className={content.statusTone === 'empty' ? 'text-empty-ink' : 'text-ink'}>
+                    {content.statusLabel}
+                  </span>
                 </span>
               </Dialog.Title>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-safe">
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-safe">
               {content.reason !== null && (
                 <p className="mt-2 text-body text-ink">{content.reason}</p>
               )}
@@ -184,7 +179,7 @@ function SheetLayers({
               {staleNotice !== null && (
                 <p className="mt-3 text-body font-bold text-ink">{staleNotice}</p>
               )}
-              <Button className="mt-4" onClick={onClose}>
+              <Button className="mt-5" onClick={onClose}>
                 닫기
               </Button>
             </div>

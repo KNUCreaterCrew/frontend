@@ -1,20 +1,20 @@
 import { memo } from 'react'
 import { seatAccessibleName, seatStatusLabel } from '@/entities/room'
 import type { Seat, SeatStatus } from '@/entities/room'
-import { OutletIcon } from '@/shared/ui'
+import { BagIcon, OutletIcon, QuestionIcon } from '@/shared/ui'
 import type { CellStage } from '../lib/geometry'
 
+// 밝기 순서가 곧 뜻이다. 빈자리는 가장 밝은 흰 유리에 에메랄드 테두리와 빛,
+// 짐 있음은 중간 톤 회청색, 사용 중은 진한 스모크, 확인 불가는 면 없이 점선 윤곽
 const FACE: Record<SeatStatus, string> = {
-  // 빈자리는 밝은 민트 면에 틸 테두리를 두르고 그림자로 떠 있다(비어 있는 칸).
-  // 사용 중은 진한 면으로 채운다(누가 있는 칸). 나머지는 바닥판에 붙은 흰 면과 테두리로 구분한다
-  EMPTY: 'bg-empty-tint text-empty shadow-seat',
-  OCCUPIED: 'bg-occupied text-on-occupied',
-  AWAY: 'border border-line-strong bg-surface text-ink',
-  UNKNOWN: 'pattern-unknown border border-line-strong bg-surface text-ink',
-  UNRECOGNIZED: 'pattern-unknown border border-line-strong bg-surface text-ink',
+  EMPTY: 'seat-empty',
+  OCCUPIED: 'seat-occupied',
+  AWAY: 'seat-away',
+  UNKNOWN: 'seat-unknown',
+  UNRECOGNIZED: 'seat-unknown',
 }
 
-function isHatched(status: SeatStatus): boolean {
+function isUnknown(status: SeatStatus): boolean {
   return status === 'UNKNOWN' || status === 'UNRECOGNIZED'
 }
 
@@ -63,11 +63,13 @@ function SeatButtonView({
     height: `${rect.height}%`,
   }
   const showText = stage !== 'zoom'
-  const hatched = isHatched(seat.status)
-  const away = seat.status === 'AWAY'
-  // 빈자리 칸의 2px 틸 테두리(shadow-seat 의 inset)만큼 글자 영역을 안으로 들인다
+  const full = stage === 'full'
+  const unknown = isUnknown(seat.status)
+  // 상태 아이콘: 짐 있음은 가방, 확인 불가는 물음표. 콘센트가 있으면 그 옆에 나란히 둔다
+  const StatusIcon = seat.status === 'AWAY' ? BagIcon : unknown ? QuestionIcon : null
+  // 빈자리 칸의 2px 테두리(안쪽 그림자)만큼 글자 영역을 안으로 들인다. 점선 테두리는 상자 안에 있다
   const ring = seat.status === 'EMPTY' ? 2 : 0
-  const chip = hatched ? 'self-start rounded-chip bg-surface px-2 py-px' : ''
+  const icon = full ? 'size-4' : 'size-3'
 
   const justLabel =
     justChanged === undefined
@@ -83,41 +85,37 @@ function SeatButtonView({
         aria-label={seatAccessibleName(seat)}
         aria-haspopup="dialog"
         data-seat-id={seat.seatId}
+        data-status={seat.status}
         onClick={() => onSelect?.(seat.seatId)}
         style={style}
-        className={`absolute overflow-hidden rounded-seat text-left transition focus-visible:z-20 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent motion-safe:hover:-translate-y-px ${FACE[seat.status]} ${selected ? 'outline-4 outline-offset-3 outline-ink' : ''} ${justChanged !== undefined ? 'motion-safe:animate-flip' : ''}`}
+        className={`absolute overflow-hidden text-left transition focus-visible:z-20 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent motion-safe:hover:-translate-y-px ${stage === 'zoom' ? 'rounded-seat-sm' : 'rounded-seat'} ${FACE[seat.status]} ${selected ? 'outline-4 outline-offset-3 outline-ink' : ''} ${justChanged !== undefined ? 'motion-safe:animate-flip' : ''}`}
       >
-        {away && (
-          <span
-            aria-hidden="true"
-            className="absolute inset-x-0 bottom-0 bg-ink"
-            style={{ height: '25%' }}
-          />
-        )}
         {showText && (
           <span
-            className={`absolute flex flex-col justify-between ${stage === 'full' ? 'p-2' : 'p-1'}`}
-            style={{ top: ring, left: ring, right: ring, bottom: away ? '25%' : ring }}
+            className={`absolute flex flex-col justify-between ${full ? 'p-2' : 'p-1'}`}
+            style={{ inset: ring }}
           >
-            <span
-              className={`num font-bold ${stage === 'full' ? 'text-number' : 'text-label'} ${chip}`}
-            >
+            <span className={`num leading-none font-bold ${full ? 'text-number' : 'text-label'}`}>
               {seat.label}
             </span>
-            {stage === 'full' && (
+            {full && (
               <span
-                className={`text-label font-medium ${
-                  justLabel === null ? chip : 'self-start rounded-chip bg-live px-1 text-on-live'
-                }`}
+                className={`text-label leading-none font-medium ${
+                  justLabel === null
+                    ? ''
+                    : 'self-start rounded-chip bg-live px-1 py-px text-on-live'
+                }`.trim()}
               >
                 {justLabel ?? seatStatusLabel(seat.status)}
               </span>
             )}
-            {seat.hasOutlet && (
+            {(StatusIcon !== null || seat.hasOutlet) && (
               <span
-                className={`absolute ${stage === 'full' ? 'top-2 right-2' : 'top-1 right-1'} ${hatched ? 'rounded-chip bg-surface p-px' : ''}`}
+                data-seat-icons=""
+                className={`absolute flex gap-1 ${full ? 'top-2 right-2' : 'right-1 bottom-1'} ${unknown ? 'text-ink-soft' : ''}`.trim()}
               >
-                <OutletIcon className={stage === 'full' ? 'size-4' : 'size-3'} />
+                {seat.hasOutlet && <OutletIcon className={icon} />}
+                {StatusIcon !== null && <StatusIcon className={icon} />}
               </span>
             )}
           </span>
@@ -128,7 +126,7 @@ function SeatButtonView({
       {justChanged !== undefined && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute z-10 rounded-seat outline-4 outline-offset-2 outline-live motion-safe:animate-live"
+          className={`pointer-events-none absolute z-10 ${stage === 'zoom' ? 'rounded-seat-sm' : 'rounded-seat'} outline-4 outline-offset-2 outline-live motion-safe:animate-live`}
           style={style}
         />
       )}

@@ -56,7 +56,7 @@ function ScenarioRow({ name, current }: { name: string; current: boolean }) {
 export function ScenarioPicker({ scenario, unknownScenario }: MockingResult) {
   const groups = groupScenarios(Object.keys(scenarios))
   return (
-    <main className="mt-6">
+    <main className="page mt-6">
       <h1 className="text-title font-bold tracking-tight">어떤 화면을 볼까요</h1>
       <p className="mt-4 text-body">
         실제 장치와 서버 없이 모의 데이터로 앱을 볼 수 있어요. 고르면 그 상태로 앱이 열려요. 이상한
@@ -68,10 +68,7 @@ export function ScenarioPicker({ scenario, unknownScenario }: MockingResult) {
         </p>
       )}
       {groups.map((group) => (
-        <section
-          key={group.id}
-          className="mt-6 rounded-panel bg-surface px-4 pt-1 pb-2 shadow-plate"
-        >
+        <section key={group.id} className="glass relative mt-6 rounded-glass px-5 pt-1 pb-2">
           <h2 className="mt-3 mb-1 text-fact font-bold">{group.title}</h2>
           <ul className="border-t border-line">
             {group.names.map((name) => (
@@ -80,7 +77,7 @@ export function ScenarioPicker({ scenario, unknownScenario }: MockingResult) {
           </ul>
         </section>
       ))}
-      <section className="mt-6 rounded-panel bg-surface px-4 pt-1 pb-2 shadow-plate">
+      <section className="glass relative mt-6 rounded-glass px-5 pt-1 pb-2">
         <h2 className="mt-3 mb-1 text-fact font-bold">어느 시나리오에서나</h2>
         <div className="flex flex-wrap gap-x-4 border-t border-line">
           {commonLinks.map((link) => (

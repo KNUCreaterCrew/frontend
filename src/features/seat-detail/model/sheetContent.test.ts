@@ -18,7 +18,7 @@ test('빈자리 A1 은 fixture 값대로 내용이 만들어진다', () => {
     statusTone: 'empty',
     title: 'A1 빈자리',
     reason: null,
-    band: 'empty',
+    tone: 'empty',
     rows: [
       { key: 'place', label: '자리', value: '창가' },
       { key: 'outlet', label: '콘센트', value: '있음' },
@@ -55,7 +55,7 @@ test('INTERFACES v2 좌석은 장치 연결 끊김 이유와 빗금 띠', () => 
   const seat = toRoom(dto).seats[0]!
   const content = sheetContent(seat, Date.parse('2026-11-24T10:16:20+09:00'))
   expect(content.reason).toBe('장치 연결이 끊겨 지금은 확인할 수 없어요')
-  expect(content.band).toBe('hatched')
+  expect(content.tone).toBe('unknown')
   expect(content.statusTone).toBe('ink')
   expect(content.title).toBe('A1 확인 불가')
   expect(content.rows[2]?.value).toBe('51초 전 (10:15:29)')
@@ -80,14 +80,17 @@ test('UNRECOGNIZED 상태는 이유 없이 빗금 띠', () => {
     NOW,
   )
   expect(content.reason).toBeNull()
-  expect(content.band).toBe('hatched')
+  expect(content.tone).toBe('unknown')
   expect(content.statusLabel).toBe('알 수 없는 상태')
   expect(content.statusTone).toBe('ink')
 })
 
-test.each(['OCCUPIED', 'AWAY'] as const)('%s 는 ink 띠와 ink 글자', (status) => {
+test.each([
+  ['OCCUPIED', 'occupied'],
+  ['AWAY', 'away'],
+] as const)('%s 는 %s 견본과 ink 글자', (status, tone) => {
   const content = sheetContent(withSeat({ status }), NOW)
-  expect(content.band).toBe('ink')
+  expect(content.tone).toBe(tone)
   expect(content.statusTone).toBe('ink')
   expect(content.reason).toBeNull()
 })

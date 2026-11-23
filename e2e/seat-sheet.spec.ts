@@ -160,15 +160,21 @@ test('mixed: 키보드로 A1 에서 Enter 로 열고 Escape 로 닫으면 A1 에
   await expect(seat).toBeFocused()
 })
 
-test('mixed: 위쪽 띠는 확인 불가(빗금)와 빈자리 모두 높이 6px 이다', async ({ page }) => {
+test('mixed: 제목 옆 견본은 좌석 칸과 같은 상태(확인 불가는 점선, 빈자리는 에메랄드)다', async ({
+  page,
+}) => {
   await openSeat(page, 'mixed', 'B2')
-  const band = dialogOf(page).locator('div[aria-hidden="true"].h-band')
-  expect((await band.boundingBox())!.height).toBeCloseTo(6, 0)
+  const swatch = dialogOf(page).getByRole('heading').locator('[data-tone]')
+  await expect(swatch).toHaveAttribute('data-tone', 'unknown')
+  const box = (await swatch.boundingBox())!
+  expect(box.width).toBeCloseTo(32, 0)
+  expect(box.height).toBeCloseTo(24, 0)
+  expect(await swatch.evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe('dashed')
   await page.keyboard.press('Escape')
   await expect(dialogOf(page)).toHaveCount(0)
   await seatButton(page, 'A1').click()
   await expect(dialogOf(page)).toBeVisible()
-  expect((await band.boundingBox())!.height).toBeCloseTo(6, 0)
+  await expect(swatch).toHaveAttribute('data-tone', 'empty')
 })
 
 test.describe('동작 줄이기', () => {
