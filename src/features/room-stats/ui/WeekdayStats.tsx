@@ -31,7 +31,7 @@ export function WeekdayStats({ weekly, today, nowMinute }: WeekdayStatsProps) {
       </div>
       <WeekdayPicker value={selected} onChange={setSelected} />
       <p className="mt-3 text-body text-ink">{weekdaySentence(weekly, selected)}</p>
-      <StepChart chart={chart} />
+      <StepChart chart={chart} tone="usual" />
       {sourceSentence !== null && <p className="text-label text-ink-soft">{sourceSentence}</p>}
     </div>
   )

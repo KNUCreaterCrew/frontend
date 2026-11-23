@@ -93,7 +93,21 @@ describe('방 화면 오늘 빈자리 흐름', () => {
       .map((li) => li.textContent)
     expect(legend).toEqual(['오늘 빈자리', '평소 화요일', '확인하지 못한 시간', '잠깐만 본 시간'])
     const chart = within(region).getAllByText('0석')[0]?.parentElement
-    expect(chart?.querySelector('.opacity-40.bg-empty-tint')).not.toBeNull()
+    expect(chart?.querySelector('path[data-kind="lowConfidence"]')).toHaveAttribute(
+      'opacity',
+      '0.4',
+    )
+  })
+
+  test('최근 값 점은 오늘 그래프에만 있고 요일별 평소 그래프에는 없다', async () => {
+    renderApp(PATH)
+    const region = await chartReady()
+    const [today, weekday] = within(region)
+      .getAllByText('0석')
+      .map((label) => label.parentElement)
+    expect(today?.querySelectorAll('[data-latest]')).toHaveLength(1)
+    expect(weekday).toBeTruthy()
+    expect(weekday?.querySelectorAll('[data-latest]')).toHaveLength(0)
   })
 
   test('stats-seed: 오늘 기록이 없으면 평소 흐름만, 예시 데이터임을 알린다', async () => {
