@@ -8,7 +8,7 @@ export function RoomsTopBar({ updatedAt, refreshFailed = false }: Props) {
   const text = warning ?? (updatedAt !== null ? `${formatRelative(updatedAt, now)} 갱신` : null)
 
   return (
-    <header className="sticky top-sticky z-20 border-b border-line glass pt-safe-top">
+    <header className="glass sticky top-sticky z-20 pt-safe-top">
       <div className="page-x flex min-h-tap items-center justify-between gap-3 text-label">
         <p className="flex items-center gap-2 text-body font-bold tracking-tight text-ink">
           <span aria-hidden="true" className="size-2 rounded-full bg-empty" />

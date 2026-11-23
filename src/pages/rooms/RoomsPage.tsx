@@ -47,7 +47,7 @@ export function RoomsPage() {
   return (
     <>
       <RoomsTopBar updatedAt={dataUpdatedAt} refreshFailed={state === 'refreshFailed'} />
-      <main className="pt-6 lg:pt-10">
+      <main className="page pt-6 lg:pt-10">
         <h1 className="text-title font-bold tracking-tight">방을 골라 주세요</h1>
         {data.length === 0 ? (
           <p className="mt-4 text-body text-ink-soft">아직 등록된 방이 없어요.</p>

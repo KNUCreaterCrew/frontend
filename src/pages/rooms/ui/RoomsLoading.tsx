@@ -11,7 +11,7 @@ export function RoomsLoading({
   const showSkeleton = useDelayedVisibility(true)
 
   return (
-    <main className="pt-6 lg:pt-10">
+    <main className="page pt-6 lg:pt-10">
       <h1 className="text-title font-bold tracking-tight">방을 골라 주세요</h1>
       <div className="mt-2">
         <LoadingStatus elapsedMs={elapsedMs} paused={paused} />
@@ -19,7 +19,7 @@ export function RoomsLoading({
       {showSkeleton && (
         <div aria-busy="true" className="mt-5 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="rounded-panel bg-surface p-4 shadow-plate">
+            <div key={i} className="glass relative rounded-glass p-5">
               <div className="min-w-0 flex-1 motion-safe:animate-pulse">
                 <div className="flex h-6 items-center">
                   <div className="h-3 w-1/2 rounded-chip bg-line" />

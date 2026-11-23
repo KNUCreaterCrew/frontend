@@ -80,26 +80,51 @@ describe('SeatMap', () => {
 describe('SeatMap 좌석 모양', () => {
   const base = mixed[0]!
 
-  it('짐 있음 좌석은 full 단계에서 상태 말이 보이고 띠 위에 놓인다', () => {
+  it('짐 있음 좌석은 중간 톤 면에 가방 아이콘, full 단계에서 상태 말이 보인다', () => {
     render(<SeatMap seats={[{ ...base, status: 'AWAY', hasOutlet: false }]} />)
     const button = screen.getByRole('button', { name: 'A1 짐 있음' })
+    expect(button).toHaveClass('seat-away')
     expect(within(button).getByText('짐 있음')).toBeInTheDocument()
-    const band = button.querySelector<HTMLElement>('span[aria-hidden="true"].bg-ink')
-    expect(band).not.toBeNull()
-    expect(band!.style.height).toBe('25%')
-    const content = within(button).getByText('짐 있음').parentElement as HTMLElement
-    expect(content.style.bottom).toBe('25%')
+    expect(button.querySelectorAll('[data-seat-icons] svg')).toHaveLength(1)
   })
 
-  it('빗금 칸의 콘센트 아이콘은 흰 칩 위에 놓인다', () => {
+  it('짐 있음 좌석에 콘센트가 있으면 가방과 콘센트 아이콘을 나란히 둔다', () => {
+    render(<SeatMap seats={[{ ...base, status: 'AWAY', hasOutlet: true }]} />)
+    const button = screen.getByRole('button', { name: /^A1 짐 있음/ })
+    expect(button.querySelectorAll('[data-seat-icons] svg')).toHaveLength(2)
+  })
+
+  it('확인 불가 칸은 면 없이 점선 윤곽에 물음표, 콘센트가 있으면 함께 둔다', () => {
     render(<SeatMap seats={[{ ...base, status: 'UNKNOWN', hasOutlet: true }]} />)
     const button = screen.getByRole('button', { name: /^A1 / })
-    const icon = button.querySelector('svg')!
-    expect(icon.parentElement).not.toBe(button)
-    expect(icon.parentElement).toHaveClass('bg-surface')
+    expect(button).toHaveClass('seat-unknown')
+    const icons = button.querySelector('[data-seat-icons]')!
+    expect(icons.querySelectorAll('svg')).toHaveLength(2)
+    expect(icons).toHaveClass('text-ink-soft')
   })
 
-  it('알 수 없는 상태는 확인 불가와 같은 빗금이다', () => {
+  it('빈자리와 사용 중 칸에는 상태 아이콘이 없다', () => {
+    render(
+      <SeatMap
+        seats={[
+          { ...base, seatId: 'e', label: 'E1', status: 'EMPTY', hasOutlet: false },
+          {
+            ...base,
+            seatId: 'o',
+            label: 'O1',
+            status: 'OCCUPIED',
+            hasOutlet: false,
+            layout: { x: 80, y: 0, width: 64, height: 48 },
+          },
+        ]}
+      />,
+    )
+    expect(screen.getByRole('button', { name: /^E1 / })).toHaveClass('seat-empty')
+    expect(screen.getByRole('button', { name: /^O1 / })).toHaveClass('seat-occupied')
+    expect(document.querySelector('[data-seat-icons]')).toBeNull()
+  })
+
+  it('알 수 없는 상태는 확인 불가와 같은 점선 윤곽이다', () => {
     render(
       <SeatMap
         seats={[
@@ -114,8 +139,8 @@ describe('SeatMap 좌석 모양', () => {
         ]}
       />,
     )
-    expect(screen.getByRole('button', { name: /^U1 / })).toHaveClass('pattern-unknown')
-    expect(screen.getByRole('button', { name: /^R1 / })).toHaveClass('pattern-unknown')
+    expect(screen.getByRole('button', { name: /^U1 / })).toHaveClass('seat-unknown')
+    expect(screen.getByRole('button', { name: /^R1 / })).toHaveClass('seat-unknown')
   })
 })
 

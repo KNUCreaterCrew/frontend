@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 import { congestionLabel, getRoomListSummary } from '@/entities/room'
 import type { RoomListItem } from '@/entities/room'
-import { ChevronRightIcon } from '@/shared/ui'
+import { ChevronRightIcon, SeatSwatch } from '@/shared/ui'
 
 const OFFLINE = '장치 연결이 끊겼어요'
 const NO_READING = '아직 자리를 확인하지 못했어요'
@@ -11,8 +11,8 @@ const unknownSeatsSentence = (n: number) => `확인하지 못한 자리가 ${n}�
 const ROW = 'h-full'
 // 카드 전체가 링크다
 const LINK =
-  'group block h-full min-h-tap overflow-hidden rounded-panel bg-surface shadow-plate transition motion-safe:hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
-const BODY = 'min-w-0 p-4'
+  'group relative block h-full min-h-tap rounded-glass glass transition motion-safe:hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
+const BODY = 'min-w-0 p-5'
 const NAME = 'block min-w-0 text-fact font-semibold break-keep wrap-anywhere text-ink'
 const NUMBER = 'num text-row-number tracking-tight'
 const COLUMN = 'w-1/3 shrink-0'
@@ -28,14 +28,9 @@ function Name({ children }: { children: string }) {
   )
 }
 
-// "모름" 방에서 빈자리 라벨 옆에 둔다. 좌석 칸, 범례와 같은 빗금이라 흑백에서도 모름으로 읽힌다
+// "모름" 방에서 빈자리 라벨 옆에 둔다. 좌석 칸, 범례와 같은 점선 윤곽이라 흑백에서도 모름으로 읽힌다
 function UnknownSwatch() {
-  return (
-    <span
-      aria-hidden="true"
-      className="ml-2 inline-block h-3 w-5 rounded-chip border border-line-strong bg-surface pattern-unknown align-middle"
-    />
-  )
+  return <SeatSwatch tone="unknown" className="ml-2 align-middle" />
 }
 
 function Fact({ term, value }: { term: string; value: string }) {
@@ -123,7 +118,7 @@ export function RoomRow({ room }: { room: RoomListItem }) {
           <div className="mt-3 flex items-start gap-4">
             <div className={COLUMN}>
               <span className={LABEL}>빈자리</span>
-              <span className={`${NUMBER} font-bold text-empty`}>{summary.availableSeats}</span>
+              <span className={`${NUMBER} font-bold text-empty-ink`}>{summary.availableSeats}</span>
               <span className="ml-1 text-body font-semibold text-ink-soft">석</span>
             </div>
             <dl className="min-w-0 flex-1">
