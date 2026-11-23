@@ -3,6 +3,7 @@ export {
   fetchRoomList,
   roomKeys,
   roomListQueryOptions,
+  roomPreviewQueryOptions,
   roomQueryOptions,
 } from './api/roomQuery'
 export {

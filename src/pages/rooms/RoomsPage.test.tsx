@@ -21,14 +21,17 @@ async function onlyRow(): Promise<HTMLElement> {
   return within(await screen.findByRole('list')).getByRole('link')
 }
 
+// 목록 안의 링크 하나(좌석 무대 캡슐도 링크라 화면 전체에서 찾지 않는다)
+const rowNow = () => within(screen.getByRole('list')).getByRole('link')
+
 describe('방 목록 화면 행', () => {
   test('mixed: 제목, 상단 줄, 링크 이름과 행 안의 값', async () => {
     renderApp('/', { scenario: 'mixed' })
     expect(await screen.findByRole('heading', { level: 1, name: TITLE })).toBeInTheDocument()
     expect(screen.getByText('ZeroFrame')).toBeInTheDocument()
     const link = await onlyRow()
-    expect(screen.getAllByRole('link')).toHaveLength(1)
-    expect(link).toHaveAccessibleName(`${NAME}, 빈자리 1석, 확인 불가 1석, 전체 4석, 보통`)
+    expect(within(screen.getByRole('list')).getAllByRole('link')).toHaveLength(1)
+    expect(link).toHaveAccessibleName(`${NAME}, 빈자리 1석, 확인 불가 1석, 전체 4석`)
     expect(link).toHaveAttribute('href', '/rooms/IT4-101')
     const row = within(link)
     expect(row.getByText(NAME)).toBeInTheDocument()
@@ -37,7 +40,6 @@ describe('방 목록 화면 행', () => {
     expect(row.getByText('1석')).toBeInTheDocument()
     expect(row.getByText('전체')).toBeInTheDocument()
     expect(row.getByText('4석')).toBeInTheDocument()
-    expect(row.getByText('보통')).toBeInTheDocument()
   })
 
   test('서버 시작 직후(전부 확인 불가, 장치 끊김): 확인 불가, 끊김 문장, 혼잡 없음', async () => {
@@ -89,7 +91,8 @@ describe('방 목록 화면 행', () => {
     renderApp('/')
     const row = within(await onlyRow())
     expect(row.getByText('0')).toBeInTheDocument()
-    expect(row.getByText('혼잡')).toBeInTheDocument()
+    // 혼잡도는 타일에 두지 않는다(방 화면 요약에서 본다)
+    expect(await onlyRow()).not.toHaveTextContent('혼잡')
     expect(row.queryByText('확인 불가', { selector: 'span' })).not.toBeInTheDocument()
     expect(row.queryByText(/확인하지 못한 자리가/)).not.toBeInTheDocument()
   })
@@ -99,7 +102,7 @@ describe('방 목록 화면 행', () => {
     const list = await screen.findByRole('list')
     const link = within(list).getByRole('link', { name: /^제2실습실/ })
     expect(link).toHaveAccessibleName(
-      '제2실습실, 빈자리 0석, 확인 불가 2석, 전체 6석, 혼잡, 확인하지 못한 자리가 2석 있어요',
+      '제2실습실, 빈자리 0석, 확인 불가 2석, 전체 6석, 확인하지 못한 자리가 2석 있어요',
     )
     const sentence = within(link).getByText('확인하지 못한 자리가 2석 있어요')
     expect(sentence).toHaveClass('font-bold')
@@ -122,7 +125,7 @@ describe('방 목록 화면 행', () => {
     const second = within(link).getByText('장치 연결이 끊겼어요')
     expect(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(link).toHaveAccessibleName(
-      `${NAME}, 빈자리 0석, 확인 불가 2석, 전체 6석, 혼잡, 확인하지 못한 자리가 2석 있어요, 장치 연결이 끊겼어요`,
+      `${NAME}, 빈자리 0석, 확인 불가 2석, 전체 6석, 확인하지 못한 자리가 2석 있어요, 장치 연결이 끊겼어요`,
     )
   })
 
@@ -132,12 +135,13 @@ describe('방 목록 화면 행', () => {
     expect(within(await onlyRow()).queryByText(/확인하지 못한 자리가/)).not.toBeInTheDocument()
   })
 
-  test('혼잡도 값은 다른 표 값과 같은 크기와 굵기', async () => {
+  test('확인 불가와 전체는 한 줄 표에 같은 크기와 굵기로', async () => {
     useList([item()])
     renderApp('/')
     const row = within(await onlyRow())
     const style = (el: HTMLElement) => el.className
-    expect(style(row.getByText('보통'))).toBe(style(row.getByText('4석')))
+    expect(style(row.getByText('1석'))).toBe(style(row.getByText('4석')))
+    expect(row.getByText('1석').closest('dl')).toBe(row.getByText('4석').closest('dl'))
   })
 
   test('좌석 0: 등록된 좌석이 없어요, 링크 유지', async () => {
@@ -150,21 +154,23 @@ describe('방 목록 화면 행', () => {
     expect(link).not.toHaveTextContent('전체')
   })
 
-  test('모르는 혼잡도는 알 수 없음', async () => {
+  test('혼잡도는 모르는 값이어도 타일에 쓰지 않는다', async () => {
     useList([item({ congestion_level: 'SURPRISE' })])
     renderApp('/')
-    expect(within(await onlyRow()).getByText('알 수 없음')).toBeInTheDocument()
+    const link = await onlyRow()
+    expect(link).not.toHaveTextContent('알 수 없음')
+    expect(link).toHaveAccessibleName(`${NAME}, 빈자리 1석, 확인 불가 1석, 전체 4석`)
   })
 
-  test('known + 장치 끊김: 혼잡도 줄을 두고 끊김 문장을 덧붙인다', async () => {
+  test('known + 장치 끊김: 숫자를 두고 끊김 문장을 덧붙인다', async () => {
     useList([item({ edge_online: false })])
     renderApp('/')
     const link = await onlyRow()
     const row = within(link)
-    expect(row.getByText('보통')).toBeInTheDocument()
+    expect(row.getByText('1')).toBeInTheDocument()
     expect(row.getByText('장치 연결이 끊겼어요')).toBeInTheDocument()
     expect(link).toHaveAccessibleName(
-      `${NAME}, 빈자리 1석, 확인 불가 1석, 전체 4석, 보통, 장치 연결이 끊겼어요`,
+      `${NAME}, 빈자리 1석, 확인 불가 1석, 전체 4석, 장치 연결이 끊겼어요`,
     )
   })
 
@@ -225,8 +231,9 @@ describe('방 목록 행 구성', () => {
     expect(sentence.closest('dl')).toBeNull()
     expect(sentence).toHaveClass('font-bold')
     const dl = link.querySelector('dl')!
-    // 표 칸 안이 아니라 숫자와 표 묶음 아래, 행 전체 폭
-    expect(dl.parentElement).not.toContainElement(sentence)
+    // 표 칸 안이 아니라 표 아래, 타일 전체 폭
+    expect(dl).not.toContainElement(sentence)
+    expect(sentence.parentElement).toBe(link)
     expect(dl.compareDocumentPosition(sentence) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     return dl
   }
@@ -246,7 +253,7 @@ describe('방 목록 행 구성', () => {
     const label = row.getByText('빈자리')
     const word = row.getByText('확인 불가', { selector: 'span' })
     expect(label.parentElement).toContainElement(word)
-    expect(word).toHaveClass('text-title', 'font-bold')
+    expect(word).toHaveClass('text-heading', 'font-bold')
   })
 
   test('좌석 0인 방에는 빈자리 라벨이 없다', async () => {
@@ -270,29 +277,49 @@ describe('방 목록 행 구성', () => {
     sentenceOutsideTable(await onlyRow(), NO_READING)
   })
 
-  test('확인된 방 + 장치 끊김: 혼잡도는 표에 두고 문장은 표 아래', async () => {
+  test('확인된 방 + 장치 끊김: 숫자는 표에 두고 문장은 표 아래', async () => {
     useList([item({ edge_online: false })])
     renderApp('/')
     const link = await onlyRow()
     const dl = sentenceOutsideTable(link, OFFLINE)
-    expect(within(dl).getByText('보통')).toBeInTheDocument()
+    expect(within(dl).getByText('4석')).toBeInTheDocument()
   })
 
-  test('전부 확인 불가 카드: 빈자리 라벨 옆에 좌석 칸과 같은 점선 견본이 있고, 카드 옆면에는 띠가 없다', async () => {
+  test('개수 점: 범례 순서대로 빈자리, 쓰는 중, 확인 불가이고 화면 읽기 도구에 숨는다', async () => {
+    useList([item({ total_seats: 6, available_seats: 2, unknown_seats: 1 })])
+    renderApp('/')
+    const link = await onlyRow()
+    const pips = Array.from(link.querySelectorAll('[data-pip]'))
+    expect(pips.map((p) => p.getAttribute('data-pip'))).toEqual([
+      'pip-empty',
+      'pip-empty',
+      'pip-taken',
+      'pip-taken',
+      'pip-taken',
+      'pip-unknown',
+    ])
+    expect(pips[0]?.parentElement).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  test('전부 확인 불가 카드: 개수 점이 모두 점선이고 카드 옆면에는 띠가 없다', async () => {
     useList([item({ total_seats: 4, available_seats: 0, unknown_seats: 4 })])
     renderApp('/')
     const link = await onlyRow()
     expect(link).toHaveClass('min-h-tap')
-    const label = within(link).getByText('빈자리')
-    expect(label.querySelector('[aria-hidden="true"].swatch-unknown')).not.toBeNull()
-    expect(link.querySelectorAll('.swatch-unknown')).toHaveLength(1)
+    const pips = Array.from(link.querySelectorAll('[data-pip]'))
+    expect(pips).toHaveLength(4)
+    for (const pip of pips) expect(pip).toHaveClass('pip-unknown')
     expect(link.querySelector('.w-band')).toBeNull()
   })
 
-  test('확인된 방 카드에는 점선 견본이 없다', async () => {
-    useList([item()])
+  test('좌석이 48석을 넘으면 개수 점 대신 같은 순서의 비율 막대', async () => {
+    useList([item({ total_seats: 60, available_seats: 15, unknown_seats: 15 })])
     renderApp('/')
-    expect((await onlyRow()).querySelector('.swatch-unknown')).toBeNull()
+    const link = await onlyRow()
+    expect(link.querySelector('[data-pip]')).toBeNull()
+    const bar = link.querySelector('.pip-empty')
+    expect(bar).toHaveStyle({ width: '25%' })
+    expect(bar?.parentElement).toHaveAttribute('aria-hidden', 'true')
   })
 
   test('카드 전체가 링크라 이름에는 밑줄 대신 화면 읽기 도구에 숨은 이동 아이콘이 붙는다', async () => {
@@ -358,8 +385,8 @@ describe('방 목록 로딩과 재조회', () => {
     await advance(250)
     const busy = document.querySelector('[aria-busy="true"]')
     expect(busy).not.toBeNull()
-    // 실제 행 모양: 방 카드와 같은 면, 모서리, 그림자의 카드 세 장
-    expect(busy!.children).toHaveLength(3)
+    // 실제 타일 모양: 방 타일과 같은 면, 모서리, 그림자의 타일 네 장(휴대폰 2열 두 줄)
+    expect(busy!.children).toHaveLength(4)
     for (const row of Array.from(busy!.children)) expect(row).toHaveClass('rounded-glass', 'glass')
     await advance(5000)
     expect(screen.getByRole('status')).toHaveTextContent('서버를 깨우는 중이에요')
@@ -378,9 +405,7 @@ describe('방 목록 로딩과 재조회', () => {
     expect((await onlyRow()).getAttribute('aria-label')).toContain('빈자리 1석')
     current = [item({ available_seats: 2 })]
     await advance(30_000)
-    await waitFor(() =>
-      expect(screen.getByRole('link').getAttribute('aria-label')).toContain('빈자리 2석'),
-    )
+    await waitFor(() => expect(rowNow().getAttribute('aria-label')).toContain('빈자리 2석'))
   })
 
   test('재조회 실패 뒤 회복: 경고가 사라지고 새 값이 보인다', async () => {
@@ -398,11 +423,93 @@ describe('방 목록 로딩과 재조회', () => {
     mode = 'fail'
     await advance(30_000)
     expect(await screen.findByText(/^갱신하지 못했어요/)).toHaveClass('font-bold')
-    expect(screen.getByRole('link')).toBeInTheDocument()
+    expect(rowNow()).toBeInTheDocument()
     mode = 'ok'
     current = [item({ available_seats: 3 })]
     await advance(30_000)
     await waitFor(() => expect(screen.queryByText(/^갱신하지 못했어요/)).not.toBeInTheDocument())
-    expect(screen.getByRole('link').getAttribute('aria-label')).toContain('빈자리 3석')
+    expect(rowNow().getAttribute('aria-label')).toContain('빈자리 3석')
+  })
+})
+
+describe('좌석 무대(머리 영역)', () => {
+  const stage = () => screen.findByRole('region', { name: '좌석 무대' })
+
+  test('mixed: 빈자리가 가장 많은 방으로 가는 캡슐과 그 방의 실제 좌석 배치', async () => {
+    renderApp('/', { scenario: 'mixed' })
+    const region = await stage()
+    const link = within(region).getByRole('link', {
+      name: `지금 빈자리가 가장 많은 방, ${NAME}, 빈자리 1석`,
+    })
+    expect(link).toHaveAttribute('href', '/rooms/IT4-101')
+    // 테스트 환경에는 WebGL 이 없어 정지 그림으로 그린다. 좌석 넷, 밝기 순서대로의 네 면
+    await waitFor(() => expect(region.querySelectorAll('rect[data-tone]')).toHaveLength(4))
+    const tones = Array.from(region.querySelectorAll('rect[data-tone]')).map((r) =>
+      r.getAttribute('data-tone'),
+    )
+    expect(tones).toEqual(['empty', 'occupied', 'away', 'unknown'])
+    expect(region.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  test('rooms-many: 빈자리 3석인 첫 방을 고른다', async () => {
+    renderApp('/', { scenario: 'rooms-many' })
+    const region = await stage()
+    expect(
+      within(region).getByRole('link', { name: `지금 빈자리가 가장 많은 방, ${NAME}, 빈자리 3석` }),
+    ).toBeInTheDocument()
+    await waitFor(() => expect(region.querySelectorAll('rect[data-tone]')).toHaveLength(5))
+  })
+
+  test('빈자리 있는 방이 없으면 좌석 있는 첫 방을 그리고 그렇다고 말한다', async () => {
+    useList([
+      item({ total_seats: 0, available_seats: 0, unknown_seats: 0, room_id: 'IT4-105' }),
+      item({ available_seats: 0, congestion_level: 'HIGH' }),
+    ])
+    renderApp('/')
+    const region = await stage()
+    expect(
+      within(region).getByRole('link', {
+        name: `확인된 빈자리가 있는 방이 없어요, ${NAME} 좌석 보기`,
+      }),
+    ).toHaveAttribute('href', '/rooms/IT4-101')
+  })
+
+  test('좌석 있는 방이 없으면 무대가 없다', async () => {
+    useList([item({ total_seats: 0, available_seats: 0, unknown_seats: 0 })])
+    renderApp('/')
+    await onlyRow()
+    expect(screen.queryByRole('region', { name: '좌석 무대' })).not.toBeInTheDocument()
+  })
+
+  test('빈 목록에도 무대가 없다', async () => {
+    renderApp('/', { scenario: 'rooms-empty' })
+    await screen.findByText('아직 등록된 방이 없어요.')
+    expect(screen.queryByRole('region', { name: '좌석 무대' })).not.toBeInTheDocument()
+  })
+
+  test('방 조회가 404 면 무대를 치우고 목록은 그대로', async () => {
+    useList([item({ room_id: 'IT4-999' })])
+    renderApp('/')
+    await onlyRow()
+    await waitFor(() =>
+      expect(screen.queryByRole('region', { name: '좌석 무대' })).not.toBeInTheDocument(),
+    )
+    expect(await onlyRow()).toHaveAttribute('href', '/rooms/IT4-999')
+  })
+
+  test('방 조회가 끝나기 전에도 캡슐과 목록이 먼저 보인다', async () => {
+    server.use(
+      http.get('*/api/v1/rooms/:roomId', async () => {
+        await delay('infinite')
+        return HttpResponse.json(mixedRoom)
+      }),
+    )
+    renderApp('/')
+    const region = await stage()
+    expect(within(region).getByRole('link')).toHaveAccessibleName(
+      `지금 빈자리가 가장 많은 방, ${NAME}, 빈자리 1석`,
+    )
+    expect(region.querySelector('rect')).toBeNull()
+    expect(await onlyRow()).toBeInTheDocument()
   })
 })

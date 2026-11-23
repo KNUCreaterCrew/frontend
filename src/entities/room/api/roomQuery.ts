@@ -8,6 +8,8 @@ export const roomKeys = {
   all: ['rooms'] as const,
   list: () => ['rooms', 'list'] as const,
   detail: (roomId: string) => ['rooms', 'detail', roomId] as const,
+  // 방 목록 머리 영역의 좌석 배치. 방 화면의 실시간 캐시(detail)와 섞이지 않게 키를 나눈다
+  preview: (roomId: string) => ['rooms', 'preview', roomId] as const,
   stats: (roomId: string) => ['rooms', 'stats', roomId] as const,
   dailyStats: (roomId: string, date: string) => ['rooms', 'stats', roomId, 'daily', date] as const,
   weeklyStats: (roomId: string, weeks: number) =>
@@ -31,6 +33,19 @@ export function roomQueryOptions(roomId: string) {
   return queryOptions({
     queryKey: roomKeys.detail(roomId),
     queryFn: ({ signal }) => fetchRoom(roomId, signal),
+    refetchOnWindowFocus: unlessNotFound,
+    refetchOnReconnect: unlessNotFound,
+    retryOnMount: unlessNotFound,
+  })
+}
+
+// 방 목록 머리 영역용. 목록처럼 30초마다 다시 조회하고 WebSocket 은 받지 않는다.
+// 404 면 주기 조회도 멈춘다
+export function roomPreviewQueryOptions(roomId: string) {
+  return queryOptions({
+    queryKey: roomKeys.preview(roomId),
+    queryFn: ({ signal }) => fetchRoom(roomId, signal),
+    refetchInterval: (query) => (unlessNotFound(query) ? 30_000 : false),
     refetchOnWindowFocus: unlessNotFound,
     refetchOnReconnect: unlessNotFound,
     retryOnMount: unlessNotFound,

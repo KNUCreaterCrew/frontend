@@ -42,7 +42,7 @@ body {
   caret-color: var(--color-accent);
 }
 
-/* 바닥판: 옅은 빛 번짐 셋과 점 격자. 화면에 붙어 있고 내용만 그 위로 지나간다.
+/* 바닥판: 옅은 빛 번짐 셋. 화면에 붙어 있고 내용만 그 위로 지나간다.
    유리는 이 번짐과 그 위를 지나는 좌석을 비춰서 유리로 읽힌다 */
 body::before {
   content: '';
@@ -51,7 +51,6 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    var(--pattern-floor) 0 0 / 18px 18px,
     radial-gradient(60vmax 60vmax at 0% 0%, var(--color-wash-blue), transparent 70%),
     radial-gradient(50vmax 50vmax at 100% 55%, var(--color-wash-lilac), transparent 70%),
     radial-gradient(45vmax 45vmax at 35% 100%, var(--color-wash-sky), transparent 70%),
@@ -271,4 +270,88 @@ body::before {
 @utility num {
   font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
+}
+
+/* 무대 장면이 px 값으로 읽도록 길이로 등록한다(등록하지 않으면 calc 글자 그대로 읽힌다) */
+@property --stage-inset-top {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+@property --stage-inset-bottom {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+/* 방 목록 머리 영역(좌석 무대)의 높이. 휴대폰은 화면의 약 48%, PC 는 56% */
+@utility rooms-stage {
+  height: clamp(20rem, 48svh, 28rem);
+  /* 무대가 블록을 놓지 않는 위아래 자리: 위 캡슐 줄, 아래 블록 설명과 무대 캡슐.
+     휴대폰은 설명 두 줄(문장, 범례)과 캡슐 두 줄, 768px 이상은 설명 한 줄과 캡슐 한 줄 */
+  --stage-inset-top: calc(
+    var(--sticky-top, 0px) + var(--header-safe-top, env(safe-area-inset-top)) + var(--spacing-tap) +
+      var(--spacing-6)
+  );
+  --stage-inset-bottom: 8.5rem;
+  @media (width >= 48rem) {
+    --stage-inset-bottom: 6rem;
+  }
+  @media (width >= 64rem) {
+    height: clamp(24rem, 56svh, 40rem);
+  }
+}
+
+/* 정지 그림도 three.js 무대와 같은 띠(위 캡슐 줄과 아래 설명 사이)에 들어간다 */
+@utility rooms-stage-still {
+  padding-top: var(--stage-inset-top);
+  padding-bottom: var(--stage-inset-bottom);
+}
+
+/* 방 타일의 이름 자리. 한 줄 이름도 두 줄 자리를 잡아 타일마다 숫자 줄 높이가 같다 */
+@utility tile-name {
+  min-height: 2lh;
+}
+
+/* 무대가 없는 방 목록(빈 목록, 좌석 있는 방 없음): 떠 있는 위 캡슐 줄 아래에서 시작한다 */
+@utility pt-below-float {
+  padding-top: calc(
+    var(--sticky-top, 0px) + var(--header-safe-top, env(safe-area-inset-top)) + var(--spacing-tap) +
+      var(--spacing-3) + var(--spacing-8)
+  );
+}
+
+/* 머리 영역의 정지 그림(SVG). 좌석 4상태를 위에서 본 평면으로 되풀이한다 */
+@utility stage-empty {
+  fill: var(--color-surface);
+  stroke: var(--color-empty);
+  stroke-width: 2.5px;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 4px 6px rgb(16 185 129 / 0.35));
+}
+@utility stage-away {
+  fill: var(--color-away);
+}
+@utility stage-occupied {
+  fill: var(--color-occupied);
+}
+@utility stage-unknown {
+  fill: rgb(255 255 255 / 0.3);
+  stroke: var(--color-line-strong);
+  stroke-width: 1.5px;
+  stroke-dasharray: 5 4;
+  vector-effect: non-scaling-stroke;
+}
+
+/* 방 타일의 개수 점. 좌석 배치가 아니라 개수다. 목록 응답은 사용 중과 짐 있음을 나누지 않으므로
+   둘을 합친 "쓰는 중"은 짐 있음과 사용 중 사이 밝기 하나로 둔다 */
+@utility pip-empty {
+  background-color: var(--color-surface);
+  box-shadow: inset 0 0 0 1.5px var(--color-empty);
+}
+@utility pip-unknown {
+  border: 1px dashed var(--color-line-strong);
+}
+@utility pip-taken {
+  background-color: var(--color-line-strong);
 }
