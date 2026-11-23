@@ -158,7 +158,12 @@ export function createSeatScene(
   { onContextLost }: { onContextLost: () => void },
 ): SeatScene {
   const palette = readPalette()
-  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true })
+  const renderer = new WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true,
+    failIfMajorPerformanceCaveat: true,
+  })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.outputColorSpace = SRGBColorSpace
   renderer.setClearColor(0x000000, 0)

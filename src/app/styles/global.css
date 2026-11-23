@@ -42,7 +42,7 @@ body {
   caret-color: var(--color-accent);
 }
 
-/* 바닥판: 옅은 빛 번짐 셋과 점 격자. 화면에 붙어 있고 내용만 그 위로 지나간다.
+/* 바닥판: 옅은 빛 번짐 셋. 화면에 붙어 있고 내용만 그 위로 지나간다.
    유리는 이 번짐과 그 위를 지나는 좌석을 비춰서 유리로 읽힌다 */
 body::before {
   content: '';
@@ -51,7 +51,6 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    var(--pattern-floor) 0 0 / 18px 18px,
     radial-gradient(60vmax 60vmax at 0% 0%, var(--color-wash-blue), transparent 70%),
     radial-gradient(50vmax 50vmax at 100% 55%, var(--color-wash-lilac), transparent 70%),
     radial-gradient(45vmax 45vmax at 35% 100%, var(--color-wash-sky), transparent 70%),
@@ -285,21 +284,33 @@ body::before {
   initial-value: 0px;
 }
 
-/* 방 목록 머리 영역(좌석 무대)의 높이. 휴대폰은 화면의 약 44%, PC 는 56% */
+/* 방 목록 머리 영역(좌석 무대)의 높이. 휴대폰은 화면의 약 48%, PC 는 56% */
 @utility rooms-stage {
-  height: clamp(18rem, 44svh, 26rem);
-  /* three.js 무대가 블록을 놓지 않는 위아래 자리: 위 캡슐 줄, 아래 무대 캡슐(휴대폰은 두 줄) */
+  height: clamp(20rem, 48svh, 28rem);
+  /* 무대가 블록을 놓지 않는 위아래 자리: 위 캡슐 줄, 아래 블록 설명과 무대 캡슐.
+     휴대폰은 설명 두 줄(문장, 범례)과 캡슐 두 줄, 768px 이상은 설명 한 줄과 캡슐 한 줄 */
   --stage-inset-top: calc(
     var(--sticky-top, 0px) + var(--header-safe-top, env(safe-area-inset-top)) + var(--spacing-tap) +
       var(--spacing-6)
   );
-  --stage-inset-bottom: 5rem;
+  --stage-inset-bottom: 8.5rem;
   @media (width >= 48rem) {
-    --stage-inset-bottom: 4rem;
+    --stage-inset-bottom: 6rem;
   }
   @media (width >= 64rem) {
     height: clamp(24rem, 56svh, 40rem);
   }
+}
+
+/* 정지 그림도 three.js 무대와 같은 띠(위 캡슐 줄과 아래 설명 사이)에 들어간다 */
+@utility rooms-stage-still {
+  padding-top: var(--stage-inset-top);
+  padding-bottom: var(--stage-inset-bottom);
+}
+
+/* 방 타일의 이름 자리. 한 줄 이름도 두 줄 자리를 잡아 타일마다 숫자 줄 높이가 같다 */
+@utility tile-name {
+  min-height: 2lh;
 }
 
 /* 무대가 없는 방 목록(빈 목록, 좌석 있는 방 없음): 떠 있는 위 캡슐 줄 아래에서 시작한다 */

@@ -124,3 +124,26 @@ test('첫 화면에 좌석 무대 캡슐과 첫 타일의 빈자리 숫자가 �
   const first = page.getByRole('listitem').first()
   await expect(first.getByText('3', { exact: true })).toBeInViewport()
 })
+
+test('좌석 무대: 블록 설명과 이 방에 있는 상태만의 범례가 캡슐 위에 보인다', async ({ page }) => {
+  await page.goto(url('rooms-many'))
+  const stage = page.getByRole('region', { name: '좌석 무대' })
+  const key = stage.getByText('블록 하나가 좌석 하나예요')
+  await expect(key).toBeInViewport()
+  // 제1실습실(예시)은 빈자리, 짐 있음, 사용 중만 있다
+  await expect(stage.locator('span[data-tone]')).toHaveCount(3)
+  const keyBox = (await key.boundingBox())!
+  const capsuleBox = (await stage.getByRole('link').boundingBox())!
+  expect(keyBox.y + keyBox.height).toBeLessThanOrEqual(capsuleBox.y)
+})
+
+test('방 타일은 내용과 상관없이 크기가 같다', async ({ page }) => {
+  await page.goto(url('rooms-many'))
+  // 불러오는 중에도 제목이 보이므로 타일 여섯 개가 다 놓인 뒤에 잰다
+  const tiles = page.getByRole('listitem')
+  await expect(tiles).toHaveCount(6)
+  const heights = await tiles.evaluateAll((items) =>
+    items.map((li) => Math.round(li.getBoundingClientRect().height)),
+  )
+  expect(new Set(heights).size).toBe(1)
+})

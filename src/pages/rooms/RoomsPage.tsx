@@ -62,7 +62,7 @@ export function RoomsPage() {
           {data.length === 0 ? (
             <p className="mt-4 text-body text-ink-soft">아직 등록된 방이 없어요.</p>
           ) : (
-            <ul className="mt-4 grid grid-cols-2 items-start gap-3 md:grid-cols-3 lg:grid-cols-4">
+            <ul className="mt-4 grid auto-rows-fr grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
               {data.map((room) => (
                 <RoomTile key={room.roomId} room={room} />
               ))}
