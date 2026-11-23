@@ -205,7 +205,7 @@ function StatsBody({
           {`오늘은 아직 기록이 없어요. 평소 ${weekday} 흐름만 보여요.`}
         </p>
       )}
-      <StepChart chart={chart} />
+      <StepChart chart={chart} showLatest />
       <StatsLegend
         showToday={hasToday}
         usualLabel={usualLabel}

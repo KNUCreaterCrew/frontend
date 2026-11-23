@@ -1,10 +1,28 @@
-import type { CSSProperties } from 'react'
+import { useId, type CSSProperties } from 'react'
 import { formatKstHour } from '@/shared/lib'
-import type { DayChart } from '../model/chartModel'
+import { barPaths, latestBar, unknownBands } from '../model/barPath'
+import type { BarKind, DayChart } from '../model/chartModel'
 import { usualPath } from '../model/usualPath'
 
-// 좌석도처럼 위치와 크기는 % inline style 로 준다
-export function StepChart({ chart }: { chart: DayChart }) {
+// 판 위의 선과 면은 viewBox 0 0 100 100 을 판 크기로 늘린 SVG, 글자와 점은 % 위치의 HTML 이다
+const STRETCH = {
+  viewBox: '0 0 100 100',
+  preserveAspectRatio: 'none',
+  className: 'absolute inset-0 h-full w-full overflow-visible',
+} as const
+
+const KINDS = ['observed', 'lowConfidence'] as const satisfies readonly BarKind[]
+// 잠깐만 본 묶음(관측 5분 미만)은 흐리게
+const DIM: Record<BarKind, number> = { observed: 1, lowConfidence: 0.4 }
+
+interface StepChartProps {
+  chart: DayChart
+  /** 가장 최근 값에 점을 찍는다. 오늘 그래프만 쓴다(요일별 평소는 지금 값이 아니다) */
+  showLatest?: boolean
+}
+
+export function StepChart({ chart, showLatest = false }: StepChartProps) {
+  const fillId = useId()
   const start = chart.rangeStartMinute
   const end = chart.rangeEndMinute
   const span = end - start
@@ -15,13 +33,13 @@ export function StepChart({ chart }: { chart: DayChart }) {
     width: `${ratio(to) - ratio(from)}%`,
   })
   const showNow = chart.nowMinute !== null && chart.nowMinute >= start && chart.nowMinute <= end
+  const paths = barPaths(chart.bars, start, end)
+  const latest = showLatest && showNow ? latestBar(chart.bars, chart.nowMinute) : null
 
   return (
-    <div
-      aria-hidden="true"
-      className="relative mt-6 mb-6 ml-8 aspect-2/1 border-b border-line-strong"
-    >
+    <div aria-hidden="true" className="relative mt-6 mb-8 ml-8 aspect-2/1">
       <div className="absolute inset-x-0 top-0 border-t border-dashed border-line" />
+      <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-line" />
       <span className="absolute top-0 right-full mr-2 -translate-y-1/2 num text-label whitespace-nowrap text-ink-soft">
         {`${chart.totalSeats}석`}
       </span>
@@ -32,54 +50,72 @@ export function StepChart({ chart }: { chart: DayChart }) {
       {chart.missingSpans.map((missing) => (
         <div
           key={`missing-${missing.startMinute}`}
-          className="absolute inset-y-0 border border-line-strong bg-surface pattern-unknown"
+          className="absolute inset-y-0 border-x border-line-strong bg-surface/70 pattern-unknown"
           style={horizontal(missing.startMinute, missing.endMinute)}
         />
       ))}
 
-      {chart.bars.map((bar) => (
-        <div key={`bar-${bar.startMinute}`}>
-          <div
-            className={[
-              'absolute bottom-0 border-t-2 border-empty bg-empty-tint',
-              bar.kind === 'lowConfidence' && 'opacity-40',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            style={{
-              ...horizontal(bar.startMinute, bar.startMinute + bar.widthMinutes),
-              height: `${bar.availablePct}%`,
-            }}
-          />
-          {bar.unknownPct > 0 && (
-            <div
-              className="absolute bg-surface pattern-unknown"
-              style={{
-                ...horizontal(bar.startMinute, bar.startMinute + bar.widthMinutes),
-                bottom: `${bar.availablePct}%`,
-                height: `${bar.unknownPct}%`,
-              }}
-            />
-          )}
-        </div>
+      <svg {...STRETCH}>
+        <defs>
+          <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+            <stop offset="0" style={{ stopColor: 'var(--color-empty-tint)' }} />
+            <stop offset="1" style={{ stopColor: 'var(--color-empty-tint)', stopOpacity: 0.45 }} />
+          </linearGradient>
+        </defs>
+        {KINDS.map(
+          (kind) =>
+            paths[kind].area !== '' && (
+              <path
+                key={kind}
+                data-kind={kind}
+                d={paths[kind].area}
+                fill={`url(#${fillId})`}
+                opacity={DIM[kind]}
+              />
+            ),
+        )}
+      </svg>
+
+      {unknownBands(chart.bars, start, end).map((band) => (
+        <div
+          key={band}
+          className="absolute inset-0 bg-surface/70 pattern-unknown"
+          style={{ clipPath: band }}
+        />
       ))}
 
-      {chart.usualSteps.length > 0 && (
-        <svg
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          className="absolute inset-0 h-full w-full overflow-visible text-ink-soft"
-        >
+      <svg {...STRETCH}>
+        {chart.usualSteps.length > 0 && (
           <path
             d={usualPath(chart.usualSteps, start, end)}
+            className="text-ink-soft"
             fill="none"
             stroke="currentColor"
             strokeWidth={2}
             strokeDasharray="5 4"
             vectorEffect="non-scaling-stroke"
           />
-        </svg>
-      )}
+        )}
+        {KINDS.map(
+          (kind) =>
+            paths[kind].line !== '' && (
+              <path
+                key={kind}
+                d={paths[kind].line}
+                className="text-empty"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                opacity={DIM[kind]}
+                vectorEffect="non-scaling-stroke"
+              />
+            ),
+        )}
+      </svg>
+
+      <div className="absolute inset-x-0 bottom-0 border-t border-line-strong" />
 
       {showNow && (
         <div
@@ -92,14 +128,24 @@ export function StepChart({ chart }: { chart: DayChart }) {
         </div>
       )}
 
-      {chart.xTickHours.map((hour) => (
+      {latest !== null && (
         <span
+          className="absolute size-3 -translate-x-1/2 translate-y-1/2 rounded-full border-2 border-surface bg-empty"
+          style={{ left: x(latest.minute), bottom: `${latest.pct}%` }}
+        />
+      )}
+
+      {chart.xTickHours.map((hour) => (
+        <div
           key={`tick-${hour}`}
-          className="absolute top-full mt-1 -translate-x-1/2 num text-label whitespace-nowrap text-ink-soft"
+          className="absolute top-full flex -translate-x-1/2 flex-col items-center"
           style={{ left: x(hour * 60) }}
         >
-          {formatKstHour(hour)}
-        </span>
+          <span className="h-1 w-px bg-line-strong" />
+          <span className="num text-label whitespace-nowrap text-ink-soft">
+            {formatKstHour(hour)}
+          </span>
+        </div>
       ))}
     </div>
   )

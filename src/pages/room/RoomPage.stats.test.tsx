@@ -93,7 +93,10 @@ describe('방 화면 오늘 빈자리 흐름', () => {
       .map((li) => li.textContent)
     expect(legend).toEqual(['오늘 빈자리', '평소 화요일', '확인하지 못한 시간', '잠깐만 본 시간'])
     const chart = within(region).getAllByText('0석')[0]?.parentElement
-    expect(chart?.querySelector('.opacity-40.bg-empty-tint')).not.toBeNull()
+    expect(chart?.querySelector('path[data-kind="lowConfidence"]')).toHaveAttribute(
+      'opacity',
+      '0.4',
+    )
   })
 
   test('stats-seed: 오늘 기록이 없으면 평소 흐름만, 예시 데이터임을 알린다', async () => {
